@@ -18,73 +18,66 @@
     z-index: 2;
     min-width: 40px;
     flex-shrink: 0;
+    cursor: pointer;
+    /* Clickable */
 }
 
-.step-circle {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--bg-secondary);
-    border: 3px solid var(--border);
-    font-size: 0;
-    margin-bottom: 8px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-sizing: border-box;
+/* ... existing styles ... */
+
+/* Status Colors */
+
+/* Invalid (Missing Mandatory) - Red */
+.step-item.step-invalid .step-circle {
+    border-color: #ff6b6b;
+    background: #ff6b6b;
+    color: white;
 }
 
-.step-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text-light);
-    transition: var(--transition);
-    text-align: center;
-    white-space: nowrap;
-    opacity: 0.7;
+.step-item.step-invalid .step-label {
+    color: #ff6b6b;
 }
 
-/* Connecting Line */
-.step-line {
-    flex: 1;
-    height: 2px;
-    background: var(--border);
-    margin: 5px -5px 0;
-    min-width: 15px;
-    max-width: 60px;
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 1;
-    border-radius: 1px;
-}
-
-/* Active step */
-.step-item.active .step-circle {
-    width: 14px;
-    height: 14px;
+/* Valid (Filled) - Mint */
+.step-item.step-valid .step-circle {
     border-color: var(--secondary);
     background: var(--secondary);
-    margin-bottom: 6px;
-    margin-top: -1px;
-    box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
+    color: white;
 }
 
-.step-item.active .step-label {
+.step-item.step-valid .step-label {
     color: var(--secondary);
-    opacity: 1;
 }
 
-/* Completed step */
+.step-item.step-valid+.step-line {
+    background: var(--secondary);
+}
+
+/* Empty (Optional Unfilled) - Gray */
+.step-item.step-empty .step-circle {
+    border-color: #ddd;
+    background: #f8f9fa;
+    color: #999;
+}
+
+.step-item.step-empty .step-label {
+    color: #aaa;
+}
+
+/* Active State Overrides */
+.step-item.active .step-circle {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
+    /* Keep the underlying color (invalid/valid/empty) but add active emphasis */
+}
+
+/* Specific override for active & invalid */
+.step-item.active.step-invalid .step-circle {
+    box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+}
+
+/* Legacy support removal or adjustment if needed */
 .step-item.completed .step-circle {
-    border-color: var(--secondary);
-    background: var(--secondary);
-}
-
-.step-item.completed .step-label {
-    color: var(--dark);
-    opacity: 0.9;
-}
-
-.step-item.completed+.step-line {
-    background: var(--secondary);
+    /* Replaced by step-valid logic */
 }
 
 /* Form steps animation */

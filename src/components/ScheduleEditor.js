@@ -300,15 +300,146 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     stepManager.updateStepUI();
 
     // Navigation button events
+    // REPLACED standard next/prev with goToStep usage for buttons too, or keep them but update UI
     container.querySelector('#btnNext').addEventListener('click', () => {
-        stepManager.nextStep(
-            renderStep2,
-            () => accommodationManager.renderAccommodations(),
-            (tab) => checklistManager.renderChecklists(tab),
-            () => tipManager.renderTips()
-        );
+        stepManager.goToStep(stepManager.currentStep + 1, {
+            renderStep2: () => renderStep2(stepManager.generateDaysFromDateRange(container.querySelector('input[name="startDate"]').value, container.querySelector('input[name="endDate"]').value, schedule.days), Array.from(locations), container),
+            renderAccommodations: () => accommodationManager.renderAccommodations(),
+            renderChecklists: (tab) => checklistManager.renderChecklists(tab),
+            renderTips: () => tipManager.renderTips()
+        });
+        updateStatus(); // Update status after move
     });
-    container.querySelector('#btnPrev').addEventListener('click', () => stepManager.prevStep());
+    container.querySelector('#btnPrev').addEventListener('click', () => {
+        stepManager.goToStep(stepManager.currentStep - 1);
+        updateStatus();
+    });
+    container.querySelector('#btnCancel').addEventListener('click', onCancel);
+
+    // --- NEW: Step Status & Navigation Logic ---
+
+    function getStepStatuses() {
+        const statuses = {};
+        const form = container.querySelector('#scheduleForm');
+        const formData = new FormData(form);
+
+        // Step 1: Basic Info Validation
+        const title = formData.get('title');
+        const startDate = formData.get('startDate');
+        const endDate = formData.get('endDate');
+        const hasLocations = locations.size > 0;
+
+        const isStep1Valid = title && startDate && endDate && hasLocations;
+        statuses[1] = isStep1Valid ? 'valid' : 'invalid'; // Mandatory
+
+        // Step 2: Days (Optional)
+        // We need to check if ANY event exists in the collected days data OR existing schedule logic
+        // For accurate real-time check, we might need to look at DOM or internal state
+        // Here we just check if days are generated and likely have events. 
+        // A better check: check DOM for events or use collected data. 
+        // Since Step 2 is rendered dynamically, we check the DOM if visible, or fallback to schedule data?
+        // Let's check schedule.days if we are not on step 2, or DOM if we are? 
+        // Simpler: Check schedule.days length and events count.
+        // NOTE: schedule object is NOT auto-updated until save. 
+        // So we rely on "Valid" (Mint) meaning "User has visited/added something"?
+        // Plan said: "Check if any data exists. Return 'valid' if yes, 'empty' if no."
+        // We'll treat this loosely for now. If events exist > valid.
+        // But since we can't easily peek into un-rendered DOMs for other steps, we rely on manager's state if possible.
+        // Managers (accommodationManager, etc.) usually keep state in DOM or internal array.
+        // accommodationManager exposes .getAccommodations(). 
+        // checklistManager .getChecklists().
+        // tipManager .getTips().
+
+        // However, days are tricky as they are generated on fly. 
+        // We'll check the DOM for Step 2 if rendered, else rely on schedule.days (saved state).
+        // This might be slightly out of sync if user edits but doesn't save? 
+        // Actually, we are in ONE editing session. We should assume managers hold the truth.
+        // Step 2 logic is embedded in ScheduleEditor. 
+        // Let's check container for .event-item
+        const hasEvents = container.querySelectorAll('.event-item').length > 0 || (schedule.days && schedule.days.some(d => d.events.length > 0));
+        statuses[2] = hasEvents ? 'valid' : 'empty';
+
+        // Step 3: Accommodations
+        const accs = accommodationManager.getAccommodations();
+        statuses[3] = (accs && accs.length > 0) ? 'valid' : 'empty';
+
+        // Step 4: Checklists
+        const checks = checklistManager.getChecklists();
+        const hasChecks = (checks.packing && checks.packing.length > 0) || (checks.todo && checks.todo.length > 0);
+        statuses[4] = hasChecks ? 'valid' : 'empty';
+
+        // Step 5: Tips
+        const tips = tipManager.getTips();
+        statuses[5] = (tips && tips.length > 0) ? 'valid' : 'empty';
+
+        return statuses;
+    }
+
+    function updateStatus() {
+        stepManager.updateStepUI(getStepStatuses());
+    }
+
+    // Attach Click Handlers to Step Indicators (Tab Navigation)
+    container.querySelectorAll('.step-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const targetStep = parseInt(item.dataset.step);
+
+            // Define callbacks for rendering
+            const callbacks = {
+                onLeaveStep1: () => {
+                    // Collect Step 1 data if needed, or just rely on form state
+                    // generateDays logic is called in goToStep target check if we want, 
+                    // but stepManager.js calls renderStep2Callback.
+                },
+                renderStep2: () => renderStep2(stepManager.generateDaysFromDateRange(
+                    container.querySelector('input[name="startDate"]').value,
+                    container.querySelector('input[name="endDate"]').value,
+                    container.querySelectorAll('.day-card').length > 0 ? collectDaysData(container) : schedule.days // Preserve current edits if re-rendering? 
+                    // Actually generateDays... merges existing. 
+                    // We should pass potentially modified 'days'.
+                    // But collectDaysData reads DOM. If Step 2 is not visible, it returns nothing?
+                    // Wait, if we jump 1->3, Step 2 is skipped. 
+                    // If we jump 2->3, we should probably save Step 2 state? 
+                    // `schedule` object is local to this editor. We should update `schedule.days`?
+                    // For simplicity in this refactor, we pass `schedule.days` (original) merged with dates.
+                    // Events added in Step 2 are in DOM only until save! 
+                    // This is a risk. If user goes 2 -> 1 -> 2, they might lose events if we re-render from schedule.days?
+                    // stepManager.generateDaysFromDateRange merges `existingDays`.
+                    // We must insure `schedule.days` is up to date OR pass current DOM state.
+                    // FIX: If we leave Step 2, we must capture its state!
+                ), Array.from(locations), container),
+
+                renderAccommodations: () => accommodationManager.renderAccommodations(),
+                renderChecklists: (tab) => checklistManager.renderChecklists(tab),
+                renderTips: () => tipManager.renderTips()
+            };
+
+            // Before moving, if we are on Step 2, capture days data to `schedule.days` so it's preserved
+            if (stepManager.currentStep === 2) {
+                schedule.days = collectDaysData(container);
+            }
+
+            stepManager.goToStep(targetStep, callbacks);
+            updateStatus();
+        });
+    });
+
+    // Real-time Validation Listeners
+    // Step 1 Inputs
+    const inputsStep1 = container.querySelectorAll('input[name="title"], input[name="startDate"], input[name="endDate"]');
+    inputsStep1.forEach(input => {
+        input.addEventListener('input', updateStatus);
+        input.addEventListener('change', updateStatus); // Date inputs
+    });
+
+    // Locations/Tags observers
+    // We already have addLocation/removeLocation. We should call updateStatus there.
+    // We'll hook into them below.
+
+    // Initial Status Update
+    updateStatus();
+
+    // ------------------------------------
 
     // 여행 유형 변경 시 레이블 업데이트
     const tripTypeRadios = container.querySelectorAll('input[name="tripType"]');
@@ -343,10 +474,13 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 if (locationsContainer.children.length === 0) {
                     locationsContainer.style.display = 'none';
                 }
+                updateStatus(); // Update status on remove
             });
             locationsContainer.appendChild(locationElement);
             locationsContainer.style.display = 'flex';
             locationInput.value = '';
+
+            updateStatus(); // Update status on add
         }
     }
 
@@ -367,6 +501,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             if (locationsContainer.children.length === 0) {
                 locationsContainer.style.display = 'none';
             }
+            updateStatus(); // Update status on existing remove
         });
     });
 

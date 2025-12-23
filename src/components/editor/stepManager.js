@@ -5,19 +5,23 @@ export function createStepManager(container, schedule, locations) {
     let currentStep = 1;
     const totalSteps = 5;
 
-    function updateStepUI() {
+    function updateStepUI(stepStatuses = {}) {
         // Update step indicator
         container.querySelectorAll('.step-item').forEach(item => {
             const step = parseInt(item.dataset.step);
-            if (step < currentStep) {
-                item.classList.add('completed');
-                item.classList.remove('active');
-            } else if (step === currentStep) {
+
+            // Clear existing status classes
+            item.classList.remove('active', 'completed', 'step-invalid', 'step-valid', 'step-empty');
+
+            // Set active state
+            if (step === currentStep) {
                 item.classList.add('active');
-                item.classList.remove('completed');
-            } else {
-                item.classList.remove('active', 'completed');
             }
+
+            // Set status color (Red/Mint/Gray)
+            // Default to 'empty' if not specified
+            const status = stepStatuses[step] || 'empty';
+            item.classList.add(`step-${status}`);
         });
 
         // Show/hide form steps
@@ -31,9 +35,34 @@ export function createStepManager(container, schedule, locations) {
         const btnNext = container.querySelector('#btnNext');
         const btnSubmit = container.querySelector('#btnSubmit');
 
-        btnPrev.style.display = currentStep > 1 ? 'inline-block' : 'none';
-        btnNext.style.display = currentStep < totalSteps ? 'inline-block' : 'none';
-        btnSubmit.style.display = currentStep === totalSteps ? 'inline-block' : 'none';
+        if (btnPrev) btnPrev.style.display = currentStep > 1 ? 'inline-block' : 'none';
+        if (btnNext) btnNext.style.display = currentStep < totalSteps ? 'inline-block' : 'none';
+        if (btnSubmit) btnSubmit.style.display = currentStep === totalSteps ? 'inline-block' : 'none';
+    }
+
+    function goToStep(targetStep, callbacks = {}) {
+        if (targetStep < 1 || targetStep > totalSteps || targetStep === currentStep) return;
+
+        // Execute logic when leaving explicit steps (e.g. generating days when leaving step 1)
+        // We do this regardless of direction now, because we want data ready if we jump from 1 to 3
+        if (currentStep === 1 || targetStep >= 2) {
+            if (callbacks.onLeaveStep1) callbacks.onLeaveStep1();
+        }
+
+        // Trigger render callbacks based on destination
+        if (targetStep === 2 && callbacks.renderStep2) callbacks.renderStep2();
+        if (targetStep === 3 && callbacks.renderAccommodations) callbacks.renderAccommodations();
+        if (targetStep === 4 && callbacks.renderChecklists) {
+            callbacks.renderChecklists('packing');
+            callbacks.renderChecklists('todo');
+        }
+        if (targetStep === 5 && callbacks.renderTips) callbacks.renderTips();
+
+        currentStep = targetStep;
+        // UI update is handled by the caller (ScheduleEditor) usually, or we can call it here if we had statuses
+        // But statuses are dynamic. We will let ScheduleEditor call updateStepUI with latest statuses.
+        // For now, we scroll.
+        container.querySelector('.schedule-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function nextStep(renderStep2Callback, renderAccommodationsCallback, renderChecklistsCallback, renderTipsCallback) {
@@ -132,6 +161,7 @@ export function createStepManager(container, schedule, locations) {
         nextStep,
         prevStep,
         updateStepUI,
+        goToStep,
         generateDaysFromDateRange,
         generateTimeOptions
     };
