@@ -277,6 +277,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 
                 <!-- Navigation Buttons -->
                 <div class="form-navigation">
+                    <button type="button" class="btn-secondary" id="btnCancel">취소</button>
                     <button type="button" class="btn-secondary" id="btnPrev" style="display: none;">이전</button>
                     <button type="button" class="btn-primary" id="btnNext">다음</button>
                     <button type="submit" class="btn-primary" id="btnSubmit" style="display: none;">저장</button>
