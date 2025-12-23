@@ -48,7 +48,8 @@
 }
 
 .step-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    /* Adjusted to 0.7rem */
     font-weight: 600;
     color: var(--text-light);
     transition: var(--transition);
@@ -103,13 +104,13 @@
 
 /* Valid (Filled) - Mint */
 .step-item.step-valid .step-circle {
-    border-color: var(--secondary);
-    background: var(--secondary);
+    border-color: var(--secondary-dark);
+    background: var(--secondary-dark);
     color: white;
 }
 
 .step-item.step-valid .step-label {
-    color: var(--secondary);
+    color: var(--secondary-dark);
 }
 
 /* REMOVED: .step-item.step-valid + .step-line color change */
@@ -138,6 +139,8 @@
     color: #333;
     /* Darker text */
     font-weight: 700;
+    font-size: 0.8rem;
+    /* Explicitly set to 0.8rem */
     opacity: 1;
 }
 
