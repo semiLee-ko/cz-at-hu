@@ -90,7 +90,6 @@ export function showShareModal(scheduleId) {
     // 모달 닫기
     const closeModal = () => modal.remove();
     modal.querySelector('#btnCloseModal').addEventListener('click', closeModal);
-    modal.querySelector('#btnCloseModalFooter').addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
@@ -245,7 +244,6 @@ export function showImportModal(onImport) { // onImport handles file object, we 
     // 닫기
     const closeModal = () => modal.remove();
     modal.querySelector('#btnCloseModal').addEventListener('click', closeModal);
-    modal.querySelector('#btnCloseModalFooter').addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });
