@@ -26,27 +26,27 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             <!-- Step Progress Indicator -->
             <div class="step-indicator">
                 <div class="step-item active" data-step="1">
-                    <div class="step-circle">1</div>
+                    <div class="step-circle"></div>
                     <div class="step-label">기본<br />정보</div>
                 </div>
                 <div class="step-line"></div>
                 <div class="step-item" data-step="2">
-                    <div class="step-circle">2</div>
+                    <div class="step-circle"></div>
                     <div class="step-label">일별<br />일정</div>
                 </div>
                 <div class="step-line"></div>
                 <div class="step-item" data-step="3">
-                    <div class="step-circle">3</div>
+                    <div class="step-circle"></div>
                     <div class="step-label">숙소<br />정보</div>
                 </div>
                 <div class="step-line"></div>
                 <div class="step-item" data-step="4">
-                    <div class="step-circle">4</div>
+                    <div class="step-circle"></div>
                     <div class="step-label">체크<br />리스트</div>
                 </div>
                 <div class="step-line"></div>
                 <div class="step-item" data-step="5">
-                    <div class="step-circle">5</div>
+                    <div class="step-circle"></div>
                     <div class="step-label">팁<br />작성</div>
                 </div>
             </div>

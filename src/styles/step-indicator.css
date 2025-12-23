@@ -31,10 +31,7 @@
     background: var(--bg-secondary);
     border: 2px solid var(--border);
     /* Slightly thinner border */
-    font-size: 12px;
-    /* Visible font size */
-    font-weight: bold;
-    color: var(--text-light);
+    /* font properties removed */
     display: flex;
     /* Flex to center text */
     align-items: center;
@@ -130,9 +127,8 @@
 }
 
 /* Legacy support removal or adjustment if needed */
-.step-item.completed .step-circle {
-    /* Replaced by step-valid logic */
-}
+/* Legacy support removal or adjustment if needed */
+/* .step-item.completed .step-circle removed */
 
 /* Form steps animation */
 .form-step {

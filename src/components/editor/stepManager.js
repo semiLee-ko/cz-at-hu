@@ -40,6 +40,20 @@ export function createStepManager(container, schedule, locations) {
         if (btnSubmit) btnSubmit.style.display = currentStep === totalSteps ? 'inline-block' : 'none';
     }
 
+    function scrollToTop() {
+        const stepIndicator = container.querySelector('.step-indicator');
+        if (stepIndicator) {
+            const headerOffset = 100; // Height of nav bar + some padding
+            const elementPosition = stepIndicator.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: "smooth"
+            });
+        }
+    }
+
     function goToStep(targetStep, callbacks = {}) {
         if (targetStep < 1 || targetStep > totalSteps || targetStep === currentStep) return;
 
@@ -62,7 +76,7 @@ export function createStepManager(container, schedule, locations) {
         // UI update is handled by the caller (ScheduleEditor) usually, or we can call it here if we had statuses
         // But statuses are dynamic. We will let ScheduleEditor call updateStepUI with latest statuses.
         // For now, we scroll.
-        container.querySelector('.step-indicator').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        scrollToTop();
     }
 
     function nextStep(renderStep2Callback, renderAccommodationsCallback, renderChecklistsCallback, renderTipsCallback) {
@@ -97,7 +111,7 @@ export function createStepManager(container, schedule, locations) {
 
             currentStep++;
             updateStepUI();
-            container.querySelector('.step-indicator').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            scrollToTop();
         }
     }
 
@@ -105,7 +119,7 @@ export function createStepManager(container, schedule, locations) {
         if (currentStep > 1) {
             currentStep--;
             updateStepUI();
-            container.querySelector('.step-indicator').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            scrollToTop();
         }
     }
 
