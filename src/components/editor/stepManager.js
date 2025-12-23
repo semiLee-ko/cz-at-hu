@@ -62,7 +62,7 @@ export function createStepManager(container, schedule, locations) {
         // UI update is handled by the caller (ScheduleEditor) usually, or we can call it here if we had statuses
         // But statuses are dynamic. We will let ScheduleEditor call updateStepUI with latest statuses.
         // For now, we scroll.
-        container.querySelector('.schedule-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        container.querySelector('.step-indicator').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function nextStep(renderStep2Callback, renderAccommodationsCallback, renderChecklistsCallback, renderTipsCallback) {
@@ -97,7 +97,7 @@ export function createStepManager(container, schedule, locations) {
 
             currentStep++;
             updateStepUI();
-            container.querySelector('.schedule-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            container.querySelector('.step-indicator').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 
@@ -105,7 +105,7 @@ export function createStepManager(container, schedule, locations) {
         if (currentStep > 1) {
             currentStep--;
             updateStepUI();
-            container.querySelector('.schedule-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            container.querySelector('.step-indicator').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 
