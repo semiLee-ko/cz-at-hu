@@ -1,0 +1,100 @@
+// localStorage 기반 여행 일정 관리
+
+const STORAGE_KEY = 'travel_schedules';
+const CURRENT_SCHEDULE_KEY = 'current_schedule_id';
+
+// 모든 일정 가져오기
+export function getAllSchedules() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+}
+
+// 특정 일정 가져오기
+export function getSchedule(id) {
+    const schedules = getAllSchedules();
+    return schedules.find(s => s.id === id);
+}
+
+// 현재 선택된 일정 ID 가져오기
+export function getCurrentScheduleId() {
+    return localStorage.getItem(CURRENT_SCHEDULE_KEY);
+}
+
+// 현재 선택된 일정 가져오기
+export function getCurrentSchedule() {
+    const id = getCurrentScheduleId();
+    return id ? getSchedule(id) : null;
+}
+
+// 일정 저장
+export function saveSchedule(schedule) {
+    const schedules = getAllSchedules();
+
+    // ID가 없으면 새로 생성
+    if (!schedule.id) {
+        schedule.id = Date.now().toString();
+        schedule.createdAt = new Date().toISOString();
+    }
+
+    schedule.updatedAt = new Date().toISOString();
+
+    // 기존 일정 업데이트 또는 새 일정 추가
+    const index = schedules.findIndex(s => s.id === schedule.id);
+    if (index >= 0) {
+        schedules[index] = schedule;
+    } else {
+        schedules.push(schedule);
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules));
+    return schedule;
+}
+
+// 일정 삭제
+export function deleteSchedule(id) {
+    const schedules = getAllSchedules();
+    const filtered = schedules.filter(s => s.id !== id);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+
+    // 현재 일정이 삭제된 경우 초기화
+    if (getCurrentScheduleId() === id) {
+        localStorage.removeItem(CURRENT_SCHEDULE_KEY);
+    }
+}
+
+// 현재 일정 설정
+export function setCurrentSchedule(id) {
+    localStorage.setItem(CURRENT_SCHEDULE_KEY, id);
+}
+
+// 기본 템플릿 일정 생성
+export function createDefaultSchedule() {
+    return {
+        title: '동유럽 3국 가을 여행',
+        tag: 'FAMILY TRIP',
+        startDate: '2026-10-02',
+        endDate: '2026-10-13',
+        countries: ['🇨🇿', '🇦🇹', '🇭🇺'],
+        members: {
+            adults: 2,
+            children: 1
+        },
+        days: [
+            {
+                day: 1,
+                date: '10.02 (금)',
+                location: '프라하 도착 🇨🇿',
+                events: [
+                    { time: '16:45', detail: '✈️ 프라하 공항 도착', tag: 'move' },
+                    { time: '18:00', detail: '전용 차량으로 호텔 이동 및 체크인' },
+                    { time: '19:00', detail: '팔라디움 몰 식사 및 휴식' }
+                ],
+                hotel: {
+                    name: '이비스 프라하 올드 타운',
+                    description: '올드타운/팔라디움 몰 바로 옆 위치 최적'
+                }
+            }
+            // 나머지 일정은 필요시 추가
+        ]
+    };
+}

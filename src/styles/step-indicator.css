@@ -1,0 +1,179 @@
+/* Step Progress Indicator - Metro Style */
+
+.step-indicator {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    min-width: 40px;
+    flex-shrink: 0;
+}
+
+.step-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 3px solid var(--border);
+    font-size: 0;
+    margin-bottom: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+}
+
+.step-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-light);
+    transition: var(--transition);
+    text-align: center;
+    white-space: nowrap;
+    opacity: 0.7;
+}
+
+/* Connecting Line */
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    margin: 5px -5px 0;
+    min-width: 15px;
+    max-width: 60px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    border-radius: 1px;
+}
+
+/* Active step */
+.step-item.active .step-circle {
+    width: 14px;
+    height: 14px;
+    border-color: var(--secondary);
+    background: var(--secondary);
+    margin-bottom: 6px;
+    margin-top: -1px;
+    box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
+}
+
+.step-item.active .step-label {
+    color: var(--secondary);
+    opacity: 1;
+}
+
+/* Completed step */
+.step-item.completed .step-circle {
+    border-color: var(--secondary);
+    background: var(--secondary);
+}
+
+.step-item.completed .step-label {
+    color: var(--dark);
+    opacity: 0.9;
+}
+
+.step-item.completed+.step-line {
+    background: var(--secondary);
+}
+
+/* Form steps animation */
+.form-step {
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form navigation - FIXED BOTTOM */
+.form-navigation {
+    display: flex;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    z-index: 1000;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.schedule-form {
+    padding-bottom: 100px;
+    /* Space for fixed navigation to prevent content hiding */
+}
+
+.form-navigation button {
+    flex: 1;
+}
+
+.form-navigation #btnPrev {
+    max-width: 120px;
+    background-color: var(--bg-secondary);
+    color: var(--text-light);
+    border: 1px solid var(--border);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .step-indicator {
+        padding: 20px 10px 12px;
+    }
+
+    .step-item {
+        min-width: 30px;
+    }
+
+    .step-circle {
+        width: 10px;
+        height: 10px;
+        border-width: 2px;
+        margin-bottom: 6px;
+    }
+
+    .step-item.active .step-circle {
+        width: 12px;
+        height: 12px;
+        margin-top: -1px;
+        margin-bottom: 4px;
+    }
+
+    .step-label {
+        font-size: 0.6rem;
+        white-space: normal;
+        line-height: 1.1;
+        max-width: 50px;
+    }
+
+    .step-line {
+        margin: 4px -4px 0;
+        min-width: 10px;
+    }
+
+    .form-navigation {
+        padding: 16px;
+    }
+}

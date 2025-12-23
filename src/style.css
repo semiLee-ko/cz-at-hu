@@ -1,0 +1,140 @@
+/* Main CSS - Imports all modules */
+
+@import './styles/base.css';
+@import './styles/navigation.css';
+@import './styles/schedule-list.css';
+@import './styles/schedule-view.css';
+@import './styles/editor.css';
+@import './styles/step-indicator.css';
+@import './styles/daily-itinerary.css';
+@import './styles/accommodation.css';
+@import './styles/checklist.css';
+@import './styles/modal.css';
+@import './styles/responsive.css';
+/* Tip Manager / Accordion Styles */
+.tip-form-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.tip-form-section h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.tip-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.accordion-item {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.accordion-item.active {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.accordion-header {
+    padding: 1rem 1.5rem;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.accordion-header:hover {
+    background: #f8f9fa;
+}
+
+.tip-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: #1f2937;
+}
+
+.accordion-icon {
+    font-size: 0.8rem;
+    color: #6b7280;
+    transition: transform 0.2s;
+}
+
+.accordion-item.active .accordion-icon {
+    transform: rotate(180deg);
+}
+
+.accordion-item.active .accordion-header {
+    border-bottom: 1px solid #e9ecef;
+    background: #f0f9ff;
+}
+
+.accordion-content {
+    display: none;
+    padding: 1.5rem;
+    background: #fff;
+}
+
+.accordion-item.active .accordion-content {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+.tip-body {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+.tip-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.btn-edit-tip, .btn-delete-tip {
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-edit-tip {
+    background: #eff6ff;
+    color: #3b82f6;
+    border: 1px solid #bfdbfe;
+}
+
+.btn-edit-tip:hover {
+    background: #dbeafe;
+}
+
+.btn-delete-tip {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+}
+
+.btn-delete-tip:hover {
+    background: #fee2e2;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+

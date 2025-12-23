@@ -1,0 +1,112 @@
+/* Navigation & Buttons */
+
+/* ========== Navigation ========== */
+.nav-bar {
+    display: flex;
+    gap: 12px;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.nav-item {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    background: var(--bg-primary);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text-secondary);
+}
+
+.nav-item:hover {
+    background: var(--secondary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+/* ========== Buttons ========== */
+.btn-primary,
+.btn-secondary,
+.btn-close,
+.btn-back,
+.btn-delete,
+.btn-remove {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-secondary);
+    border-color: var(--secondary);
+    color: var(--secondary);
+}
+
+.btn-close,
+.btn-back {
+    background: transparent;
+    padding: 8px 12px;
+    color: var(--text-secondary);
+}
+
+.btn-close:hover,
+.btn-back:hover {
+    color: var(--primary);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.btn-delete,
+.btn-remove {
+    background: transparent;
+    padding: 6px 12px;
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.btn-delete:hover,
+.btn-remove:hover {
+    color: var(--primary);
+    background: rgba(255, 107, 107, 0.1);
+}

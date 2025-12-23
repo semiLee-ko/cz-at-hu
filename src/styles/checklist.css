@@ -1,0 +1,338 @@
+/* Checklist Management Styles - Step 4 */
+
+.checklist-section {
+    margin-top: 24px;
+}
+
+/* Tab Navigation */
+.checklist-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border);
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: var(--secondary);
+    background: rgba(78, 205, 196, 0.05);
+}
+
+.tab-btn.active {
+    color: var(--secondary);
+    border-bottom-color: var(--secondary);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Categories Container */
+.categories-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Category Card */
+.category-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    transition: var(--transition);
+}
+
+.category-card:hover {
+    border-color: var(--secondary);
+    box-shadow: var(--shadow-md);
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+}
+
+.category-header h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.btn-delete-category {
+    padding: 6px 12px;
+    background: transparent;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-delete-category:hover {
+    background: rgba(255, 107, 107, 0.1);
+}
+
+/* Items List */
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.checklist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.checklist-item:hover {
+    border-color: var(--secondary);
+}
+
+.checklist-item.checked .item-text {
+    text-decoration: line-through;
+    color: var(--text-light);
+}
+
+.item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.btn-move-up,
+.btn-move-down {
+    width: 24px;
+    height: 24px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-move-up:hover,
+.btn-move-down:hover {
+    background: var(--secondary);
+    color: white;
+    border-color: var(--secondary);
+}
+
+.btn-move-up:disabled,
+.btn-move-down:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.checklist-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--secondary);
+}
+
+.item-text {
+    font-size: 0.95rem;
+    color: var(--dark);
+    flex: 1;
+}
+
+.item-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Priority Select */
+.priority-select {
+    padding: 6px 10px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.priority-select:focus {
+    outline: none;
+    border-color: var(--secondary);
+}
+
+.priority-select option[value="high"] {
+    color: var(--primary);
+}
+
+.priority-select option[value="medium"] {
+    color: #ff9800;
+}
+
+.priority-select option[value="low"] {
+    color: #2196f3;
+}
+
+/* Priority Badge Colors */
+.priority-high {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.priority-medium {
+    color: #ff9800;
+    border-color: #ff9800;
+}
+
+.priority-low {
+    color: #2196f3;
+    border-color: #2196f3;
+}
+
+.btn-delete-item {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: var(--radius-sm);
+}
+
+.btn-delete-item:hover {
+    background: rgba(255, 107, 107, 0.1);
+    color: var(--primary);
+}
+
+/* Add Item Form */
+.add-item-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.add-item-form input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.add-item-form input:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+}
+
+.btn-add-item {
+    padding: 10px 20px;
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-add-item:hover {
+    background: #45b7aa;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Add Category Button */
+.btn-add-category {
+    width: 100%;
+    padding: 14px;
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-md);
+    color: var(--secondary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-add-category:hover {
+    background: rgba(78, 205, 196, 0.1);
+    border-color: var(--secondary);
+    border-style: solid;
+}
+
+/* Empty State */
+.no-categories {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-light);
+    font-size: 0.95rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .checklist-tabs {
+        gap: 4px;
+    }
+
+    .tab-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    .category-card {
+        padding: 16px;
+    }
+
+    .item-left {
+        gap: 6px;
+    }
+
+    .btn-move-up,
+    .btn-move-down {
+        width: 20px;
+        height: 20px;
+        font-size: 0.7rem;
+    }
+}

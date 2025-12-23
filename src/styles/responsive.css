@@ -1,0 +1,66 @@
+/* Responsive Design */
+
+@media (max-width: 640px) {
+    .nav-bar {
+        padding: 16px;
+        gap: 8px;
+    }
+
+    .nav-item {
+        padding: 10px 14px;
+        font-size: 0.85rem;
+    }
+
+    .schedule-list-header {
+        padding: 24px 16px 20px;
+    }
+
+    .schedule-list-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .schedule-cards {
+        padding: 0 16px 24px;
+        gap: 16px;
+    }
+
+    .schedule-card {
+        padding: 20px;
+    }
+
+    .header {
+        padding: 55px 20px 20px;
+        border-bottom-left-radius: 24px;
+        border-bottom-right-radius: 24px;
+    }
+
+    .title {
+        font-size: 1.65rem;
+    }
+
+    .stats {
+        margin: -24px 16px 24px;
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .day-card {
+        margin: 0 16px 20px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .schedule-form {
+        padding: 24px 20px;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+    .mobile-container {
+        max-width: 100%;
+        padding: 0 24px;
+    }
+}

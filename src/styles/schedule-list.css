@@ -1,0 +1,124 @@
+/* Schedule List Components */
+
+.schedule-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32px 24px 24px;
+}
+
+.schedule-list-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--dark);
+}
+
+.schedule-cards {
+    padding: 0 24px 32px;
+    display: grid;
+    gap: 20px;
+}
+
+.schedule-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    border: 1px solid var(--border);
+}
+
+.schedule-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+    border-color: var(--secondary);
+}
+
+.schedule-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.schedule-tag {
+    background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.schedule-title {
+    margin: 12px 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.3;
+}
+
+.schedule-info {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.schedule-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.schedule-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-view {
+    background: linear-gradient(135deg, var(--dark), var(--dark-light));
+    color: white;
+}
+
+.btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-share {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+}
+
+.btn-share:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-secondary);
+}
+
+.empty-state p {
+    margin: 12px 0;
+    font-size: 1.2rem;
+}
+
+.empty-hint {
+    font-size: 0.95rem !important;
+    opacity: 0.7;
+}
