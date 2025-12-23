@@ -120,9 +120,10 @@ function renderScheduleView(container, scheduleId) {
         babymoon: 'theme_prenatal.png'
     };
 
+    const baseUrl = import.meta.env.BASE_URL;
     const themeImage = (schedule.theme && themeMap[schedule.theme])
-        ? `/images/theme/${themeMap[schedule.theme]}`
-        : '/images/theme/theme_basic.png';
+        ? `${baseUrl}images/theme/${themeMap[schedule.theme]}`
+        : `${baseUrl}images/theme/theme_basic.png`;
 
     container.innerHTML = `
         <div class="view-container">
