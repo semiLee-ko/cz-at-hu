@@ -1,5 +1,5 @@
 export default {
-    base: process.env.NODE_ENV === 'production' ? '/cz-at-hu/' : '/',
+    base: '/',
     build: {
         outDir: 'dist'
     }
