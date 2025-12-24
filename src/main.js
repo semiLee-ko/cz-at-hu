@@ -223,8 +223,19 @@ function renderScheduleView(container, scheduleId) {
 
     function updateIndicator(activeTab) {
         if (!activeTab || !indicator) return;
+
+        const colors = {
+            'itinerary': '#45B8AF',
+            'checklist': '#456eb8',
+            'tips': '#b89545'
+        };
+
+        const target = activeTab.dataset.tab;
         indicator.style.width = `${activeTab.offsetWidth}px`;
         indicator.style.left = `${activeTab.offsetLeft}px`;
+        if (colors[target]) {
+            indicator.style.background = colors[target];
+        }
     }
 
     // Initial indicator position
@@ -434,23 +445,23 @@ function renderChecklistsSection(checklists = []) {
     return `
         <div class="view-list-container" style="margin-top: 10px;">
             ${checklists.map(list => `
-                <div class="day-card collapsed" style="margin-bottom: 12px;">
-                    <div class="day-header" style="background: rgba(62, 166, 214, 0.05);">
+                <div class="day-card collapsed" style="margin-bottom: 12px; border: 1px solid #e2e8f0;">
+                    <div class="day-header" style="background: #456eb8; padding: 12px 15px;">
                         <div class="day-info">
-                            <span class="day-badge" style="color: #3ea6d6; font-size: 0.8rem;">LIST</span>
-                            <span class="day-date" style="font-size: 1rem;">${list.title}</span>
+                            <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">LIST</span>
+                            <span class="day-date" style="font-size: 0.95rem; font-weight: 800; color: white;">${list.name || 'Checklist'}</span>
                         </div>
-                        <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="collapse-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </div>
                     <div class="tip-content-wrapper">
-                        <div class="tip-content-inner" style="padding: 12px 20px;">
+                        <div class="tip-content-inner" style="padding: 10px;">
                             <ul style="list-style: none; padding: 0; margin: 0;">
                                 ${list.items && list.items.length > 0 ? list.items.map(item => `
                                     <li style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
                                         <div style="width: 18px; height: 18px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                                            ${item.completed ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3ea6d6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                                            ${item.completed ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#456eb8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
                                         </div>
                                         <span style="font-size: 0.95rem; color: #333; ${item.completed ? 'text-decoration: line-through; color: #aaa;' : ''}">${item.text}</span>
                                     </li>
@@ -471,18 +482,18 @@ function renderTipsSection(tips = []) {
     return `
         <div class="view-list-container" style="margin-top: 10px;">
             ${tips.map(tip => `
-                <div class="day-card collapsed" style="margin-bottom: 12px;">
-                    <div class="day-header" style="background: rgba(239, 68, 68, 0.05);">
+                <div class="day-card collapsed" style="margin-bottom: 12px; border: 1px solid #e2e8f0;">
+                    <div class="day-header" style="background: #b89545; padding: 12px 15px;">
                         <div class="day-info">
-                            <span class="day-badge" style="color: #ef4444; font-size: 0.8rem;">TIP</span>
-                            <span class="day-date" style="font-size: 1rem;">${tip.title}</span>
+                            <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">TIP</span>
+                            <span class="day-date" style="font-size: 0.95rem; font-weight: 800; color: white;">${tip.title}</span>
                         </div>
-                        <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="collapse-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </div>
                     <div class="tip-content-wrapper">
-                        <div class="tip-content-inner" style="padding: 16px 20px;">
+                        <div class="tip-content-inner" style="padding: 10px;">
                             <div style="font-size: 0.95rem; color: #444; line-height: 1.6; white-space: pre-wrap;">${tip.content}</div>
                         </div>
                     </div>
