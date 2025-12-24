@@ -268,12 +268,16 @@ function renderDays(days = []) {
                     <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
             </div>
-            <div class="events-list tip-content-wrapper">
+            <div class="events-list-view tip-content-wrapper">
                 <div class="tip-content-inner">
-                ${day.events && day.events.length > 0 ? day.events.map(event => `
+                ${day.events && day.events.length > 0 ? day.events.map((event, index) => `
+                    ${index > 0 && event.startTime ? '<div class="event-divider"></div>' : ''}
                     <div class="event">
                         <div class="event-time-col">
-                            ${event.startTime ? `<span class="event-time-start">${event.startTime}</span>` : '<span class="event-time-spacer"></span>'}
+                            ${event.startTime ? `
+                                <span class="event-time-bullet"></span>
+                                <span class="event-time-start">${event.startTime}</span>
+                            ` : '<span class="event-time-spacer"></span>'}
                             <span class="event-time-dash">${event.startTime || event.endTime ? '-' : ''}</span>
                             <span class="event-time-end">${event.endTime || ''}</span>
                         </div>

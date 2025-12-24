@@ -41,17 +41,10 @@ export function createStepManager(container, schedule, locations) {
     }
 
     function scrollToTop() {
-        const stepIndicator = container.querySelector('.step-indicator');
-        if (stepIndicator) {
-            const headerOffset = 100; // Height of nav bar + some padding
-            const elementPosition = stepIndicator.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth"
-            });
-        }
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
     }
 
     function goToStep(targetStep, callbacks = {}) {

@@ -372,12 +372,12 @@
 /* Default (Expanded): Point UP (Native Icon is Up) */
 .day-header .collapse-icon {
     transition: transform 0.3s ease;
-    transform: rotate(0deg);
+    transform: rotate(180deg);
 }
 
 /* Collapsed: Point DOWN */
 .day-card.collapsed .day-header .collapse-icon {
-    transform: rotate(180deg);
+    transform: rotate(0deg);
 }
 
 /* ========================================= */

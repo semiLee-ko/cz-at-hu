@@ -41,8 +41,15 @@
 
 .collapse-icon {
     color: rgba(255, 255, 255, 0.9);
-    transition: transform 0.2s;
+    transition: transform 0.3s ease;
     flex-shrink: 0;
+    transform: rotate(180deg);
+    /* Default Expanded: Point UP */
+}
+
+/* Collapsed: Point DOWN */
+.day-card.collapsed .collapse-icon {
+    transform: rotate(0deg);
 }
 
 .day-badge {
@@ -62,10 +69,21 @@
     color: white;
 }
 
-/* Events List */
-.events-list {
+/* Events List & Accordion Wrapper */
+.tip-content-wrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s ease-out;
     background: white;
-    margin-bottom: 0;
+}
+
+.tip-content-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.day-card.collapsed .tip-content-wrapper {
+    grid-template-rows: 0fr;
 }
 
 .no-events {
@@ -387,10 +405,10 @@
     pointer-events: none;
 }
 
-/* Collapsed States */
-.day-card.collapsed .events-list {
+/* Collapsed States - Handled by grid-template-rows now */
+/* .day-card.collapsed .events-list {
     display: none;
-}
+} */
 
 /* Responsive */
 @media (max-width: 640px) {
