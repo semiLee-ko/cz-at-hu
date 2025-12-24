@@ -48,7 +48,8 @@
 }
 
 /* Collapsed: Point DOWN */
-.day-card.collapsed .collapse-icon {
+.day-card.collapsed .collapse-icon,
+.day-card-under.collapsed .collapse-icon {
     transform: rotate(0deg);
 }
 
@@ -75,6 +76,7 @@
     grid-template-rows: 1fr;
     transition: grid-template-rows 0.3s ease-out;
     background: white;
+    overflow: hidden;
 }
 
 .tip-content-inner {
@@ -82,8 +84,12 @@
     min-height: 0;
 }
 
-.day-card.collapsed .tip-content-wrapper {
+.day-card.collapsed .tip-content-wrapper,
+.day-card-under.collapsed .tip-content-wrapper {
     grid-template-rows: 0fr;
+    visibility: hidden;
+    opacity: 0;
+    transition: grid-template-rows 0.3s ease-out, opacity 0.3s ease-out, visibility 0.3s;
 }
 
 .no-events {

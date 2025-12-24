@@ -182,7 +182,6 @@ function renderScheduleView(container, scheduleId) {
                     <div class="stat-value">성인${schedule.members?.adults || 0} 아동${schedule.members?.children || 0}</div>
                 </div>
                 
-                <!-- Toggle button positioned at bottom center -->
                 <button class="stat-toggle-btn-floating" id="btnToggleCountries" aria-label="국가 목록 펼치기/접기">
                     <svg class="toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
@@ -190,8 +189,25 @@ function renderScheduleView(container, scheduleId) {
                 </button>
             </div>
             
-            <div class="days-container entry-stagger-2">
-                ${renderDays(schedule.days)}
+            <div class="view-tabs-container entry-stagger-2">
+                <div class="view-tabs">
+                    <button class="view-tab active" data-tab="itinerary">일정</button>
+                    <button class="view-tab" data-tab="checklist">체크리스트</button>
+                    <button class="view-tab" data-tab="tips">여행팁</button>
+                    <div class="view-tab-indicator"></div>
+                </div>
+            </div>
+            
+            <div class="view-sections entry-stagger-2">
+                <div class="view-section active" id="section-itinerary">
+                    ${renderDays(schedule.days, schedule.accommodations)}
+                </div>
+                <div class="view-section" id="section-checklist">
+                    ${renderChecklistsSection(schedule.checklists)}
+                </div>
+                <div class="view-section" id="section-tips">
+                    ${renderTipsSection(schedule.tips)}
+                </div>
             </div>
         </div>
     `;
@@ -200,31 +216,61 @@ function renderScheduleView(container, scheduleId) {
     container.querySelector('#btnEdit').addEventListener('click', () => showView('edit', schedule.id));
     container.querySelector('#btnShare').addEventListener('click', () => showShareModal(schedule.id));
 
+    // Tabs functionality
+    const tabs = container.querySelectorAll('.view-tab');
+    const sections = container.querySelectorAll('.view-section');
+    const indicator = container.querySelector('.view-tab-indicator');
+
+    function updateIndicator(activeTab) {
+        if (!activeTab || !indicator) return;
+        indicator.style.width = `${activeTab.offsetWidth}px`;
+        indicator.style.left = `${activeTab.offsetLeft}px`;
+    }
+
+    // Initial indicator position
+    setTimeout(() => {
+        const activeTab = container.querySelector('.view-tab.active');
+        updateIndicator(activeTab);
+    }, 100);
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.dataset.tab;
+
+            // Update tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            updateIndicator(tab);
+
+            // Update sections
+            sections.forEach(s => {
+                s.classList.remove('active');
+                if (s.id === `section-${target}`) {
+                    s.classList.add('active');
+                }
+            });
+        });
+    });
+
     // Countries toggle functionality
     const toggleBtn = container.querySelector('#btnToggleCountries');
     const countriesValue = container.querySelector('#countriesValue');
     if (toggleBtn && countriesValue) {
-        // Check if content exceeds 2 lines (approximately 3em with line-height 1.5)
         const checkHeight = () => {
             const lineHeight = parseFloat(getComputedStyle(countriesValue).lineHeight);
-            const maxHeight = lineHeight * 2; // 2 lines
+            const maxHeight = lineHeight * 2;
             const actualHeight = countriesValue.scrollHeight;
 
             if (actualHeight > maxHeight) {
-                toggleBtn.style.display = 'flex'; // Show button
+                toggleBtn.style.display = 'flex';
             } else {
-                toggleBtn.style.display = 'none'; // Hide button
-                countriesValue.classList.remove('collapsed'); // Ensure it's expanded if short
+                toggleBtn.style.display = 'none';
+                countriesValue.classList.remove('collapsed');
             }
         };
 
-        // Check on load
         checkHeight();
-
-        // Recheck on window resize (for orientation changes)
         window.addEventListener('resize', checkHeight);
-
-        // Toggle functionality
         toggleBtn.addEventListener('click', () => {
             countriesValue.classList.toggle('collapsed');
             toggleBtn.classList.toggle('expanded');
@@ -237,73 +283,218 @@ function renderScheduleView(container, scheduleId) {
 
 // 일정 일수 계산
 function calculateDuration(startDate, endDate) {
+    if (!startDate || !endDate) return '-';
     const start = new Date(startDate);
     const end = new Date(endDate);
     const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
     const nights = days - 1;
-    return nights === 0 ? `무박 ${days}일` : `${nights}박 ${days}일`;
+    return nights <= 0 ? `무박 ${days}일` : `${nights}박 ${days}일`;
 }
 
 // 일별 일정 렌더링
-function renderDays(days = []) {
+function renderDays(days = [], allAccommodations = []) {
     if (days.length === 0) {
         return '<div class="empty-state"><p>아직 일정이 없습니다</p></div>';
     }
 
-    return days.map(day => `
-        <div class="day-card">
-            <div class="day-header">
-                <div class="day-info">
-                    <span class="day-badge">Day ${day.day}</span>
-                    <span class="day-date">${(() => {
-            const date = new Date(day.date);
-            const month = date.getMonth() + 1;
-            const dayNum = date.getDate();
-            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-            const dayName = dayNames[date.getDay()];
-            return `${month}월 ${dayNum}일 (${dayName})`;
-        })()}</span>
-                </div>
-                <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </div>
-            <div class="events-list-view tip-content-wrapper">
-                <div class="tip-content-inner">
-                ${day.events && day.events.length > 0 ? day.events.map((event, index) => `
-                    ${index > 0 && event.startTime ? '<div class="event-divider"></div>' : ''}
-                    <div class="event">
-                        <div class="event-time-col">
-                            ${event.startTime ? `
-                                <span class="event-time-bullet"></span>
-                                <span class="event-time-start">${event.startTime}</span>
-                            ` : '<span class="event-time-spacer"></span>'}
-                            <span class="event-time-dash">${event.startTime || event.endTime ? '-' : ''}</span>
-                            <span class="event-time-end">${event.endTime || ''}</span>
-                        </div>
-                        <div class="event-detail-content">
-                            <span class="event-place">${event.place || ''}</span>
-                            <span class="event-desc">${event.description || ''}</span>
-                        </div>
+    return days.map(day => {
+        // Find accommodations assigned to this specific date
+        const dayAccommodations = allAccommodations.filter(acc =>
+            acc.assignedDates && acc.assignedDates.includes(day.date)
+        );
+
+        return `
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-info">
+                        <span class="day-badge">Day ${day.day}</span>
+                        <span class="day-date">${(() => {
+                try {
+                    const date = new Date(day.date);
+                    if (isNaN(date.getTime())) return day.date;
+                    const month = date.getMonth() + 1;
+                    const dayNum = date.getDate();
+                    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+                    const dayName = dayNames[date.getDay()];
+                    return `${month}월 ${dayNum}일 (${dayName})`;
+                } catch (e) {
+                    return day.date;
+                }
+            })()}</span>
                     </div>
-                `).join('') : '<div class="no-events">일정을 등록해 주세요</div>'}
-            
-                ${day.hotel ? `
-                    <div class="hotel-info">
-                        <div class="hotel-label">🛌 ACCOMMODATION</div>
-                        <div class="hotel-name">${day.hotel.name}</div>
-                        ${day.hotel.description ? `<div class="hotel-desc">${day.hotel.description}</div>` : ''}
+                    <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+                <div class="events-list-view tip-content-wrapper">
+                    <div class="tip-content-inner">
+                    ${day.events && day.events.length > 0 ? day.events.map((event, index) => {
+                // Support for multiple data structures (compatibility)
+                const startTime = event.startTime || event.time || '';
+                const endTime = event.endTime || '';
+                const place = event.place || event.detail || '';
+                const desc = event.description || '';
+
+                return `
+                            ${index > 0 && startTime ? '<div class="event-divider"></div>' : ''}
+                            <div class="event">
+                                <div class="event-time-col">
+                                    ${startTime ? `
+                                        <span class="event-time-bullet"></span>
+                                        <span class="event-time-start">${startTime}</span>
+                                    ` : '<span class="event-time-spacer"></span>'}
+                                    <span class="event-time-dash">${startTime || endTime ? '-' : ''}</span>
+                                    <span class="event-time-end">${endTime}</span>
+                                </div>
+                                <div class="event-detail-content">
+                                    <span class="event-place">${place}</span>
+                                    <span class="event-desc">${desc}</span>
+                                </div>
+                            </div>
+                        `;
+            }).join('') : '<div class="no-events">일정을 등록해 주세요</div>'}
+                
+                    ${dayAccommodations.length > 0 ? `
+                        ${dayAccommodations.map(acc => `
+                            <div class="day-card-under collapsed hotel-card-nested" style="margin-top: 10px; box-shadow: none;">
+                                <div class="day-header" style="background: #246367; padding: 12px 15px;">
+                                    <div class="day-info">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-right: 2px;">
+                                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                            <polyline points="9 22 9 12 15 12 15 22"/>
+                                        </svg>
+                                        <span class="day-date" style="font-size: 0.95rem; font-weight: 800; color: #ffffff;">${acc.name}</span>
+                                    </div>
+                                    <svg class="collapse-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="tip-content-wrapper" style="background: #246367 !important;">
+                                    <div class="tip-content-inner" style="padding: 0 15px 15px 15px;">
+                                        <div class="acc-details" style="gap:2px !important;">
+                                            ${acc.location ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> <span>${acc.location}</span></p>` : ''}
+                                            ${acc.contact ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> <span>${acc.contact}</span></p>` : ''}
+                                            ${acc.url ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> <a href="${acc.url}" target="_blank" style="color: #45B8AF; text-decoration: none; font-weight: 600;">홈페이지 방문</a></p>` : ''}
+                                            ${acc.checkIn || acc.checkOut ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> <span>체크인 ${acc.checkIn || '미지정'} / 체크아웃 ${acc.checkOut || '미지정'}</span></p>` : ''}
+                                            ${acc.notes ? `<div class="acc-notes" style="font-size: 0.85rem; color: #6a6a6a; background: #fff; padding: 12px; border-radius: 8px; white-space: pre-wrap; line-height: 1.5; margin-top: 8px;">${acc.notes}</div>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    ` : ''}
                     </div>
-                ` : ''}
                 </div>
             </div>
+        `;
+    }).join('');
+}
+
+// 숙소 섹션 렌더링
+function renderAccommodationsSection(accommodations = []) {
+    if (!accommodations || accommodations.length === 0) return '';
+
+    return `
+        <div class="section-divider" style="margin-top: 20px; margin-bottom: 12px;">
+            <span>ACCOMMODATIONS</span>
         </div>
-    `).join('');
+        <div class="view-list-container">
+            ${accommodations.map(acc => `
+                <div class="day-card collapsed" style="margin-bottom: 12px;">
+                    <div class="day-header" style="background: rgba(69, 184, 175, 0.05);">
+                        <div class="day-info">
+                            <span class="day-badge" style="color: #45B8AF; font-size: 0.8rem;">${acc.type || '숙소'}</span>
+                            <span class="day-date" style="font-size: 1rem;">${acc.name}</span>
+                        </div>
+                        <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="tip-content-wrapper">
+                        <div class="tip-content-inner" style="padding: 16px 20px;">
+                            <div class="acc-details">
+                                ${acc.location ? `<p class="acc-detail-item" style="font-size: 0.9rem; margin-bottom: 8px; color: #666;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${acc.location}</p>` : ''}
+                                ${acc.contact ? `<p class="acc-detail-item" style="font-size: 0.9rem; margin-bottom: 8px; color: #666;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${acc.contact}</p>` : ''}
+                                ${acc.url ? `<p class="acc-detail-item" style="font-size: 0.9rem; margin-bottom: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> <a href="${acc.url}" target="_blank" style="color: #45B8AF; text-decoration: none;">홈페이지 방문</a></p>` : ''}
+                                ${acc.checkIn || acc.checkOut ? `<p class="acc-detail-item" style="font-size: 0.9rem; margin-bottom: 8px; color: #666;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 체크인 ${acc.checkIn || '미지정'} / 체크아웃 ${acc.checkOut || '미지정'}</p>` : ''}
+                                ${acc.notes ? `<div class="acc-notes" style="font-size: 0.9rem; color: #444; background: #f9f9f9; padding: 12px; border-radius: 8px; white-space: pre-wrap;">${acc.notes}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// 체크리스트 섹션 렌더링
+function renderChecklistsSection(checklists = []) {
+    if (!checklists || checklists.length === 0) return '';
+
+    return `
+        <div class="view-list-container" style="margin-top: 10px;">
+            ${checklists.map(list => `
+                <div class="day-card collapsed" style="margin-bottom: 12px;">
+                    <div class="day-header" style="background: rgba(62, 166, 214, 0.05);">
+                        <div class="day-info">
+                            <span class="day-badge" style="color: #3ea6d6; font-size: 0.8rem;">LIST</span>
+                            <span class="day-date" style="font-size: 1rem;">${list.title}</span>
+                        </div>
+                        <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="tip-content-wrapper">
+                        <div class="tip-content-inner" style="padding: 12px 20px;">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                ${list.items && list.items.length > 0 ? list.items.map(item => `
+                                    <li style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+                                        <div style="width: 18px; height: 18px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                                            ${item.completed ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3ea6d6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                                        </div>
+                                        <span style="font-size: 0.95rem; color: #333; ${item.completed ? 'text-decoration: line-through; color: #aaa;' : ''}">${item.text}</span>
+                                    </li>
+                                `).join('') : '<li style="color: #999; font-size: 0.9rem;">항목이 없습니다.</li>'}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// 꿀팁 섹션 렌더링
+function renderTipsSection(tips = []) {
+    if (!tips || tips.length === 0) return '';
+
+    return `
+        <div class="view-list-container" style="margin-top: 10px;">
+            ${tips.map(tip => `
+                <div class="day-card collapsed" style="margin-bottom: 12px;">
+                    <div class="day-header" style="background: rgba(239, 68, 68, 0.05);">
+                        <div class="day-info">
+                            <span class="day-badge" style="color: #ef4444; font-size: 0.8rem;">TIP</span>
+                            <span class="day-date" style="font-size: 1rem;">${tip.title}</span>
+                        </div>
+                        <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="tip-content-wrapper">
+                        <div class="tip-content-inner" style="padding: 16px 20px;">
+                            <div style="font-size: 0.95rem; color: #444; line-height: 1.6; white-space: pre-wrap;">${tip.content}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
 }
 
 // Initialize accordion functionality for day cards
 function initDayAccordion() {
-    const dayCards = document.querySelectorAll('.day-card');
+    const dayCards = document.querySelectorAll('.day-card, .day-card-under');
     dayCards.forEach(card => {
         const header = card.querySelector('.day-header');
         const contentWrapper = card.querySelector('.tip-content-wrapper');

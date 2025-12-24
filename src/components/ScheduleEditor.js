@@ -1152,6 +1152,14 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     function collectDaysData(container, showWarning = false) {
         const daysContainer = container.querySelector('#daysContainer');
         const dayCards = daysContainer ? daysContainer.querySelectorAll(':scope > .day-card') : [];
+
+        // CRITICAL FIX: If no day cards are found, it means Step 2 was likely never rendered 
+        // in this editing session. In this case, we MUST return the existing schedule.days
+        // to prevent data loss upon saving from other steps.
+        if (dayCards.length === 0) {
+            return schedule.days || [];
+        }
+
         const days = [];
         let emptyEventCount = 0;
 
