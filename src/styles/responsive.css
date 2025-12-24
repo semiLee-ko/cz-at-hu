@@ -40,12 +40,8 @@
 
     .stats {
         margin: -24px 16px 24px;
-        padding: 16px;
+        padding: 5px;
         gap: 12px;
-    }
-
-    .day-card {
-        margin: 0 16px 20px;
     }
 
     .form-row {
@@ -61,6 +57,5 @@
 @media (min-width: 641px) and (max-width: 1024px) {
     .mobile-container {
         max-width: 100%;
-        padding: 0 24px;
     }
 }

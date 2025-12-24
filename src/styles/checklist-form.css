@@ -1,0 +1,193 @@
+/* Checklist Form Styling - Accordion Items and Inner Form */
+
+.checklist-items-container {
+    padding: 8px 16px;
+}
+
+.no-items {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    font-style: italic;
+    padding: 12px 0;
+}
+
+.checklist-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f3f4f6;
+    gap: 12px;
+}
+
+.checklist-item-row:last-child {
+    border-bottom: none;
+}
+
+.item-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 0;
+    /* Important for truncation */
+}
+
+.item-checkbox-wrapper input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #45B8AF;
+    flex-shrink: 0;
+}
+
+.item-text {
+    font-size: 0.9rem;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.checklist-item-row.checked .item-text {
+    text-decoration: line-through;
+    color: #9ca3af;
+}
+
+.item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.priority-dropdown {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.priority-dropdown:focus {
+    outline: none;
+    border-color: #45B8AF;
+}
+
+/* Priority Colors */
+.priority-dropdown.priority-high {
+    color: #ef4444;
+    border-color: #fee2e2;
+    background: #fef2f2;
+}
+
+.priority-dropdown.priority-medium {
+    color: #f59e0b;
+    border-color: #fef3c7;
+    background: #fffbeb;
+}
+
+.priority-dropdown.priority-low {
+    color: #10b981;
+    border-color: #d1fae5;
+    background: #ecfdf5;
+}
+
+.btn-delete-item-small {
+    background: none;
+    border: none;
+    color: #d1d5db;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    transition: color 0.2s;
+}
+
+.btn-delete-item-small:hover {
+    color: #ef4444;
+}
+
+/* Inner Addition Form */
+.add-item-inner-form {
+    display: flex;
+    padding: 12px 48px 12px 16px;
+    /* Increased right padding to avoid overlap with delete icon */
+    gap: 8px;
+    background: #f9fafb;
+    border-top: 1px solid #f3f4f6;
+}
+
+.inner-item-input {
+    flex: 1;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+
+.inner-item-input:focus {
+    outline: none;
+    border-color: #45B8AF;
+    background: white;
+}
+
+.btn-add-item-small {
+    background: #45B8AF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-add-item-small:hover {
+    background: #3da89f;
+}
+
+/* Text Truncation */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Category Type Selector */
+.category-type-selector {
+    display: flex;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+}
+
+.btn-type-select {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-type-select.active {
+    background: #45B8AF;
+    color: white;
+    box-shadow: 0 2px 4px rgba(69, 184, 175, 0.2);
+}
+
+.btn-type-select:not(.active):hover {
+    background: #f9fafb;
+    color: #374151;
+}

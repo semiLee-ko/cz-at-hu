@@ -11,10 +11,17 @@
 <body>
     <div class="mobile-container">
         <!-- Navigation -->
-        <nav class="nav-bar">
-            <button class="nav-item active" id="navList">목록</button>
-            <button class="nav-item" id="navNewSchedule">등록</button>
-        </nav>
+        <!-- Navigation -->
+        <header class="app-header">
+            <h1 class="app-logo">Little Trip</h1>
+        </header>
+
+        <!-- Floating Action Button -->
+        <button id="fabAdd" class="fab-button" aria-label="새 일정 등록">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button>
 
         <!-- Dynamic Content Area -->
         <div id="app"></div>

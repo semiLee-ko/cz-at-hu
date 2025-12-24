@@ -30,6 +30,8 @@
 
 .days-container {
     padding: 0 0 24px;
+    margin-left: 16px;
+    margin-right: 16px;
 }
 
 /* ========== Header Area ========== */
@@ -43,6 +45,8 @@
     box-shadow: var(--shadow-lg);
     position: relative;
     overflow: hidden;
+    margin-left: 8px;
+    margin-right: 8px;
 }
 
 /* ========== Header Actions ========== */
@@ -133,7 +137,7 @@
 .title {
     font-size: 2rem;
     font-weight: 800;
-    margin: 0 0 12px 0;
+    margin: 5px 0 5px 0;
     letter-spacing: -0.5px;
     line-height: 1.2;
 }
@@ -167,13 +171,13 @@
 .stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
     background: var(--bg-secondary);
     margin: -10px 24px 28px;
     padding: 10px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
+    position: relative;
 }
 
 .stat-item {
@@ -190,17 +194,80 @@
     margin-bottom: 6px;
 }
 
+.stat-toggle-btn-floating {
+    position: absolute;
+    bottom: -11px;
+    /* Half outside the container */
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1px solid #e0e0e0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-light);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.stat-toggle-btn-floating:focus,
+.stat-toggle-btn-floating:active,
+.stat-toggle-btn-floating:focus-visible {
+    outline: none;
+    background: white;
+    color: var(--text-light);
+    border-color: #e0e0e0;
+    transform: translateX(-50%);
+}
+
+.stat-toggle-btn-floating:hover {
+    /* Keep same style as default - no color change */
+    background: white;
+    color: var(--text-light);
+    border-color: #e0e0e0;
+    transform: translateX(-50%);
+}
+
+.stat-toggle-btn-floating .toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.stat-toggle-btn-floating.expanded .toggle-icon {
+    transform: rotate(180deg);
+}
+
 .stat-value {
     font-weight: 600;
     font-size: 0.8rem;
     color: var(--dark);
 }
 
+.stat-value-collapsible {
+    max-height: 3em;
+    /* 약 2줄 */
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    line-height: 1.5;
+}
+
+.stat-value-collapsible.collapsed {
+    max-height: 3em;
+}
+
+.stat-value-collapsible:not(.collapsed) {
+    max-height: 500px;
+    /* 충분히 큰 값 */
+}
+
 /* ========== Day Card ========== */
 /* ========== Day Card - Clean Style ========== */
 .day-card {
     background: transparent;
-    margin: 0 24px 12px;
     border-radius: 0;
     box-shadow: none;
     border: none;
@@ -212,15 +279,6 @@
     border-color: transparent;
 }
 
-.day-header {
-    padding: 0 0 16px 0;
-    border-bottom: none;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 12px;
-    background: transparent;
-}
 
 .day-badge {
     background: transparent;
@@ -269,8 +327,9 @@
 .event {
     position: relative;
     display: flex;
-    align-items: baseline;
-    margin-bottom: 8px;
+    align-items: flex-start;
+    margin-left: 5px;
+    margin-right: 5px;
     z-index: 1;
 }
 
@@ -278,50 +337,98 @@
 /* .timeline-node { ... } */
 
 .event-time-col {
-    width: 95px;
+    width: 80px;
     text-align: right;
     padding-right: 0;
     flex-shrink: 0;
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-.event-time-range {
-    font-size: 1rem;
-    font-weight: 600;
+.event-time-start {
+    font-size: 0.85rem;
     color: var(--text-secondary);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    letter-spacing: 0;
-    line-height: 1.5;
+    text-align: left;
+    width: 35px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.event-time-start:empty {
+    width: 0;
+}
+
+.event-time-spacer {
+    width: 35px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.event-time-dash {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    width: 10px;
+    text-align: center;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.event-time-dash:empty {
+    width: 0;
+}
+
+.event-time-end {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    text-align: right;
+    width: 35px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.event-time-end:empty {
+    width: 0;
 }
 
 /* Aggressive Border Removal */
 .event-detail-content,
 .event-detail-content * {
     flex: 1;
-    padding-left: 12px;
+    padding-left: 5px;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     outline: none !important;
+    padding-top: 2px;
 }
 
 .event-place {
     display: block;
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 600;
     color: var(--dark);
-    margin-bottom: 6px;
     line-height: 1.3;
+}
+
+.event-place:empty {
+    display: none;
 }
 
 .event-desc {
     display: block;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.5;
+    margin: 0;
     white-space: pre-wrap;
+}
+
+.event-desc:empty {
+    display: none;
 }
 
 /* ========== Hotel Section ========== */

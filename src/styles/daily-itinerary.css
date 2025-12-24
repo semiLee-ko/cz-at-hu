@@ -1,219 +1,418 @@
-/* Daily Itinerary Styles - Step 2 */
+/* Daily Itinerary Styles - Professional Boarding Pass Design */
 
 .day-card {
-    background: var(--bg-secondary);
-    border: 2px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: 24px;
-    transition: var(--transition);
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
 }
 
 .day-card:hover {
-    border-color: var(--secondary);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .day-header {
+    background: #45B8AF;
+    color: white;
+    padding: 10px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid var(--border);
     cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
     user-select: none;
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .day-header:hover {
-    background: rgba(78, 205, 196, 0.05);
-    border-radius: var(--radius-md);
+    background: #45B8AF;
 }
 
 .day-info {
     display: flex;
-    gap: 12px;
     align-items: center;
+    gap: 10px;
 }
 
 .collapse-icon {
-    color: var(--text-light);
-    transition: var(--transition);
+    color: rgba(255, 255, 255, 0.9);
+    transition: transform 0.2s;
     flex-shrink: 0;
 }
 
-.collapse-icon:hover {
-    color: var(--secondary);
-}
-
 .day-badge {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    background: rgba(255, 255, 255, 0.25);
     color: white;
-    padding: 6px 14px;
-    border-radius: var(--radius-md);
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.75rem;
     font-weight: 700;
-    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .day-date {
+    font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+    color: white;
 }
 
 /* Events List */
 .events-list {
-    margin-bottom: 16px;
+    background: white;
+    margin-bottom: 0;
 }
 
 .no-events {
+    padding: 16px;
     text-align: center;
-    padding: 40px 20px;
-    color: var(--text-light);
-    font-size: 0.95rem;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    font-style: italic;
 }
 
 .event-item {
-    background: var(--bg-primary);
-    border: 2px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 16px;
-    margin-bottom: 16px;
-    transition: var(--transition);
+    background: white;
+    border: none;
+    border-bottom: none;
+    border-radius: 0;
+    padding: 12px 16px;
+    margin-bottom: 0;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+/* Perforation line effect - bottom holes */
+.event-item::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 15px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        30px 0 0 -1px #f9fafb, 30px 0 0 0 #e5e7eb,
+        60px 0 0 -1px #f9fafb, 60px 0 0 0 #e5e7eb,
+        90px 0 0 -1px #f9fafb, 90px 0 0 0 #e5e7eb,
+        120px 0 0 -1px #f9fafb, 120px 0 0 0 #e5e7eb,
+        150px 0 0 -1px #f9fafb, 150px 0 0 0 #e5e7eb,
+        180px 0 0 -1px #f9fafb, 180px 0 0 0 #e5e7eb,
+        210px 0 0 -1px #f9fafb, 210px 0 0 0 #e5e7eb,
+        240px 0 0 -1px #f9fafb, 240px 0 0 0 #e5e7eb,
+        270px 0 0 -1px #f9fafb, 270px 0 0 0 #e5e7eb,
+        300px 0 0 -1px #f9fafb, 300px 0 0 0 #e5e7eb,
+        330px 0 0 -1px #f9fafb, 330px 0 0 0 #e5e7eb,
+        360px 0 0 -1px #f9fafb, 360px 0 0 0 #e5e7eb,
+        390px 0 0 -1px #f9fafb, 390px 0 0 0 #e5e7eb,
+        420px 0 0 -1px #f9fafb, 420px 0 0 0 #e5e7eb,
+        450px 0 0 -1px #f9fafb, 450px 0 0 0 #e5e7eb;
+}
+
+/* Hide bottom perforation for first event */
+.event-item:first-of-type::after {
+    display: none;
+}
+
+/* Perforation line effect - top holes (except first item) */
+.event-item:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 15px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        30px 0 0 -1px #f9fafb, 30px 0 0 0 #e5e7eb,
+        60px 0 0 -1px #f9fafb, 60px 0 0 0 #e5e7eb,
+        90px 0 0 -1px #f9fafb, 90px 0 0 0 #e5e7eb,
+        120px 0 0 -1px #f9fafb, 120px 0 0 0 #e5e7eb,
+        150px 0 0 -1px #f9fafb, 150px 0 0 0 #e5e7eb,
+        180px 0 0 -1px #f9fafb, 180px 0 0 0 #e5e7eb,
+        210px 0 0 -1px #f9fafb, 210px 0 0 0 #e5e7eb,
+        240px 0 0 -1px #f9fafb, 240px 0 0 0 #e5e7eb,
+        270px 0 0 -1px #f9fafb, 270px 0 0 0 #e5e7eb,
+        300px 0 0 -1px #f9fafb, 300px 0 0 0 #e5e7eb,
+        330px 0 0 -1px #f9fafb, 330px 0 0 0 #e5e7eb,
+        360px 0 0 -1px #f9fafb, 360px 0 0 0 #e5e7eb,
+        390px 0 0 -1px #f9fafb, 390px 0 0 0 #e5e7eb,
+        420px 0 0 -1px #f9fafb, 420px 0 0 0 #e5e7eb,
+        450px 0 0 -1px #f9fafb, 450px 0 0 0 #e5e7eb;
+    z-index: 2;
+}
+
+.event-item:last-child {
+    border-bottom: none;
+}
+
+.event-item:last-child::after {
+    display: none;
 }
 
 .event-item:hover {
-    border-color: var(--secondary);
+    background: #f9fafb;
 }
 
 .event-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px dashed var(--border);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #e5e7eb;
     cursor: pointer;
     user-select: none;
 }
 
 .event-header:hover {
-    background: rgba(78, 205, 196, 0.05);
-    border-radius: var(--radius-sm);
+    background: transparent;
 }
 
 .event-header span {
-    font-weight: 700;
-    color: var(--dark);
-    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.85rem;
 }
 
 .event-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .event-content {
     display: block;
 }
 
+/* Form Group - Compact for Schedule Editor */
+.form-group-compact {
+    margin-bottom: 10px;
+}
+
+.form-group-compact label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 4px;
+    position: relative;
+    padding-left: 12px;
+}
+
+.form-group-compact label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background: #45B8AF;
+    border-radius: 50%;
+}
+
+/* Form Row - Horizontal Layout for Time Inputs */
+.event-item .form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.event-item .form-row .form-group-compact {
+    flex: 1;
+    margin-bottom: 0;
+}
+
 .btn-remove-event {
     background: transparent;
     border: none;
-    color: var(--text-light);
-    font-size: 0.85rem;
+    color: #9ca3af;
     cursor: pointer;
-    padding: 4px 12px;
-    border-radius: var(--radius-sm);
-    transition: var(--transition);
-    font-weight: 600;
+    padding: 4px;
+    border-radius: 3px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
 }
 
 .btn-remove-event:hover {
-    color: var(--primary);
-    background: rgba(255, 107, 107, 0.1);
+    color: #ef4444;
+    background: #fef2f2;
 }
 
-/* Location Checkboxes */
+/* Location Checkboxes - Compact */
 .location-checkboxes {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 6px;
+    margin-bottom: 8px;
 }
 
 .checkbox-label {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border: 2px solid var(--border);
-    border-radius: var(--radius-md);
+    gap: 6px;
+    padding: 5px 10px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: var(--transition);
-    background: var(--bg-secondary);
+    transition: all 0.2s;
+    line-height: 1;
 }
 
 .checkbox-label:hover {
-    border-color: var(--secondary);
-    background: rgba(78, 205, 196, 0.05);
+    background: #e5e7eb;
+    border-color: #d1d5db;
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     cursor: pointer;
-    accent-color: var(--secondary);
+    accent-color: #45B8AF;
+    margin: 0;
+    flex-shrink: 0;
+    vertical-align: middle;
 }
 
 .checkbox-label input[type="checkbox"]:checked+span {
-    color: var(--secondary);
-    font-weight: 700;
+    color: #45B8AF;
+    font-weight: 600;
 }
 
 .checkbox-label:has(input[type="checkbox"]:checked) {
-    border-color: var(--secondary);
-    background: rgba(78, 205, 196, 0.1);
+    border-color: #45B8AF;
+    background: #e6f7f6;
 }
 
 .checkbox-label span {
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: var(--transition);
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: color 0.2s;
+    color: #4b5563;
+    line-height: 1.2;
+    display: inline-block;
+    align-self: center;
 }
 
-/* Add Event Button */
-.btn-add-event {
+/* Remove bullet from checkbox labels */
+.checkbox-label::before {
+    display: none;
+}
+
+/* Form Labels - Uppercase Professional Style */
+.event-item label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* Form Inputs - Compact */
+.event-item input,
+.event-item textarea {
     width: 100%;
-    padding: 12px;
-    background: var(--bg-primary);
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-md);
-    color: var(--secondary);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: var(--transition);
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    background: white;
+    margin-bottom: 8px;
 }
 
-.btn-add-event:hover {
-    background: rgba(78, 205, 196, 0.1);
-    border-color: var(--secondary);
-    border-style: solid;
+.event-item input:focus,
+.event-item textarea:focus {
+    outline: none;
+    border-color: #45B8AF;
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1);
+}
+
+/* Events List - Relative positioning for floating button */
+.events-list {
+    background: white;
+    margin-bottom: 0;
+    position: relative;
+}
+
+/* Floating Add Button */
+.btn-add-event-floating {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: #45B8AF;
+    border: none;
+    color: white;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    box-shadow: 0 2px 8px rgba(69, 184, 175, 0.3);
+}
+
+.btn-add-event-floating:hover {
+    background: #3da89f;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(69, 184, 175, 0.4);
+}
+
+.btn-add-event-floating svg {
+    pointer-events: none;
+}
+
+/* Collapsed States */
+.day-card.collapsed .events-list {
+    display: none;
 }
 
 /* Responsive */
 @media (max-width: 640px) {
     .day-card {
-        padding: 16px;
+        margin-bottom: 10px;
+    }
+
+    .day-header {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .event-item {
+        padding: 10px 12px;
     }
 
     .location-checkboxes {
-        gap: 8px;
+        gap: 4px;
     }
 
     .checkbox-label {
-        padding: 6px 10px;
-        font-size: 0.85rem;
+        padding: 3px 6px;
+        font-size: 0.7rem;
     }
 }

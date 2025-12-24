@@ -6,11 +6,13 @@
 @import './styles/schedule-view.css';
 @import './styles/editor.css';
 @import './styles/step-indicator.css';
+@import './styles/editor-nav.css';
 @import './styles/daily-itinerary.css';
 @import './styles/accommodation.css';
 @import './styles/checklist.css';
 @import './styles/modal.css';
 @import './styles/responsive.css';
+
 /* Tip Manager / Accordion Styles */
 .tip-form-section {
     background: #f8f9fa;
@@ -29,7 +31,6 @@
 .tip-list {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
 }
 
 .accordion-item {
@@ -92,7 +93,6 @@
 }
 
 .tip-body {
-    margin-bottom: 1.5rem;
     line-height: 1.6;
     color: #4b5563;
 }
@@ -105,7 +105,8 @@
     border-top: 1px solid #f3f4f6;
 }
 
-.btn-edit-tip, .btn-delete-tip {
+.btn-edit-tip,
+.btn-delete-tip {
     padding: 0.4rem 0.8rem;
     border-radius: 4px;
     font-size: 0.85rem;
@@ -134,7 +135,13 @@
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
 
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

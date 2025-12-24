@@ -27,6 +27,8 @@
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
     border: 1px solid var(--border);
+    opacity: 0;
+    animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .schedule-card:hover {
@@ -70,41 +72,74 @@
     gap: 6px;
 }
 
-.schedule-actions {
+/* Button Styles */
+.btn-secondary {
     display: flex;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-.schedule-actions button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: var(--radius-md);
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
 }
 
-.btn-view {
-    background: linear-gradient(135deg, var(--dark), var(--dark-light));
-    color: white;
+.btn-secondary:hover {
+    background-color: var(--bg-primary);
+    border-color: var(--secondary);
+    color: var(--secondary-dark);
 }
 
-.btn-view:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+/* Card Actions Group */
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.btn-share {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
+/* Action Icon Buttons Global */
+.btn-icon-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: var(--transition);
+    padding: 0;
 }
 
-.btn-share:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+.btn-icon-action:hover {
+    background-color: #f1f3f5;
+    color: var(--dark);
+    transform: scale(1.1);
+}
+
+/* Specific Action Colors On Hover */
+.btn-share-icon:hover {
+    background-color: #e0f2fe;
+    /* Light Blue */
+    color: #0ea5e9;
+}
+
+.btn-edit-icon:hover {
+    background-color: #f0fdf4;
+    /* Light Green */
+    color: #22c55e;
+}
+
+.btn-delete-icon:hover {
+    background-color: #fee2e2;
+    /* Light Red */
+    color: #ef4444;
 }
 
 .empty-state {

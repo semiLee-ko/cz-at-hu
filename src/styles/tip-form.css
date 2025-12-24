@@ -1,0 +1,91 @@
+/* Tip Form Styling - Circular Add Button with Animation */
+
+.tip-form-section {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+/* Circular Add Button Container */
+.tip-add-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+    height: 48px;
+    align-items: center;
+    overflow: hidden;
+    /* Essential for height transition */
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Hidden State for Container (Collapsing) */
+.tip-add-button-container.hidden {
+    height: 0 !important;
+    margin-top: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+/* Circular Button */
+.btn-add-tip-circular {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 1.5rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(69, 184, 175, 0.4);
+    background: #45B8AF;
+    color: white;
+
+    /* Default (Enabled) State */
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.btn-add-tip-circular:hover {
+    background: #3da89f;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(69, 184, 175, 0.5);
+}
+
+.btn-add-tip-circular:active {
+    transform: scale(0.95);
+}
+
+/* Disabled State - Hidden */
+.btn-add-tip-circular:disabled {
+    opacity: 0;
+    transform: scale(0);
+    pointer-events: none;
+}
+
+/* Icon Styles */
+.icon-hyphen {
+    display: none;
+}
+
+.icon-check {
+    display: block;
+}
+
+/* Validation Error Message */
+.validation-error-msg {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 8px;
+    text-align: center;
+    min-height: 1.2em;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.validation-error-msg:empty {
+    opacity: 0;
+}

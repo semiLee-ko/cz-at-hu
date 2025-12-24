@@ -22,7 +22,6 @@
 }
 
 .schedule-form {
-    padding: 28px 24px 150px 24px !important;
     /* Bottom padding increased for fixed nav */
     max-width: 600px;
     margin: 0 auto;
@@ -30,40 +29,61 @@
 }
 
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .form-group label {
     display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
     font-weight: 600;
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-    color: var(--dark);
+    margin-bottom: 6px;
+    position: relative;
+    padding-left: 12px;
+}
+
+.form-group label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background: #45B8AF;
+    border-radius: 50%;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 14px 16px;
-    border: 2px solid var(--border);
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.85rem;
     font-family: inherit;
-    transition: var(--transition);
-    background: var(--bg-secondary);
+    transition: border-color 0.2s;
+    background: white;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+    border-color: #45B8AF;
+    box-shadow: 0 0 0 2px rgba(69, 184, 175, 0.1);
+}
+
+.input-error {
+    background-color: #fff5f5 !important;
+    border-color: #ff6b6b !important;
 }
 
 /* ========== Date Input Enhancement ========== */
 .date-input {
-    padding: 14px 16px !important;
-    font-size: 0.95rem !important;
+    padding: 8px 12px !important;
+    font-size: 0.85rem !important;
     cursor: pointer;
     line-height: 1.5;
 }
@@ -81,13 +101,13 @@
 }
 
 .date-input::-webkit-datetime-edit-text {
-    padding: 0 2px;
+    padding: 0 1px;
 }
 
 .date-input::-webkit-datetime-edit-month-field,
 .date-input::-webkit-datetime-edit-day-field,
 .date-input::-webkit-datetime-edit-year-field {
-    padding: 2px 4px;
+    padding: 1px 2px;
     border-radius: 4px;
     text-align: center;
 }
@@ -99,20 +119,21 @@
     color: white;
 }
 
-
 .form-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 10px;
 }
 
 .hint {
-    font-size: 0.85rem;
-    color: var(--text-light);
-    margin-top: 6px;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-top: 0;
     display: inline;
-    margin-left: 8px;
+    margin-left: 6px;
     font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 /* ========== Trip Type Selector ========== */
@@ -126,18 +147,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 14px 20px;
-    border: 2px solid var(--border);
-    border-radius: var(--radius-md);
+    padding: 10px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
     cursor: pointer;
-    transition: var(--transition);
-    background: var(--bg-secondary);
+    transition: all 0.2s;
+    background: white;
     position: relative;
 }
 
 .radio-option:hover {
-    border-color: var(--secondary);
-    background: rgba(78, 205, 196, 0.05);
+    border-color: #45B8AF;
+    background: #f9fafb;
 }
 
 .radio-option input[type="radio"] {
@@ -148,40 +169,45 @@
 }
 
 .radio-option span {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    transition: var(--transition);
+    transition: color 0.2s;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+}
+
+/* Remove bullet from radio button labels */
+.radio-option::before {
+    display: none;
 }
 
 /* Custom checkmark */
 .radio-option span::before {
     content: '';
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--border);
+    width: 16px;
+    height: 16px;
+    border: 1px solid #e5e7eb;
     border-radius: 50%;
     display: inline-block;
-    transition: var(--transition);
+    transition: all 0.2s;
     flex-shrink: 0;
 }
 
 .radio-option input[type="radio"]:checked+span {
-    color: var(--secondary);
-    font-weight: 700;
+    color: #45B8AF;
+    font-weight: 600;
 }
 
 .radio-option input[type="radio"]:checked+span::before {
-    border-color: var(--secondary);
-    background: var(--secondary);
+    border-color: #45B8AF;
+    background: #45B8AF;
     box-shadow: inset 0 0 0 3px white;
 }
 
 .radio-option:has(input[type="radio"]:checked) {
-    border-color: var(--secondary);
-    background: rgba(78, 205, 196, 0.1);
+    border-color: #45B8AF;
+    background: #e6f7f6;
 }
 
 /* ========== Day Items ========== */
@@ -231,31 +257,31 @@
 .tags-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-    min-height: 40px;
-    padding: 8px;
-    border: 2px dashed var(--border);
-    border-radius: var(--radius-md);
-    background: var(--bg-primary);
+    gap: 6px;
+    margin-bottom: 8px;
+    min-height: 36px;
+    padding: 6px;
+    border: 1px dashed #e5e7eb;
+    border-radius: 4px;
+    background: white;
 }
 
 .tag-item {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));
+    background: linear-gradient(135deg, #45B8AF, #3da89f);
     color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-size: 0.75rem;
     font-weight: 600;
     animation: tagAppear 0.2s ease;
 }
 
-/* Location tags - different color */
+/* Location tags - Same as default (Mint) */
 .location-tag {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    /* Inherit default tag style */
 }
 
 @keyframes tagAppear {
@@ -294,17 +320,502 @@
 
 .tag-input {
     width: 100%;
-    padding: 12px 16px;
-    border: 2px solid var(--border);
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.85rem;
     font-family: inherit;
-    transition: var(--transition);
-    background: var(--bg-secondary);
+    transition: border-color 0.2s;
+    background: white;
 }
 
 .tag-input:focus {
     outline: none;
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+    border-color: #45B8AF;
+    box-shadow: 0 0 0 2px rgba(69, 184, 175, 0.1);
+}
+
+/* Select styling to match compact design */
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    background: white;
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #45B8AF;
+    box-shadow: 0 0 0 2px rgba(69, 184, 175, 0.1);
+}
+
+.error-message {
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    min-height: 1.2em;
+    /* Prevent layout jump */
+    display: none;
+    /* Hidden by default */
+}
+
+.error-message.visible {
+    display: block;
+}
+
+/* Accordion Arrow Fix */
+/* Default (Expanded): Point UP (Native Icon is Up) */
+.day-header .collapse-icon {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg);
+}
+
+/* Collapsed: Point DOWN */
+.day-card.collapsed .day-header .collapse-icon {
+    transform: rotate(180deg);
+}
+
+/* ========================================= */
+/* Professional Boarding Pass Design */
+/* ========================================= */
+
+.day-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.day-card:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.day-header {
+    background: #1e40af;
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.day-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.day-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.day-date {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+}
+
+.collapse-icon {
+    opacity: 0.9;
+}
+
+.events-list {
+    background: white;
+}
+
+.event-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.event-item:last-child {
+    border-bottom: none;
+}
+
+.event-item label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.event-item input,
+.event-item textarea {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    background: white;
+}
+
+.event-item input:focus,
+.event-item textarea:focus {
+    outline: none;
+    border-color: #1e40af;
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1);
+}
+
+.event-start-time,
+.event-end-time,
+.event-description {
+    margin-bottom: 8px;
+}
+
+.btn-add-event {
+    width: 100%;
+    padding: 10px;
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 0 0 6px 6px;
+    color: #6b7280;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-event:hover {
+    background: #f3f4f6;
+    border-color: #1e40af;
+    color: #1e40af;
+}
+
+.day-card.collapsed .events-list,
+.day-card.collapsed .btn-add-event {
+    display: none;
+}
+
+.no-events {
+    padding: 16px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* Location Checkboxes - Compact */
+.location-checkboxes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.location-checkboxes label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: none;
+    letter-spacing: normal;
+    color: #4b5563;
+}
+
+.location-checkboxes label:hover {
+    background: #e5e7eb;
+}
+
+.location-checkboxes input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
+
+
+/* Tip Accordion Styles (Align with Day Card) */
+.tip-content-wrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s ease-out;
+    background: white;
+}
+
+/* Animation Support: Inner Wrapper */
+.tip-content-inner {
+    overflow: hidden;
+    min-height: 0;
+    position: relative;
+    /* Context for absolute delete button */
+}
+
+/* Collapsed State for Tips (Override default display:none with animation) */
+.tip-card.collapsed .tip-content-wrapper {
+    display: grid !important;
+    grid-template-rows: 0fr;
+}
+
+.tip-body {
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.tip-body p {
+    margin: 0;
+    white-space: pre-wrap;
+    color: #4b5563;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.tip-footer {
+    padding: 12px 16px;
+    background: #f9fafb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.btn-edit-tip,
+.btn-delete-tip {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-edit-tip {
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+}
+
+.btn-edit-tip:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.btn-delete-tip {
+    background: white;
+    border: 1px solid #fee2e2;
+    color: #ef4444;
+}
+
+.btn-delete-tip:hover {
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+/* Drag & Drop Styles */
+.day-card.dragging {
+    opacity: 0.5;
+    background: #f9fafb;
+}
+
+/* Tip Header Specific Layout Fixes */
+.tip-card .day-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    /* Override space-between */
+    gap: 12px !important;
+}
+
+.tip-card .day-info {
+    flex: 1 !important;
+    /* Fill remaining space */
+    text-align: left !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    /* Prevent flex overflow */
+}
+
+.tip-card .collapse-icon {
+    margin-left: auto !important;
+    /* Push to right */
+    flex-shrink: 0 !important;
+}
+
+.drag-handle {
+    cursor: grab;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.7);
+    flex-shrink: 0;
+    z-index: 10;
+    /* Ensure clickable */
+}
+
+.drag-handle:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.tip-form-section {
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    border-radius: 8px;
+}
+
+.tip-form-section.drag-over {
+    border-color: #45B8AF;
+    background-color: rgba(69, 184, 175, 0.05);
+    box-shadow: 0 0 0 4px rgba(69, 184, 175, 0.1);
+}
+
+.sortable-placeholder {
+    pointer-events: none;
+}
+
+/* Tip Form Enhancements */
+.tip-form-section {
+    position: relative;
+    /* For absolute positioning of X button */
+}
+
+.btn-close-edit {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    color: #9ca3af;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+    z-index: 5;
+}
+
+.btn-close-edit:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #ef4444;
+}
+
+.tip-guide-text {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #f0fdfa;
+    /* Light mint bg */
+    border: 1px dashed #45B8AF;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #2c7a7b;
+    /* Dark mint text */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.5;
+}
+
+
+.guide-icon {
+    display: flex;
+    align-items: center;
+    color: #45B8AF;
+    flex-shrink: 0;
+}
+
+/* Force Left Alignment for Tip Titles - Aggressive Overrides */
+.tip-card .day-header {
+    justify-content: flex-start !important;
+}
+
+/* Tip Card List Styling (No Margins) */
+.tip-card {
+    margin-bottom: 0 !important;
+    border-radius: 0 !important;
+    border-bottom: none !important;
+}
+
+.tip-card:first-child {
+    border-top-left-radius: 6px !important;
+    border-top-right-radius: 6px !important;
+}
+
+.tip-card:last-child {
+    border-bottom-left-radius: 6px !important;
+    border-bottom-right-radius: 6px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+/* Delete Icon Styling */
+.btn-delete-tip-icon {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 6px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 5;
+}
+
+.btn-delete-tip-icon:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.tip-content-wrapper {
+    position: relative;
+    /* Context for absolute delete button */
+}
+
+.tip-card .day-info {
+    flex-grow: 1 !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    margin-right: auto !important;
+    width: auto !important;
+}
+
+.tip-card .day-date {
+    text-align: left !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    flex: 0 1 auto !important;
+    /* Allow shrinking but not forced growing */
 }

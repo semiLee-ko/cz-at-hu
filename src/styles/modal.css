@@ -148,3 +148,50 @@
 .file-name:empty {
     display: none;
 }
+
+/* Close button styling */
+.btn-close {
+    background: white;
+    border: 1px solid #ddd;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    color: #666;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.btn-close:hover {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: #999;
+    color: #333;
+}
+
+/* Icon buttons in URL box */
+.url-box .btn-primary {
+    background: white;
+    border: 1px solid #ddd;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    color: #666;
+    flex-shrink: 0;
+}
+
+.url-box .btn-primary:hover {
+    background: rgba(78, 205, 196, 0.1);
+    border-color: var(--secondary);
+    color: var(--secondary);
+}

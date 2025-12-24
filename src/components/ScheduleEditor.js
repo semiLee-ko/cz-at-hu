@@ -23,85 +23,74 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     container.innerHTML = `
         <div class="editor-container">
-            <!-- Step Progress Indicator -->
-            <div class="step-indicator">
-                <div class="step-item active" data-step="1">
-                    <div class="step-circle"></div>
-                    <div class="step-label">기본<br />정보</div>
-                </div>
-                <div class="step-line"></div>
-                <div class="step-item" data-step="2">
-                    <div class="step-circle"></div>
-                    <div class="step-label">일별<br />일정</div>
-                </div>
-                <div class="step-line"></div>
-                <div class="step-item" data-step="3">
-                    <div class="step-circle"></div>
-                    <div class="step-label">숙소<br />정보</div>
-                </div>
-                <div class="step-line"></div>
-                <div class="step-item" data-step="4">
-                    <div class="step-circle"></div>
-                    <div class="step-label">체크<br />리스트</div>
-                </div>
-                <div class="step-line"></div>
-                <div class="step-item" data-step="5">
-                    <div class="step-circle"></div>
-                    <div class="step-label">팁<br />작성</div>
-                </div>
-            </div>
-            
+            <!-- Header: Back & Save -->
+            <header class="editor-header-nav">
+                <button type="button" class="btn-icon" id="btnEditorBack">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <h2 class="editor-title">${scheduleId ? '일정 수정' : '새 일정'}</h2>
+                <button type="button" class="btn-icon btn-save disabled" id="btnEditorSave">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </button>
+            </header>
+
             <form id="scheduleForm" class="schedule-form">
                 <!-- Step 1: Basic Information -->
                 <div class="form-step" data-step="1">
                     <div class="form-group">
-                        <label>여행 제목 *</label>
+                        <label>제목</label>
                         <input type="text" name="title" value="${schedule.title}" 
-                               placeholder="예: 동유럽 3국 가을 여행" required>
+                               placeholder="예: 동유럽 3국 가을 여행" required maxlength="20">
+                        <div class="error-message" id="titleError"></div>
                     </div>
                     
                     <div class="form-group">
-                        <label>여행 유형 *</label>
+                        <label>유형</label>
                         <div class="trip-type-selector">
                             <label class="radio-option">
                                 <input type="radio" name="tripType" value="domestic" 
                                        ${schedule.tripType === 'domestic' ? 'checked' : ''}>
-                                <span>국내 여행</span>
+                                <span>국내</span>
                             </label>
                             <label class="radio-option">
                                 <input type="radio" name="tripType" value="international" 
                                        ${schedule.tripType === 'international' || !schedule.tripType ? 'checked' : ''}>
-                                <span>해외 여행</span>
+                                <span>해외</span>
                             </label>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label id="locationLabel">
-                            ${schedule.tripType === 'domestic' ? '도시' : '국가'} <span class="hint">(엔터로 추가)</span>
-                        </label>
-                        <div class="tags-container" id="locationsContainer" style="${(schedule.countries && schedule.countries.length > 0) ? '' : 'display: none;'}">
-                            ${(schedule.countries || []).map(location => `
-                                <span class="tag-item location-tag">
-                                    ${location}
-                                    <button type="button" class="tag-remove" data-location="${location}">×</button>
-                                </span>
-                            `).join('')}
+                        <div class="form-group">
+                            <label id="locationLabel">
+                                ${schedule.tripType === 'domestic' ? '도시' : '국가'} <span class="hint"> (입력 후 엔터)</span>
+                            </label>
+                            <input type="text" id="locationInput" class="tag-input" 
+                                   placeholder="${schedule.tripType === 'domestic' ? '예: 서울 (입력 후 엔터)' : '예: 미국 (입력 후 엔터)'}" maxlength="10">
+                            <div class="error-message" id="locationError"></div>
+                            <div class="tags-container" id="locationsContainer" style="${(schedule.countries && schedule.countries.length > 0) ? '' : 'display: none;'}">
+                                ${(schedule.countries || []).map(location => `
+                                    <span class="tag-item location-tag">
+                                        ${location}
+                                        <button type="button" class="tag-remove" data-location="${location}">×</button>
+                                    </span>
+                                `).join('')}
+                            </div>
                         </div>
-                        <input type="text" id="locationInput" class="tag-input" 
-                               placeholder="${schedule.tripType === 'domestic' ? '예: 서울 (엔터)' : '예: 미국 (엔터)'}">
-                    </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>시작일 *</label>
+                            <label>시작일</label>
                             <input type="date" name="startDate" class="date-input" 
                                    value="${schedule.startDate}" 
                                    inputmode="numeric" 
                                    required>
                         </div>
                         <div class="form-group">
-                            <label>종료일 *</label>
+                            <label>종료일</label>
                             <input type="date" name="endDate" class="date-input" 
                                    value="${schedule.endDate}" 
                                    inputmode="numeric" 
@@ -111,18 +100,22 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>성인</label>
-                            <input type="number" name="adults" value="${schedule.members?.adults || 2}" min="0">
+                            <label>성인 <span id="adultCountLabel" class="count-badge">(0명)</span> <span class="hint">(입력 후 엔터)</span></label>
+                            <input type="text" id="adultInput" placeholder="이름 입력" maxlength="10">
+                            <div class="error-message" id="adultError"></div>
+                            <div class="tags-container" id="adultsContainer" style="display: none;"></div>
                         </div>
                         <div class="form-group">
-                            <label>아동</label>
-                            <input type="number" name="children" value="${schedule.members?.children || 0}" min="0">
+                            <label>아동 <span id="childCountLabel" class="count-badge">(0명)</span> <span class="hint">(입력 후 엔터)</span></label>
+                            <input type="text" id="childInput" placeholder="이름 입력" maxlength="10">
+                            <div class="error-message" id="childError"></div>
+                            <div class="tags-container" id="childrenContainer" style="display: none;"></div>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label>여행 테마</label>
-                        <select name="theme" class="form-select" style="width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        <select name="theme" class="form-select">
                             <option value="default" ${!schedule.theme ? 'selected' : ''}>테마 선택 안함</option>
                             <option value="solo" ${schedule.theme === 'solo' ? 'selected' : ''}>홀로여행</option>
                             <option value="friends" ${schedule.theme === 'friends' ? 'selected' : ''}>우정여행</option>
@@ -133,7 +126,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     </div>
 
                     <div class="form-group">
-                        <label>해시태그 <span class="hint">(엔터로 추가)</span></label>
+                        <label>해시태그 <span class="hint">(입력 후 엔터)</span></label>
+                        <input type="text" id="tagInput" class="tag-input" placeholder="태그 입력 후 엔터" maxlength="10">
+                        <div class="error-message" id="tagError"></div>
                         <div class="tags-container" id="tagsContainer" style="${(schedule.tags && schedule.tags.length > 0) ? '' : 'display: none;'}">
                             ${(schedule.tags || []).map(tag => `
                                 <span class="tag-item">
@@ -142,7 +137,6 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 </span>
                             `).join('')}
                         </div>
-                        <input type="text" id="tagInput" class="tag-input" placeholder="태그 입력 후 엔터">
                     </div>
                 </div>
                 
@@ -156,10 +150,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 <!-- Step 3: Accommodation -->
                 <div class="form-step" data-step="3" style="display: none;">
                     <div class="accommodation-section">
-                        <h3 class="section-title">숙소 관리</h3>
-                        
                         <!-- Accommodation Form -->
-                        <div class="accommodation-form">
+                        <div class="accommodation-form tip-form-section">
+                            <h4 id="accFormTitle">새 숙소 추가</h4>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>숙소명 *</label>
@@ -167,7 +160,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 </div>
                                 <div class="form-group">
                                     <label>형태</label>
-                                    <input type="text" id="accType" placeholder="예: 호텔, 캠핑, 게스트하우스">
+                                    <input type="text" id="accType" placeholder="예: 호텔, 캠핑">
                                 </div>
                             </div>
                             
@@ -189,7 +182,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 </div>
                                 <div class="form-group">
                                     <label>URL</label>
-                                    <input type="url" id="accUrl" placeholder="예: https://booking.com/...">
+                                    <input type="url" id="accUrl" placeholder="예: https://...">
                                 </div>
                             </div>
                             
@@ -209,40 +202,59 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 <textarea id="accNotes" placeholder="추가 정보나 메모를 입력하세요" rows="3"></textarea>
                             </div>
                             
-                            <button type="button" class="btn-add-accommodation" id="btnAddAccommodation">+ 숙소 추가</button>
+                            <!-- Circular Add Button -->
+                            <div class="tip-add-button-container hidden">
+                                <button type="button" class="btn-add-tip-circular" id="btnAddAccommodation" disabled>
+                                    <span class="icon-check">✓</span>
+                                </button>
+                            </div>
                         </div>
                         
-                        <!-- Accommodation List -->
-                        <div class="accommodation-list" id="accommodationList">
+                        <!-- Accommodation List (Accordion) -->
+                        <div class="accommodation-list tip-list" id="accommodationList">
                             <!-- Accommodations will be rendered here -->
                         </div>
+                        <!-- Separate Guide Text Container -->
+                        <div id="accommodationGuide" class="tip-guide-text" style="display: none;"></div>
                     </div>
                 </div>
                 
                 <!-- Step 4: Checklist -->
                 <div class="form-step" data-step="4" style="display: none;">
                     <div class="checklist-section">
-                        <!-- Tab Navigation -->
-                        <div class="checklist-tabs">
-                            <button type="button" class="tab-btn active" data-tab="packing">준비물</button>
-                            <button type="button" class="tab-btn" data-tab="todo">할 일</button>
+ 
+                        <!-- Category Form -->
+                        <div class="category-form-section tip-form-section">
+                            <h4 id="categoryFormTitle">새 카테고리 추가</h4>
+                            <div class="form-group">
+                                <label>카테고리명</label>
+                                <input type="text" id="categoryName" placeholder="예: 의류, 세면도구, 예약확인" maxlength="20">
+                            </div>
+
+                            <div class="form-group">
+                                <label>구분</label>
+                                <div class="category-type-selector">
+                                    <button type="button" class="btn-type-select active" data-type="packing">준비물</button>
+                                    <button type="button" class="btn-type-select" data-type="todo">할 일</button>
+                                </div>
+                            </div>
+                            <!-- Validation Msg (Optional) -->
+                            <p id="categoryValidationMsg" class="validation-error-msg"></p>
+                            <!-- Circular Add Button -->
+                            <div class="category-add-button-container tip-add-button-container hidden">
+                                <button type="button" class="btn-add-tip-circular" id="btnAddCategory" disabled title="카테고리 추가">
+                                    <span class="icon-check">✓</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Checklists List (Accordion) -->
+                        <div id="checklistsContainer" class="tip-list">
+                            <!-- Categories will be rendered here -->
                         </div>
                         
-                        <!-- Packing Tab Content -->
-                        <div class="tab-content active" data-tab-content="packing">
-                            <div class="categories-container" id="packingCategories">
-                                <!-- Categories will be rendered here -->
-                            </div>
-                            <button type="button" class="btn-add-category" data-tab="packing">+ 카테고리 추가</button>
-                        </div>
-                        
-                        <!-- Todo Tab Content -->
-                        <div class="tab-content" data-tab-content="todo">
-                            <div class="categories-container" id="todoCategories">
-                                <!-- Categories will be rendered here -->
-                            </div>
-                            <button type="button" class="btn-add-category" data-tab="todo">+ 카테고리 추가</button>
-                        </div>
+                        <!-- Separate Guide Text Container -->
+                        <div id="checklistGuide" class="tip-guide-text" style="display: none;"></div>
                     </div>
                 </div>
 
@@ -257,14 +269,20 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                             <h4 id="tipFormTitle">새 팁 작성</h4>
                             <div class="form-group">
                                 <label>제목</label>
-                                <input type="text" id="tipTitle" placeholder="예: 환전 팁, 대중교통 이용법">
+                                <input type="text" id="tipTitle" placeholder="예: 환전 팁, 대중교통 이용법" maxlength="50">
                             </div>
                             <div class="form-group">
                                 <label>내용</label>
-                                <textarea id="tipContent" placeholder="상세 내용을 입력하세요" rows="4"></textarea>
+                                <textarea id="tipContent" placeholder="상세 내용을 입력하세요" rows="4" maxlength="200"></textarea>
                             </div>
-                            <div style="display: flex; align-items: center;">
-                                <button type="button" class="btn-primary" id="btnAddTip" style="padding: 0.6rem 1.2rem; margin-top: 0;">+ 팁 추가</button>
+                            <!-- Validation Error Message -->
+                            <p id="tipValidationMsg" class="validation-error-msg"></p>
+                            <!-- Circular Add Button -->
+                            <div class="tip-add-button-container hidden">
+                                <button type="button" class="btn-add-tip-circular" id="btnAddTip" disabled>
+                                    <span class="icon-hyphen">−</span>
+                                    <span class="icon-check">✓</span>
+                                </button>
                             </div>
                         </div>
 
@@ -272,23 +290,112 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                         <div id="tipsContainer" class="tip-list">
                             <!-- Tips will be rendered here -->
                         </div>
+                        <!-- Separate Guide Text Container -->
+                        <div id="tipGuide" class="tip-guide-text" style="display: none;"></div>
                     </div>
                 </div>
-                
-                <!-- Navigation Buttons -->
-                <div class="form-navigation">
-                    <button type="button" class="btn-secondary" id="btnCancel">취소</button>
-                    <button type="button" class="btn-secondary" id="btnPrev" style="display: none;">이전</button>
-                    <button type="button" class="btn-primary" id="btnNext">다음</button>
-                    <button type="submit" class="btn-primary" id="btnSubmit" style="display: none;">저장</button>
-                </div>
             </form>
+
+            <!-- Bottom Navigation (Tabs) -->
+            <div class="form-navigation">
+                 <div class="step-indicator">
+                    <!-- Step 1: Basic Info (Note/Pen) -->
+                    <div class="step-item active" data-step="1">
+                        <div class="icon-gauge-wrapper">
+                            <!-- Background Icon -->
+                            <svg class="step-icon step-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            <!-- Foreground Icon -->
+                            <div class="step-icon-fill-container">
+                                <svg class="step-icon step-icon-fill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Schedule (Calendar) - Keep -->
+                    <div class="step-item" data-step="2">
+                        <div class="icon-gauge-wrapper">
+                            <svg class="step-icon step-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <div class="step-icon-fill-container">
+                                <svg class="step-icon step-icon-fill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Accommodation (House) -->
+                    <div class="step-item" data-step="3">
+                        <div class="icon-gauge-wrapper">
+                            <svg class="step-icon step-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            <div class="step-icon-fill-container">
+                                <svg class="step-icon step-icon-fill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Checklist (List) - Keep -->
+                    <div class="step-item" data-step="4">
+                        <div class="icon-gauge-wrapper">
+                            <svg class="step-icon step-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 11l3 3L22 4"></path>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
+                            <div class="step-icon-fill-container">
+                                <svg class="step-icon step-icon-fill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Tips (Lightbulb) -->
+                    <div class="step-item" data-step="5">
+                         <div class="icon-gauge-wrapper">
+                            <svg class="step-icon step-icon-bg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 18h6"></path>
+                                <path d="M10 22h4"></path>
+                                <path d="M15.09 14c.18-.9.65-1.74 1.35-2.36C18.67 9.87 19.34 6.84 17.7 4.5c-2.3-3.05-6.91-3.17-9.35-.2-1.74 2.11-1.28 5.23 1 7.34.7.62 1.17 1.46 1.35 2.36"></path>
+                            </svg>
+                            <div class="step-icon-fill-container">
+                                <svg class="step-icon step-icon-fill" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18h6"></path>
+                                    <path d="M10 22h4"></path>
+                                    <path d="M15.09 14c.18-.9.65-1.74 1.35-2.36C18.67 9.87 19.34 6.84 17.7 4.5c-2.3-3.05-6.91-3.17-9.35-.2-1.74 2.11-1.28 5.23 1 7.34.7.62 1.17 1.46 1.35 2.36"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 
     // Tag management
     const tags = new Set(schedule.tags || []);
     const locations = new Set(schedule.countries || []);
+    const adultMembers = new Set(schedule.members?.adultList || []);
+    const childMembers = new Set(schedule.members?.childList || []);
 
     // Initialize managers
     const stepManager = createStepManager(container, schedule, locations);
@@ -300,21 +407,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     stepManager.updateStepUI();
 
     // Navigation button events
-    // REPLACED standard next/prev with goToStep usage for buttons too, or keep them but update UI
-    container.querySelector('#btnNext').addEventListener('click', () => {
-        stepManager.goToStep(stepManager.currentStep + 1, {
-            renderStep2: () => renderStep2(stepManager.generateDaysFromDateRange(container.querySelector('input[name="startDate"]').value, container.querySelector('input[name="endDate"]').value, schedule.days), Array.from(locations), container),
-            renderAccommodations: () => accommodationManager.renderAccommodations(),
-            renderChecklists: (tab) => checklistManager.renderChecklists(tab),
-            renderTips: () => tipManager.renderTips()
-        });
-        updateStatus(); // Update status after move
+    // NEW: Header Back & Save
+    container.querySelector('#btnEditorBack').addEventListener('click', onCancel);
+    container.querySelector('#btnEditorSave').addEventListener('click', () => {
+        // Trigger Submit manually
+        form.dispatchEvent(new Event('submit'));
     });
-    container.querySelector('#btnPrev').addEventListener('click', () => {
-        stepManager.goToStep(stepManager.currentStep - 1);
-        updateStatus();
-    });
-    container.querySelector('#btnCancel').addEventListener('click', onCancel);
 
     // --- NEW: Step Status & Navigation Logic ---
 
@@ -327,9 +425,49 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         const title = formData.get('title');
         const startDate = formData.get('startDate');
         const endDate = formData.get('endDate');
+        // Adults/Children verified by Set size
+        const hasAdults = adultMembers.size > 0;
+        const hasChildren = childMembers.size > 0;
         const hasLocations = locations.size > 0;
 
-        const isStep1Valid = title && startDate && endDate && hasLocations;
+        // Visual Feedback (Red Background)
+        const toggleError = (name, isValid) => {
+            const input = form.querySelector(`[name="${name}"]`);
+            if (input) {
+                if (!isValid) input.classList.add('input-error');
+                else input.classList.remove('input-error');
+            }
+        };
+
+        toggleError('title', !!title);
+        toggleError('startDate', !!startDate);
+        toggleError('endDate', !!endDate);
+        // Explicitly handle Tag Inputs (Adult/Child) by ID
+        const adultInput = form.querySelector('#adultInput');
+
+        // Children (Optional but requested visual feedback?)
+        // User asked for "Adult and Child required" -> So red if empty.
+        const childInput = form.querySelector('#childInput');
+
+        if (adultInput) {
+            if (adultMembers.size === 0) adultInput.classList.add('input-error');
+            else adultInput.classList.remove('input-error');
+        }
+
+        if (childInput) {
+            if (childMembers.size === 0) childInput.classList.add('input-error');
+            else childInput.classList.remove('input-error');
+        }
+
+        // Location Info Validation
+        const locationInput = form.querySelector('#locationInput');
+        if (!hasLocations) {
+            locationInput.classList.add('input-error');
+        } else {
+            locationInput.classList.remove('input-error');
+        }
+
+        const isStep1Valid = title && startDate && endDate && hasLocations && (adultMembers.size > 0) && (childMembers.size > 0);
         statuses[1] = isStep1Valid ? 'valid' : 'invalid'; // Mandatory
 
         // Step 2: Days (Optional)
@@ -365,7 +503,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
         // Step 4: Checklists
         const checks = checklistManager.getChecklists();
-        const hasChecks = (checks.packing && checks.packing.length > 0) || (checks.todo && checks.todo.length > 0);
+        const hasChecks = checks.length > 0;
         statuses[4] = hasChecks ? 'valid' : 'empty';
 
         // Step 5: Tips
@@ -375,8 +513,95 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         return statuses;
     }
 
+    function interpolateColor(percent) {
+        // Red: hsl(0, 70%, 60%) approx #ff6b6b
+        // Mint: hsl(174, 53%, 56%) approx #4ecdc4 (var(--secondary))
+        // We will interpolate Hue from 0 to 174. 
+        // Saturation 70 -> 53
+        // Lightness 60 -> 56
+
+        const h = (174 - 0) * (percent / 100) + 0;
+        const s = (53 - 70) * (percent / 100) + 70;
+        const l = (56 - 60) * (percent / 100) + 60;
+
+        return `hsl(${h}, ${s}%, ${l}%)`;
+    }
+
+    function updateGaugeVisuals(statuses) {
+        // Step 1 Percent Calculation
+        const form = container.querySelector('#scheduleForm');
+        const formData = new FormData(form);
+
+        let step1Checks = 0;
+        if (formData.get('title')) step1Checks++;
+        if (formData.get('startDate')) step1Checks++;
+        if (formData.get('endDate')) step1Checks++;
+        if (adultMembers.size > 0) step1Checks++;
+        if (childMembers.size > 0) step1Checks++;
+        if (locations.size > 0) step1Checks++;
+
+        const totalStep1 = 6;
+        const step1Percent = (step1Checks / totalStep1) * 100;
+
+        container.querySelectorAll('.step-item').forEach(item => {
+            const step = parseInt(item.dataset.step);
+            const status = statuses[step];
+
+            // Logic for fill percent
+            let percent = 0;
+            if (step === 1) {
+                percent = step1Percent;
+            } else {
+                // For other steps, 'valid' means 100%, 'empty'/'invalid' means 0%
+                // (User logic: "Basic Info except... others if any input -> full")
+                percent = status === 'valid' ? 100 : 0;
+            }
+
+            // Apply Gauge Styles
+            const fillContainer = item.querySelector('.step-icon-fill-container');
+            const iconFill = item.querySelector('.step-icon-fill');
+
+            if (fillContainer) {
+                const color = interpolateColor(percent);
+                fillContainer.style.setProperty('--fill-percent', `${percent}%`);
+                fillContainer.style.setProperty('--fill-color', color);
+            }
+
+            // Active Class
+            if (step === stepManager.currentStep) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
     function updateStatus() {
-        stepManager.updateStepUI(getStepStatuses());
+        const statuses = getStepStatuses();
+        stepManager.updateStepUI(statuses); // Handle Content Switching & Basic Classes
+        updateGaugeVisuals(statuses);       // Handle Gauge Animation
+
+        // Save Button Logic
+        const saveBtn = container.querySelector('#btnEditorSave');
+        if (saveBtn) {
+            const isStep1Valid = statuses[1] === 'valid';
+            const wasDisabled = saveBtn.classList.contains('disabled') || !saveBtn.classList.contains('active');
+
+            if (isStep1Valid) {
+                saveBtn.classList.remove('disabled');
+                saveBtn.classList.add('active');
+
+                // Trigger Pop Effect if it was previously disabled (or on first load if valid)
+                if (wasDisabled) {
+                    saveBtn.classList.remove('pop-effect'); // Reset to replay
+                    void saveBtn.offsetWidth; // Trigger reflow
+                    saveBtn.classList.add('pop-effect');
+                }
+            } else {
+                saveBtn.classList.add('disabled');
+                saveBtn.classList.remove('active');
+            }
+        }
     }
 
     // Attach Click Handlers to Step Indicators (Tab Navigation)
@@ -410,20 +635,27 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 ), Array.from(locations), container),
 
                 renderAccommodations: () => accommodationManager.renderAccommodations(),
-                renderChecklists: (tab) => checklistManager.renderChecklists(tab),
+                renderChecklists: () => checklistManager.renderChecklists(),
                 renderTips: () => tipManager.renderTips()
             };
 
             // Before moving, if we are on Step 2, capture days data to `schedule.days` so it's preserved
             if (stepManager.currentStep === 2) {
-                schedule.days = collectDaysData(container);
+                const daysData = collectDaysData(container, true); // Show warning
+                if (daysData === null) {
+                    return; // User cancelled due to empty events
+                }
+                schedule.days = daysData;
             }
 
             stepManager.goToStep(targetStep, callbacks);
+            updateHeaderTitle(targetStep);
             updateStatus();
         });
     });
 
+    // Real-time Validation Listeners
+    // Step 1 Inputs
     // Real-time Validation Listeners
     // Step 1 Inputs
     const inputsStep1 = container.querySelectorAll('input[name="title"], input[name="startDate"], input[name="endDate"]');
@@ -432,12 +664,25 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         input.addEventListener('change', updateStatus); // Date inputs
     });
 
-    // Locations/Tags observers
-    // We already have addLocation/removeLocation. We should call updateStatus there.
-    // We'll hook into them below.
+    // Header Title Management
+    const stepTitles = {
+        1: '기본 정보',
+        2: '일정',
+        3: '숙소',
+        4: '체크리스트',
+        5: 'Tip'
+    };
 
-    // Initial Status Update
+    function updateHeaderTitle(step) {
+        const titleEl = container.querySelector('.editor-title');
+        if (titleEl) {
+            titleEl.textContent = stepTitles[step];
+        }
+    }
+
+    // Initial Status & Title Update
     updateStatus();
+    updateHeaderTitle(1);
 
     // ------------------------------------
 
@@ -450,18 +695,140 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         radio.addEventListener('change', (e) => {
             const isDomestic = e.target.value === 'domestic';
             const labelText = isDomestic ? '도시' : '국가';
-            locationLabel.innerHTML = `${labelText} <span class="hint">(엔터로 추가)</span>`;
-            locationInput.placeholder = isDomestic ? '예: 서울 (엔터)' : '예: 미국 (엔터)';
+            locationLabel.innerHTML = `${labelText} <span class="hint"> (입력 후 엔터)</span>`;
+            locationInput.placeholder = isDomestic ? '예: 서울' : '예: 미국';
         });
     });
+
+    // --- Validation Logic ---
+    const VALIDATION_RULES = {
+        title: {
+            regex: /^[가-힣a-zA-Z0-9~!%^&*()\-_+=:"',.\[\]]+$/,
+            maxLength: 20,
+            msg: '특수문자는 ~!%^&*()-+=:"\',.[] 만 허용됩니다. (최대 20자)'
+        },
+        location: {
+            regex: /^[가-힣a-zA-Z]+$/, // Korean, English only, No Space
+            maxLength: 10,
+            noSpace: true,
+            msg: '한글, 영문만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
+        },
+        member: {
+            regex: /^[가-힣a-zA-Z0-9]+$/, // Korean, English, Number, No Space
+            maxLength: 10,
+            noSpace: true,
+            msg: '한글, 영문, 숫자만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
+        },
+        hashtag: {
+            regex: /^[가-힣a-zA-Z]+$/, // Korean, English, No Space
+            maxLength: 10,
+            noSpace: true,
+            msg: '한글, 영문만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
+        }
+    };
+
+    function validateInput(value, type) {
+        if (!value) return { valid: false, msg: '' }; // Empty is handled by required/red
+
+        const rule = VALIDATION_RULES[type];
+        if (!rule) return { valid: true };
+
+        // Space Check
+        if (rule.noSpace && /\s/.test(value)) {
+            return { valid: false, msg: '띄어쓰기는 허용되지 않습니다.' };
+        }
+
+        // Length Check
+        if (value.length > rule.maxLength) {
+            return { valid: false, msg: `최대 ${rule.maxLength}자까지 입력 가능합니다.` };
+        }
+
+        // Regex Check
+        if (!rule.regex.test(value)) {
+            return { valid: false, msg: rule.msg };
+        }
+
+        return { valid: true };
+    }
+
+    function updateErrorUI(input, errorId, isValid, msg = '') {
+        const titleError = container.querySelector(`#${errorId}`);
+        if (titleError) {
+            titleError.textContent = msg;
+            if (isValid) {
+                titleError.classList.remove('visible');
+                input.classList.remove('input-error-border'); // Optional extra style?
+            } else {
+                titleError.classList.add('visible');
+                // input.classList.add('input-error-border');
+            }
+        }
+    }
+
+    // Real-time Validation Binding
+    const titleInput = container.querySelector('input[name="title"]');
+    if (titleInput) {
+        titleInput.addEventListener('input', (e) => {
+            const result = validateInput(e.target.value, 'title');
+            // For title, empty is also invalid in terms of "required" but regex might match empty?
+            // Our regex `+` means 1 or more. So empty fails regex. 
+            // But we want "Required" to be red BG, "Invalid Char" to be red Text below.
+            if (e.target.value.length > 0) {
+                updateErrorUI(titleInput, 'titleError', result.valid, result.msg);
+            } else {
+                updateErrorUI(titleInput, 'titleError', true, ''); // Clear error if empty (handled by required style)
+            }
+        });
+    }
+
+    // Helper for Realtime on Tag Inputs
+    function bindRealtimeValidation(inputId, errorId, ruleType) {
+        const input = container.querySelector(`#${inputId}`);
+        if (input) {
+            input.addEventListener('input', (e) => {
+                let val = e.target.value;
+
+                // Force remove # from input if hashtag
+                if (ruleType === 'hashtag' && val.includes('#')) {
+                    val = val.replace(/#/g, '');
+                    e.target.value = val;
+                }
+
+                if (val.length > 0) {
+                    const result = validateInput(val, ruleType);
+                    updateErrorUI(input, errorId, result.valid, result.msg);
+                } else {
+                    updateErrorUI(input, errorId, true, '');
+                }
+            });
+        }
+    }
+
+    bindRealtimeValidation('locationInput', 'locationError', 'location');
+    bindRealtimeValidation('adultInput', 'adultError', 'member');
+    bindRealtimeValidation('childInput', 'childError', 'member');
+    bindRealtimeValidation('tagInput', 'tagError', 'hashtag');
 
     // 위치 관리 (countries/cities)
     const locationsContainer = container.querySelector('#locationsContainer');
 
     function addLocation(locationText) {
         const cleanLocation = locationText.trim();
+        const validation = validateInput(cleanLocation, 'location');
+
+        if (!validation.valid) {
+            updateErrorUI(locationInput, 'locationError', false, validation.msg);
+            return;
+        }
+
+        if (locations.size >= 20) {
+            updateErrorUI(locationInput, 'locationError', false, '최대 20개까지만 등록 가능합니다.');
+            return;
+        }
+
         if (cleanLocation && !locations.has(cleanLocation)) {
             locations.add(cleanLocation);
+            updateErrorUI(locationInput, 'locationError', true); // Clear error on success
             const locationElement = document.createElement('span');
             locationElement.className = 'tag-item location-tag';
             locationElement.innerHTML = `
@@ -486,11 +853,46 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     // 위치 입력 이벤트
     locationInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            e.preventDefault(); // Stop form submit or focus jump
             addLocation(locationInput.value);
         }
     });
+
+    // 기존 위치 삭제 버튼
+    // ... (rest of the block if contiguous)
+    // Actually I need to match context.
+    // Let's modify just the listener block if possible.
+    // But replace_file_content needs context.
+
+    // The previous view showed:
+    // 527:     locationInput.addEventListener('keydown', (e) => {
+    // 528:         if (e.key === 'Enter') {
+    // 529:             e.preventDefault();
+    // 530:             addLocation(locationInput.value);
+    // 531:         }
+    // 532:     });
+
+    // Wait, line 529 ALREADY has e.preventDefault(). 
+    // Is it possible the user's issue persists despite this?
+    // Mobile keyboards sometimes send keyCode 13 but maybe "Go" action?
+    // Or maybe `keydown` is too late? `keypress`?
+    // However, on mobile, sometimes 'Enter' is 'Go' which submits form.
+    // e.preventDefault() should stop it.
+    // Maybe checking `e.keyCode === 13` helps?
+    // Or maybe the event is different on Samsung/iOS keyboard?
+    // Let's explicitly check keyCode too.
+    // Also, adding `inputmode="text"` or `enterkeyhint="done"` might help UX but logic needs to be robust.
+
+    // I will replace both listeners (location and tag) to be robust.
+
+    /* 
+    Updated Plan:
+    1. use `keypress` or handle `compositionend`. 
+       Process 'Enter' robustly.
+    2. Add `e.stopPropagation()` just in case.
+    */
+
 
     // 기존 위치 삭제 버튼
     container.querySelectorAll('.location-tag .tag-remove').forEach(btn => {
@@ -509,10 +911,109 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     const tagInput = container.querySelector('#tagInput');
     const tagsContainer = container.querySelector('#tagsContainer');
 
+    // Member Management Logic
+
+    const adultInput = container.querySelector('#adultInput');
+    const adultsContainer = container.querySelector('#adultsContainer');
+    const childInput = container.querySelector('#childInput');
+    const childrenContainer = container.querySelector('#childrenContainer');
+
+    function updateMemberUI(type) { // type: 'adult' or 'child'
+        const isAdult = type === 'adult';
+        const set = isAdult ? adultMembers : childMembers;
+        const containerEl = isAdult ? adultsContainer : childrenContainer;
+        const countLabel = isAdult ? container.querySelector(`#${type}CountLabel`) : container.querySelector(`#${type}CountLabel`);
+
+        // Update Count
+        countLabel.textContent = `(${set.size}명)`;
+
+        // Render Tags
+        containerEl.innerHTML = '';
+        if (set.size > 0) {
+            containerEl.style.display = 'flex';
+            set.forEach(name => {
+                const tag = document.createElement('span');
+                tag.className = 'tag-item member-tag'; // reuse tag style
+                tag.innerHTML = `${name} <button type="button" class="tag-remove">&times;</button>`;
+                tag.querySelector('.tag-remove').addEventListener('click', () => {
+                    set.delete(name);
+                    updateMemberUI(type);
+                    updateStatus();
+                });
+                containerEl.appendChild(tag);
+            });
+        } else {
+            containerEl.style.display = 'none';
+        }
+    }
+
+    function addMember(type, name) {
+        const cleanName = name.trim();
+        if (!cleanName) return;
+
+        const validation = validateInput(cleanName, 'member');
+        const errorId = type === 'adult' ? 'adultError' : 'childError';
+        const inputEl = type === 'adult' ? adultInput : childInput;
+
+        if (!validation.valid) {
+            updateErrorUI(inputEl, errorId, false, validation.msg);
+            return;
+        }
+
+        const set = type === 'adult' ? adultMembers : childMembers;
+
+        if (set.size >= 20) {
+            updateErrorUI(inputEl, errorId, false, '최대 20개까지만 등록 가능합니다.');
+            return;
+        }
+
+        if (!set.has(cleanName)) {
+            set.add(cleanName);
+            updateErrorUI(inputEl, errorId, true);
+            updateMemberUI(type);
+            updateStatus();
+        }
+
+        // Clear Input
+        if (type === 'adult') adultInput.value = '';
+        else childInput.value = '';
+    }
+
+    // Initialize Member UI
+    updateMemberUI('adult');
+    updateMemberUI('child');
+
+    // Event Listeners for Members
+    [
+        { input: adultInput, type: 'adult' },
+        { input: childInput, type: 'child' }
+    ].forEach(({ input, type }) => {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                e.preventDefault();
+                e.stopPropagation();
+                addMember(type, input.value);
+            }
+        });
+    });
+
     function addTag(tagText) {
         const cleanTag = tagText.replace(/^#/, '').trim();
+
+        const validation = validateInput(cleanTag, 'hashtag');
+        if (!validation.valid) {
+            updateErrorUI(tagInput, 'tagError', false, validation.msg);
+            return;
+        }
+
+        if (tags.size >= 20) {
+            updateErrorUI(tagInput, 'tagError', false, '최대 20개까지만 등록 가능합니다.');
+            return;
+        }
+
         if (cleanTag && !tags.has(cleanTag)) {
             tags.add(cleanTag);
+            updateErrorUI(tagInput, 'tagError', true);
             const tagElement = document.createElement('span');
             tagElement.className = 'tag-item';
             tagElement.innerHTML = `
@@ -534,8 +1035,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     // 태그 입력 이벤트
     tagInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' || e.keyCode === 13) {
             e.preventDefault();
+            e.stopPropagation();
             addTag(tagInput.value);
         }
     });
@@ -565,6 +1067,13 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         e.preventDefault();
 
         const formData = new FormData(form);
+        const daysData = collectDaysData(container, true); // Show warning when saving
+
+        // If user cancelled due to empty events, don't save
+        if (daysData === null) {
+            return;
+        }
+
         const newSchedule = {
             ...schedule,
             title: formData.get('title'),
@@ -575,32 +1084,98 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             endDate: formData.get('endDate'),
             countries: Array.from(locations),
             members: {
-                adults: parseInt(formData.get('adults')) || 0,
-                children: parseInt(formData.get('children')) || 0
+                adults: adultMembers.size,
+                children: childMembers.size,
+                adultList: Array.from(adultMembers),
+                childList: Array.from(childMembers)
             },
-            days: collectDaysData(container),
+            days: daysData,
             accommodations: accommodationManager.getAccommodations(),
             checklists: checklistManager.getChecklists(),
             tips: tipManager.getTips()
         };
 
         const saved = saveSchedule(newSchedule);
-        onSave(saved);
+
+        // Prevent navigation (stay on page)
+        // onSave(saved); 
+
+        // UI Feedback: Fade In "저장완료"
+        const saveBtn = container.querySelector('#btnEditorSave');
+        const originalContent = saveBtn.innerHTML;
+
+        // 1. Fade Out Icon
+        saveBtn.style.opacity = '0';
+
+        setTimeout(() => {
+            // 2. Change to Text (Hidden)
+            saveBtn.innerHTML = '<span style="font-size: 14px; font-weight: bold;">저장완료</span>';
+            saveBtn.classList.add('disabled');
+            saveBtn.style.width = 'auto';
+            saveBtn.style.padding = '0 12px';
+            saveBtn.style.color = '#45B8AF';
+
+            // 3. Fade In Text
+            requestAnimationFrame(() => {
+                saveBtn.style.opacity = '1';
+            });
+
+            // 4. Wait 3s then Restore
+            setTimeout(() => {
+                // 5. Fade Out Text
+                saveBtn.style.opacity = '0';
+
+                setTimeout(() => {
+                    // 6. Restore Icon (Hidden)
+                    saveBtn.innerHTML = originalContent;
+                    saveBtn.style.width = '';
+                    saveBtn.style.padding = '';
+                    saveBtn.style.color = '';
+
+                    if (saved) {
+                        updateStatus(); // Handles disabled state
+                    }
+
+                    // 7. Fade In Icon
+                    requestAnimationFrame(() => {
+                        saveBtn.style.opacity = '1';
+                    });
+                }, 300); // Wait for fade out
+            }, 3000);
+        }, 300); // Wait for initial fade out
     });
 
-    // 취소 버튼
-    container.querySelector('#btnCancel').addEventListener('click', onCancel);
+
 
     // Render Step 2 Helper Functions
 
-    function collectDaysData(container) {
-        const dayCards = container.querySelectorAll('.day-card');
+    function collectDaysData(container, showWarning = false) {
+        const daysContainer = container.querySelector('#daysContainer');
+        const dayCards = daysContainer ? daysContainer.querySelectorAll(':scope > .day-card') : [];
         const days = [];
+        let emptyEventCount = 0;
 
         dayCards.forEach(dayCard => {
+            // CRITICAL: Only process cards with valid data-day attribute (Step 2 itinerary cards only)
+            // This excludes accommodation and tip cards which also use .day-card class
+            if (!dayCard.dataset.day || !dayCard.hasAttribute('data-day')) {
+                return; // Skip this card - it's not a Step 2 day card
+            }
+
             const dayNum = parseInt(dayCard.dataset.day);
-            const dayBadge = dayCard.querySelector('.day-badge').textContent;
-            const dayDate = dayCard.querySelector('.day-date').textContent.split(' ')[0]; // Get just the date part
+
+            // Additional validation: day number must be a valid positive integer
+            if (isNaN(dayNum) || dayNum < 1) {
+                return; // Skip invalid day cards
+            }
+
+            const dayBadge = dayCard.querySelector('.day-badge')?.textContent;
+            const dayDate = dayCard.querySelector('.day-date')?.textContent?.split(' ')[0]; // Get just the date part
+
+            // Validate that we have the required elements
+            if (!dayBadge || !dayDate) {
+                return; // Skip malformed cards
+            }
 
             const eventItems = dayCard.querySelectorAll('.event-item');
             const events = [];
@@ -615,7 +1190,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 const endTime = eventItem.querySelector('.event-end-time').value;
                 const description = eventItem.querySelector('.event-description').value;
 
-                if (location || place || description) {
+                // Only save events that have at least one of: place or description
+                // Location (city/country checkbox) and time alone are NOT enough
+                if (place || description) {
                     events.push({
                         location,
                         place,
@@ -623,6 +1200,10 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                         endTime,
                         description
                     });
+                } else {
+                    // Count empty events (no place or description)
+                    // This includes events that only have location checkbox or time values
+                    emptyEventCount++;
                 }
             });
 
@@ -632,6 +1213,14 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 events
             });
         });
+
+        // Show warning if requested and there are empty events
+        if (showWarning && emptyEventCount > 0) {
+            const confirmed = confirm(`${emptyEventCount}개의 빈 일정이 있습니다.\n(위치, 내용이 모두 비어있음)\n\n이 일정들을 삭제하고 계속하시겠습니까?`);
+            if (!confirmed) {
+                return null; // User cancelled
+            }
+        }
 
         return days;
     }
@@ -652,7 +1241,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                         <span class="day-date">${day.date} (${day.dayName})</span>
                     </div>
                     <svg class="collapse-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
                 
@@ -660,9 +1249,13 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     ${day.events.length > 0 ? day.events.map((event, eventIndex) =>
             renderEventItem(event, eventIndex, locationsList, timeOptions, day.day)
         ).join('') : '<p class="no-events">일정을 추가해주세요</p>'}
+                    <button type="button" class="btn-add-event-floating" data-day="${day.day}" title="일정 추가">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M8 3V13M3 8H13" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
                 </div>
-                
-                <button type="button" class="btn-add-event" data-day="${day.day}">+ 일정 추가</button>
+
             </div>
         `).join('');
 
@@ -688,7 +1281,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         });
 
         // Add event listeners for add/remove buttons
-        daysContainer.querySelectorAll('.btn-add-event').forEach(btn => {
+        daysContainer.querySelectorAll('.btn-add-event-floating').forEach(btn => {
             btn.addEventListener('click', () => {
                 const dayNum = parseInt(btn.dataset.day);
                 addEventToDay(dayNum, locationsList, timeOptions, containerElement);
@@ -699,12 +1292,30 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         daysContainer.querySelectorAll('.btn-remove-event').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent collapse toggle
-                btn.closest('.event-item').remove();
 
                 const dayNum = parseInt(btn.dataset.day);
                 const eventsList = containerElement.querySelector(`#events-day-${dayNum}`);
-                if (eventsList.querySelectorAll('.event-item').length === 0) {
+
+                // Remove the event item first
+                btn.closest('.event-item').remove();
+
+                // Then renumber remaining events
+                const remainingEvents = eventsList.querySelectorAll('.event-item');
+                remainingEvents.forEach((eventItem, index) => {
+                    const eventHeader = eventItem.querySelector('.event-header span');
+                    if (eventHeader) {
+                        eventHeader.textContent = `일정 ${index + 1}`;
+                    }
+                });
+
+                // If no events left, show empty message
+                if (remainingEvents.length === 0) {
+                    const floatingBtn = eventsList.querySelector('.btn-add-event-floating');
                     eventsList.innerHTML = '<p class="no-events">일정을 추가해주세요</p>';
+                    // Re-add floating button
+                    if (floatingBtn) {
+                        eventsList.appendChild(floatingBtn);
+                    }
                 }
             });
         });
@@ -714,15 +1325,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             header.addEventListener('click', () => {
                 const eventItem = header.closest('.event-item');
                 const eventContent = eventItem.querySelector('.event-content');
-                const icon = header.querySelector('.collapse-icon');
 
                 eventItem.classList.toggle('collapsed');
                 if (eventItem.classList.contains('collapsed')) {
                     eventContent.style.display = 'none';
-                    icon.innerHTML = '<path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
                 } else {
                     eventContent.style.display = 'block';
-                    icon.innerHTML = '<path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
                 }
             });
         });
@@ -735,14 +1343,18 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     <span>일정 ${eventIndex + 1}</span>
                     <div class="event-actions">
                         <svg class="collapse-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                        <button type="button" class="btn-remove-event" data-day="${dayNum}">삭제</button>
+                        <button type="button" class="btn-remove-event" data-day="${dayNum}">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor">
+                                <path d="M1 1L13 13M13 1L1 13" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 
                 <div class="event-content">
-                    <div class="form-group">
+                    <div class="form-group-compact">
                         <label>도시/국가</label>
                         <div class="location-checkboxes">
                             ${locationsList.map(loc => `
@@ -754,25 +1366,25 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                         </div>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group-compact">
                         <label>위치</label>
                         <input type="text" class="event-place" value="${event.place || ''}" placeholder="예: 프라하 공항">
                     </div>
                     
                     <div class="form-row">
-                        <div class="form-group">
+                        <div class="form-group-compact">
                             <label>시작 시간</label>
-                            <input type="text" class="event-start-time" value="${event.startTime || '09:00'}" 
+                            <input type="text" class="event-start-time" value="${event.startTime || ''}" 
                                    list="time-options" placeholder="00:00">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group-compact">
                             <label>종료 시간</label>
-                            <input type="text" class="event-end-time" value="${event.endTime || '10:00'}" 
+                            <input type="text" class="event-end-time" value="${event.endTime || ''}" 
                                    list="time-options" placeholder="00:00">
                         </div>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group-compact">
                         <label>내용</label>
                         <textarea class="event-description" placeholder="일정 내용 입력" rows="3">${event.description || ''}</textarea>
                     </div>
@@ -792,38 +1404,51 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         const newEvent = {
             location: locationsList[0] || '',
             place: '',
-            startTime: '09:00',
-            endTime: '10:00',
+            startTime: '',
+            endTime: '',
             description: ''
         };
 
         const eventHTML = renderEventItem(newEvent, eventCount, locationsList, timeOptions, dayNum);
-        eventsList.insertAdjacentHTML('beforeend', eventHTML);
+
+        // Insert before the floating button
+        const floatingBtn = eventsList.querySelector('.btn-add-event-floating');
+        if (floatingBtn) {
+            floatingBtn.insertAdjacentHTML('beforebegin', eventHTML);
+        } else {
+            eventsList.insertAdjacentHTML('beforeend', eventHTML);
+        }
 
         // Add remove event listener to new item
-        const newEventItem = eventsList.lastElementChild;
+        const allEvents = eventsList.querySelectorAll('.event-item');
+        const newEventItem = allEvents[allEvents.length - 1];
         const removeBtn = newEventItem.querySelector('.btn-remove-event');
         removeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+
+            const dayNum = parseInt(removeBtn.dataset.day);
+            const eventsList = containerElement.querySelector(`#events-day-${dayNum}`);
+
+            // Remove the event item first
             newEventItem.remove();
-            if (eventsList.querySelectorAll('.event-item').length === 0) {
+
+            // Then renumber remaining events
+            const remainingEvents = eventsList.querySelectorAll('.event-item');
+            remainingEvents.forEach((eventItem, index) => {
+                const eventHeader = eventItem.querySelector('.event-header span');
+                if (eventHeader) {
+                    eventHeader.textContent = `일정 ${index + 1}`;
+                }
+            });
+
+            // If no events left, show empty message
+            if (remainingEvents.length === 0) {
+                const floatingBtn = eventsList.querySelector('.btn-add-event-floating');
                 eventsList.innerHTML = '<p class="no-events">일정을 추가해주세요</p>';
-            }
-        });
-
-        // Add collapse event listener to new item
-        const eventHeader = newEventItem.querySelector('[data-toggle="event"]');
-        eventHeader.addEventListener('click', () => {
-            const eventContent = newEventItem.querySelector('.event-content');
-            const icon = eventHeader.querySelector('.collapse-icon');
-
-            newEventItem.classList.toggle('collapsed');
-            if (newEventItem.classList.contains('collapsed')) {
-                eventContent.style.display = 'none';
-                icon.innerHTML = '<path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-            } else {
-                eventContent.style.display = 'block';
-                icon.innerHTML = '<path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                // Re-add floating button
+                if (floatingBtn) {
+                    eventsList.appendChild(floatingBtn);
+                }
             }
         });
     }

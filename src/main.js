@@ -1,6 +1,8 @@
 // 메인 애플리케이션 로직
 
 import './style.css';
+import './styles/tip-form.css';
+import './styles/checklist-form.css';
 import { getCurrentSchedule, getSchedule, setCurrentSchedule } from './storage.js';
 import { loadFromShareUrl, uploadFromJson } from './share.js';
 import { renderScheduleList } from './components/ScheduleList.js';
@@ -30,44 +32,33 @@ function init() {
 
 // 네비게이션 설정
 function setupNavigation() {
-    document.getElementById('navList')?.addEventListener('click', () => showView('list'));
-    document.getElementById('navNewSchedule')?.addEventListener('click', () => showView('edit'));
+    // FAB 이벤트 리스너
+    document.getElementById('fabAdd')?.addEventListener('click', () => showView('edit'));
+
+    // 로고 클릭 시 목록으로 이동
+    document.querySelector('.app-logo')?.addEventListener('click', () => showView('list'));
 }
 
 // 뷰 전환
 function showView(view, scheduleId = null) {
     currentView = view;
     const appContainer = document.getElementById('app');
+    const fabButton = document.getElementById('fabAdd');
 
-    // 네비게이션 활성화 상태 업데이트
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // 탭 텍스트 업데이트 (등록 vs 수정)
-    const navNewSchedule = document.getElementById('navNewSchedule');
-    const navBar = document.querySelector('.nav-bar');
-
-    if (navNewSchedule) {
-        if (view === 'edit' && scheduleId) {
-            navNewSchedule.textContent = '수정';
-        } else {
-            navNewSchedule.textContent = '등록';
-        }
+    // FAB 표시/숨김 제어: 목록 화면에서만 표시
+    if (fabButton) {
+        fabButton.style.display = view === 'list' ? 'flex' : 'none';
     }
 
-    // 네비게이션 바 표시 여부 제어 (상세 화면에서는 숨김)
-    if (navBar) {
-        if (view === 'view') {
-            navBar.style.display = 'none';
-        } else {
-            navBar.style.display = 'flex';
-        }
+    // 헤더 제어 (목록 화면에서만 표시)
+    const appHeader = document.querySelector('.app-header');
+    if (appHeader) {
+        appHeader.style.display = view === 'list' ? 'flex' : 'none';
     }
 
+    window.scrollTo(0, 0);
     switch (view) {
         case 'list':
-            document.getElementById('navList')?.classList.add('active');
             renderScheduleList(appContainer, (action, id) => {
                 if (action === 'new') {
                     showView('edit');
@@ -91,13 +82,20 @@ function showView(view, scheduleId = null) {
             break;
 
         case 'edit':
-            document.getElementById('navNewSchedule')?.classList.add('active');
             renderScheduleEditor(appContainer, scheduleId,
                 (saved) => {
                     setCurrentSchedule(saved.id);
                     showView('view', saved.id);
                 },
-                () => showView('list')
+                () => {
+                    // Back logic: If editing an existing schedule, go back to View.
+                    // If creating new, go back to List.
+                    if (scheduleId) {
+                        showView('view', scheduleId);
+                    } else {
+                        showView('list');
+                    }
+                }
             );
             break;
     }
@@ -126,7 +124,7 @@ function renderScheduleView(container, scheduleId) {
         : `${baseUrl}images/theme/theme_basic.png`;
 
     container.innerHTML = `
-        <div class="view-container">
+        <div class="view-container page-transition">
             <header class="header" style="${themeImage ? `background-image: url('${themeImage}'); background-size: cover; background-position: center;` : ''}">
                 <div class="header-actions-group">
                     <button class="btn-icon" id="btnEdit" aria-label="수정">
@@ -170,31 +168,71 @@ function renderScheduleView(container, scheduleId) {
                 </div>
             </header>
 
-            <div class="stats">
+            <div class="stats entry-stagger-1">
                 <div class="stat-item">
                     <div class="stat-label">DURATION</div>
                     <div class="stat-value">${calculateDuration(schedule.startDate, schedule.endDate)}</div>
                 </div>
-                <div class="stat-item" style="border-left: 1px solid #eee; border-right: 1px solid #eee;">
+                <div class="stat-item stat-item-countries" style="border-left: 1px solid #eee; border-right: 1px solid #eee;">
                     <div class="stat-label">COUNTRIES</div>
-                    <div class="stat-value">${schedule.countries ? schedule.countries.join(' ') : '-'}</div>
+                    <div class="stat-value stat-value-collapsible collapsed" id="countriesValue">${schedule.countries ? schedule.countries.join(' ') : '-'}</div>
                 </div>
                 <div class="stat-item">
                     <div class="stat-label">MEMBERS</div>
                     <div class="stat-value">성인${schedule.members?.adults || 0} 아동${schedule.members?.children || 0}</div>
                 </div>
+                
+                <!-- Toggle button positioned at bottom center -->
+                <button class="stat-toggle-btn-floating" id="btnToggleCountries" aria-label="국가 목록 펼치기/접기">
+                    <svg class="toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
             </div>
             
-            <div class="days-container">
+            <div class="days-container entry-stagger-2">
                 ${renderDays(schedule.days)}
             </div>
         </div>
     `;
 
-    // 이벤트 리스너
     container.querySelector('#btnBack').addEventListener('click', () => showView('list'));
     container.querySelector('#btnEdit').addEventListener('click', () => showView('edit', schedule.id));
     container.querySelector('#btnShare').addEventListener('click', () => showShareModal(schedule.id));
+
+    // Countries toggle functionality
+    const toggleBtn = container.querySelector('#btnToggleCountries');
+    const countriesValue = container.querySelector('#countriesValue');
+    if (toggleBtn && countriesValue) {
+        // Check if content exceeds 2 lines (approximately 3em with line-height 1.5)
+        const checkHeight = () => {
+            const lineHeight = parseFloat(getComputedStyle(countriesValue).lineHeight);
+            const maxHeight = lineHeight * 2; // 2 lines
+            const actualHeight = countriesValue.scrollHeight;
+
+            if (actualHeight > maxHeight) {
+                toggleBtn.style.display = 'flex'; // Show button
+            } else {
+                toggleBtn.style.display = 'none'; // Hide button
+                countriesValue.classList.remove('collapsed'); // Ensure it's expanded if short
+            }
+        };
+
+        // Check on load
+        checkHeight();
+
+        // Recheck on window resize (for orientation changes)
+        window.addEventListener('resize', checkHeight);
+
+        // Toggle functionality
+        toggleBtn.addEventListener('click', () => {
+            countriesValue.classList.toggle('collapsed');
+            toggleBtn.classList.toggle('expanded');
+        });
+    }
+
+    // Initialize day accordion
+    initDayAccordion();
 }
 
 // 일정 일수 계산
@@ -215,30 +253,64 @@ function renderDays(days = []) {
     return days.map(day => `
         <div class="day-card">
             <div class="day-header">
-                <span class="day-badge">Day ${day.day}</span>
-                <span class="day-date">${day.date}</span>
+                <div class="day-info">
+                    <span class="day-badge">Day ${day.day}</span>
+                    <span class="day-date">${(() => {
+            const date = new Date(day.date);
+            const month = date.getMonth() + 1;
+            const dayNum = date.getDate();
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const dayName = dayNames[date.getDay()];
+            return `${month}월 ${dayNum}일 (${dayName})`;
+        })()}</span>
+                </div>
+                <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
             </div>
+            <div class="events-list tip-content-wrapper">
+                <div class="tip-content-inner">
                 ${day.events && day.events.length > 0 ? day.events.map(event => `
                     <div class="event">
                         <div class="event-time-col">
-                            <span class="event-time-range">${event.startTime || ''}${event.endTime ? ` - ${event.endTime}` : ''}</span>
+                            ${event.startTime ? `<span class="event-time-start">${event.startTime}</span>` : '<span class="event-time-spacer"></span>'}
+                            <span class="event-time-dash">${event.startTime || event.endTime ? '-' : ''}</span>
+                            <span class="event-time-end">${event.endTime || ''}</span>
                         </div>
                         <div class="event-detail-content">
                             <span class="event-place">${event.place || ''}</span>
                             <span class="event-desc">${event.description || ''}</span>
                         </div>
                     </div>
-                `).join('') : '<div class="no-events">일정이 없습니다</div>'}
-            </div>
-            ${day.hotel ? `
-                <div class="hotel-info">
-                    <div class="hotel-label">🛌 ACCOMMODATION</div>
-                    <div class="hotel-name">${day.hotel.name}</div>
-                    ${day.hotel.description ? `<div class="hotel-desc">${day.hotel.description}</div>` : ''}
+                `).join('') : '<div class="no-events">일정을 등록해 주세요</div>'}
+            
+                ${day.hotel ? `
+                    <div class="hotel-info">
+                        <div class="hotel-label">🛌 ACCOMMODATION</div>
+                        <div class="hotel-name">${day.hotel.name}</div>
+                        ${day.hotel.description ? `<div class="hotel-desc">${day.hotel.description}</div>` : ''}
+                    </div>
+                ` : ''}
                 </div>
-            ` : ''}
+            </div>
         </div>
     `).join('');
+}
+
+// Initialize accordion functionality for day cards
+function initDayAccordion() {
+    const dayCards = document.querySelectorAll('.day-card');
+    dayCards.forEach(card => {
+        const header = card.querySelector('.day-header');
+        const contentWrapper = card.querySelector('.tip-content-wrapper');
+        const collapseIcon = card.querySelector('.collapse-icon');
+
+        if (header && contentWrapper && collapseIcon) {
+            header.addEventListener('click', () => {
+                card.classList.toggle('collapsed');
+            });
+        }
+    });
 }
 
 // 앱 시작

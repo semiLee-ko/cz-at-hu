@@ -1,0 +1,113 @@
+/* Step indicator overrides/adjustments for bottom tabs */
+.step-indicator {
+    padding: 12px 16px;
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+    /* Remove top border */
+    /* Fixed positioning handled by form-navigation container in HTML structure implies logic? 
+       Actually user wants TABS at bottom. */
+    width: 100%;
+    margin: 0;
+}
+
+/* We need to override the styles since we moved it into .form-navigation or just use it directly */
+/* The .form-navigation container acts as the fixed bottom bar now containing step-indicator */
+.form-navigation {
+    padding: 0;
+    /* Remove padding as step-indicator has it */
+    background: white;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+}
+
+/* Editor Header Styling */
+.editor-header-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    height: 60px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    /* Higher than content */
+}
+
+.editor-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 120px);
+    /* Leave space for buttons */
+    text-align: center;
+}
+
+/* Override btn-icon for Editor (Dark icons on White bg) */
+.editor-header-nav .btn-icon {
+    background: transparent;
+    color: var(--dark);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    transition: background 0.2s;
+}
+
+.editor-header-nav .btn-icon:hover {
+    background: var(--bg-primary);
+    transform: none;
+    /* Reset lift effect if desired, or keep it */
+}
+
+/* Ensure form has padding for top and bottom fixed bars */
+.schedule-form {
+    padding-top: 20px !important;
+    padding-bottom: 100px !important;
+}
+
+/* Save Button Logic */
+.editor-header-nav .btn-save {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.editor-header-nav .btn-save.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+    color: var(--text-light);
+    transform: scale(0.9);
+}
+
+.editor-header-nav .btn-save.active {
+    opacity: 1;
+    color: var(--secondary);
+    /* Mint */
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.editor-header-nav .btn-save.pop-effect {
+    animation: popSave 0.5s ease forwards;
+}
+
+@keyframes popSave {
+    0% {
+        transform: scale(0.9);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
