@@ -638,6 +638,25 @@ function initSpotlightMode() {
         document.body.appendChild(actionBar);
 
         // --- NEW: Attach listeners ONLY ONCE when created ---
+        // Camera Review Logic
+        actionBar.querySelector('.action-camera').addEventListener('click', () => {
+            const activeGroup = document.querySelector('.event-group.active-spotlight');
+            if (activeGroup) {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.capture = 'environment';
+                fileInput.classList.add('hidden-file-input');
+                fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        showCameraPopup(activeGroup, file);
+                    }
+                };
+                fileInput.click();
+            }
+        });
+
         // Location Picker Logic
         actionBar.querySelector('.action-location').addEventListener('click', () => {
             const activeGroup = document.querySelector('.event-group.active-spotlight');
@@ -924,69 +943,54 @@ function showMemberSelectionPopup(group, updateActionStatesCallback) {
     setTimeout(() => modal.classList.add('active'), 10);
 }
 
-// Settlement Input Popup
+// Settlement Popup for Expense Management
 function showSettlementPopup(group, updateActionStatesCallback) {
     const schedule = getCurrentSchedule();
-    if (!schedule) return;
+    const dayIdx = group.dataset.dayIndex;
+    const eventIdx = group.dataset.eventIndex;
+    const event = schedule.days[dayIdx]?.events[eventIdx];
 
-    const dayIdx = parseInt(group.dataset.dayIndex);
-    const eventIdx = parseInt(group.dataset.eventIndex);
-    const targetEvent = schedule.days[dayIdx].events[eventIdx];
+    if (!event) return;
 
-    // Check if participants exist
-    const participants = targetEvent.participants || [];
-    if (participants.length === 0) {
-        showCustomAlert('참여자가 설정되지 않았습니다.<br>먼저 인원 선택 메뉴에서 참여자를 선택해 주세요!');
+    // Validation: Check if participants exist
+    if (!event.participants || event.participants.length === 0) {
+        showCustomAlert('참여 멤버를 먼저 선택해주세요!<br>(사람 아이콘 클릭)');
         return;
     }
 
-    // Initialize expenses if not exists
-    if (!targetEvent.expenses) {
-        targetEvent.expenses = [];
-        // Migration: If old settlement exists, migrate it
-        if (targetEvent.settlement && targetEvent.settlement.amount) {
-            targetEvent.expenses.push({
-                payer: targetEvent.settlement.payer,
-                amount: targetEvent.settlement.amount,
-                id: Date.now()
-            });
-            delete targetEvent.settlement;
-            saveSchedule(schedule);
-        }
-    }
+    if (!event.expenses) event.expenses = [];
 
     const modal = document.createElement('div');
     modal.className = 'settlement-popup-overlay';
 
     const renderContent = () => {
-        const totalAmount = targetEvent.expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+        const totalAmount = event.expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
 
         modal.innerHTML = `
             <div class="settlement-popup-container compact">
                 <div class="settlement-popup-header">
-                    <div>
-                        <h3>경비 내역 관리</h3>
-                        <p class="total-summary">총 ${targetEvent.expenses.length}건 | ${totalAmount.toLocaleString()}원</p>
+                    <div class="header-info">
+                        <h3>지출 내역 정산</h3>
+                        <p class="total-summary">총 ${totalAmount.toLocaleString()}원 지출됨</p>
                     </div>
                     <button class="btn-close-settlement">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
                 </div>
                 <div class="settlement-popup-content">
-                    <!-- Input Area -->
+                    <!-- New Expense Input -->
                     <div class="expense-input-card">
                         <div class="input-row">
-                            <div class="field-item">
+                            <div class="field-item flex-2">
                                 <label>결제자</label>
                                 <select class="payer-select-sm">
-                                    <option value="">선택</option>
-                                    ${participants.map(name => `<option value="${name}">${name}</option>`).join('')}
+                                    ${event.participants.map(p => `<option value="${p}">${p}</option>`).join('')}
                                 </select>
                             </div>
-                            <div class="field-item flex-2">
+                            <div class="field-item">
                                 <label>금액 (원)</label>
                                 <input type="number" class="amount-input-sm" placeholder="0" inputmode="numeric">
                             </div>
@@ -994,28 +998,31 @@ function showSettlementPopup(group, updateActionStatesCallback) {
                         </div>
                     </div>
 
-                    <!-- List Area -->
+                    <!-- History List -->
                     <div class="expense-history-list">
-                        ${targetEvent.expenses.length > 0 ? targetEvent.expenses.map((exp, idx) => `
-                            <div class="expense-item" data-id="${exp.id}">
+                        ${event.expenses.length === 0 ? `
+                            <div class="empty-msg">지출 내역이 없습니다.</div>
+                        ` : event.expenses.map((exp, idx) => `
+                            <div class="expense-item">
                                 <div class="exp-info">
-                                    <span class="exp-payer">${exp.payer || '미지정'}</span>
+                                    <span class="exp-payer">${exp.payer}</span>
                                     <span class="exp-amount">${Number(exp.amount).toLocaleString()}원</span>
                                 </div>
-                                <button class="btn-del-expense" data-idx="${idx}">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <button class="btn-del-expense" data-index="${idx}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 6h18"></path>
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
                                     </svg>
                                 </button>
                             </div>
-                        `).join('') : '<p class="empty-msg">등록된 내역이 없습니다</p>'}
+                        `).reverse().join('')}
                     </div>
                 </div>
             </div>
         `;
 
-        // Close
+        // Close logic
         modal.querySelector('.btn-close-settlement').onclick = () => {
             modal.classList.remove('active');
             setTimeout(() => modal.remove(), 300);
@@ -1023,34 +1030,35 @@ function showSettlementPopup(group, updateActionStatesCallback) {
 
         // Add Expense
         const btnAdd = modal.querySelector('.btn-add-expense');
-        btnAdd.onclick = () => {
-            const payer = modal.querySelector('.payer-select-sm').value;
-            const amount = modal.querySelector('.amount-input-sm').value;
+        const payerSelect = modal.querySelector('.payer-select-sm');
+        const amountInput = modal.querySelector('.amount-input-sm');
 
-            if (!amount || amount <= 0) {
-                showCustomAlert('금액을 입력해 주세요.');
+        btnAdd.onclick = () => {
+            const amount = amountInput.value.trim();
+            if (!amount || isNaN(amount)) {
+                showCustomAlert('금액을 정확히 입력해주세요.');
                 return;
             }
 
-            targetEvent.expenses.push({
-                payer,
-                amount: Number(amount),
-                id: Date.now()
+            event.expenses.push({
+                payer: payerSelect.value,
+                amount: parseInt(amount),
+                timestamp: new Date().toISOString()
             });
 
             saveSchedule(schedule);
-            if (updateActionStatesCallback) updateActionStatesCallback(group);
             renderContent();
+            if (updateActionStatesCallback) updateActionStatesCallback(group);
         };
 
         // Delete Expense
         modal.querySelectorAll('.btn-del-expense').forEach(btn => {
             btn.onclick = () => {
-                const idx = btn.dataset.idx;
-                targetEvent.expenses.splice(idx, 1);
+                const idx = parseInt(btn.dataset.index);
+                event.expenses.splice(idx, 1);
                 saveSchedule(schedule);
-                if (updateActionStatesCallback) updateActionStatesCallback(group);
                 renderContent();
+                if (updateActionStatesCallback) updateActionStatesCallback(group);
             };
         });
     };
@@ -1058,6 +1066,281 @@ function showSettlementPopup(group, updateActionStatesCallback) {
     renderContent();
     document.body.appendChild(modal);
     setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Camera Popup for Polaroid Reviews
+function showCameraPopup(group, imageFile) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const imageUrl = e.target.result;
+
+        const modal = document.createElement('div');
+        modal.className = 'camera-popup-overlay';
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const timeStr = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+        let starRating = 5;
+
+        const renderContent = () => {
+            modal.innerHTML = `
+                <div class="camera-popup-container">
+                    <div class="camera-popup-header">
+                        <h3>폴라로이드 리뷰 만들기</h3>
+                        <button class="btn-close-camera">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="camera-popup-content">
+                        <!-- Preview Card -->
+                        <div class="polaroid-preview-card">
+                            <div class="polaroid-frame">
+                                <div class="polaroid-image-container">
+                                    <img src="${imageUrl}" class="polaroid-image">
+                                    <div class="polaroid-time-stamp">${timeStr}</div>
+                                    <div class="polaroid-branding">LITTLE TRIP</div>
+                                    <button class="btn-reselect-image" title="이미지 다시 선택">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                            <circle cx="12" cy="13" r="4"></circle>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="polaroid-info">
+                                    <div class="info-line place-preview">장소를 입력하세요</div>
+                                    <div class="info-line item-preview">메뉴를 입력하세요</div>
+                                    <div class="info-memo memo-preview">메모를 입력하세요</div>
+                                    <div class="info-footer">
+                                        <span class="price-preview">0원</span>
+                                        <span class="rating-preview">★★★★★</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="polaroid-inputs">
+                            <div class="input-group">
+                                <label>장소명</label>
+                                <input type="text" class="input-place" placeholder="예: 구글 맛집">
+                            </div>
+                            <div class="input-group">
+                                <label>메뉴/항목</label>
+                                <input type="text" class="input-item" placeholder="예: 시그니처 샌드위치">
+                            </div>
+                            <div class="input-group">
+                                <label>메모</label>
+                                <textarea class="input-memo" placeholder="여행의 소중한 순간을 기록하세요..." rows="3"></textarea>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>가격</label>
+                                    <input type="number" class="input-price" placeholder="0" inputmode="numeric">
+                                </div>
+                                <div class="input-group">
+                                    <label>평가 (별점)</label>
+                                    <div class="star-rating-input">
+                                        ${[1, 2, 3, 4, 5].map(n => `<span class="star ${n <= starRating ? 'active' : ''}" data-value="${n}">★</span>`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="camera-popup-footer">
+                        <button class="btn-generate-polaroid">이미지로 저장하기</button>
+                    </div>
+                    <canvas id="polaroid-canvas" style="display:none;"></canvas>
+                </div>
+            `;
+
+            // Close
+            modal.querySelector('.btn-close-camera').onclick = () => {
+                modal.classList.remove('active');
+                setTimeout(() => modal.remove(), 300);
+            };
+
+            // Real-time Preview Sync
+            const inputPlace = modal.querySelector('.input-place');
+            const inputItem = modal.querySelector('.input-item');
+            const inputPrice = modal.querySelector('.input-price');
+            const inputMemo = modal.querySelector('.input-memo');
+
+            const previewPlace = modal.querySelector('.place-preview');
+            const previewItem = modal.querySelector('.item-preview');
+            const previewPrice = modal.querySelector('.price-preview');
+            const previewRating = modal.querySelector('.rating-preview');
+            const previewMemo = modal.querySelector('.memo-preview');
+
+            inputPlace.oninput = () => previewPlace.textContent = inputPlace.value || '장소를 입력하세요';
+            inputItem.oninput = () => previewItem.textContent = inputItem.value || '메뉴를 입력하세요';
+            inputPrice.oninput = () => previewPrice.textContent = (Number(inputPrice.value).toLocaleString() || '0') + '원';
+            inputMemo.oninput = () => previewMemo.textContent = inputMemo.value || '메모를 입력하세요';
+
+            // Image Re-selection
+            modal.querySelector('.btn-reselect-image').onclick = () => {
+                const reselectInput = document.createElement('input');
+                reselectInput.type = 'file';
+                reselectInput.accept = 'image/*';
+                reselectInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader2 = new FileReader();
+                        reader2.onload = (e2) => {
+                            const newUrl = e2.target.result;
+                            modal.querySelector('.polaroid-image').src = newUrl;
+                            imageUrl = newUrl; // Update closure variable
+                        };
+                        reader2.readAsDataURL(file);
+                    }
+                };
+                reselectInput.click();
+            };
+
+            // Star Rating Logic
+            modal.querySelectorAll('.star').forEach(star => {
+                star.onclick = () => {
+                    starRating = parseInt(star.dataset.value);
+                    const stars = modal.querySelectorAll('.star');
+                    stars.forEach((s, i) => {
+                        if (i < starRating) s.classList.add('active');
+                        else s.classList.remove('active');
+                    });
+                    previewRating.textContent = '★'.repeat(starRating) + '☆'.repeat(5 - starRating);
+                };
+            });
+
+            // Generate Canvas & Download
+            modal.querySelector('.btn-generate-polaroid').onclick = () => {
+                const canvas = modal.querySelector('#polaroid-canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.src = imageUrl;
+
+                img.onload = () => {
+                    // Polaroid dimensions
+                    const frameWidth = 1000;
+                    const frameHeight = 1300;
+                    const padding = 60;
+                    const imageSize = frameWidth - (padding * 2);
+                    const footerHeight = 300;
+
+                    canvas.width = frameWidth;
+                    canvas.height = frameHeight;
+
+                    // 1. Draw White Background
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, frameWidth, frameHeight);
+
+                    // 2. Draw Image (Square crop)
+                    const side = Math.min(img.width, img.height);
+                    ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, padding, padding, imageSize, imageSize);
+
+                    // 3. Draw Border for Image
+                    ctx.strokeStyle = '#f1f5f9';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(padding, padding, imageSize, imageSize);
+
+                    // 3.5 Draw Internal Branding & Time
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
+                    ctx.font = 'bold 22px sans-serif';
+
+                    // Time Stamp (Top Right)
+                    ctx.textAlign = 'right';
+                    ctx.fillText(timeStr, padding + imageSize - 20, padding + 40);
+
+                    // Service Branding (Bottom Center)
+                    ctx.textAlign = 'center';
+                    ctx.font = '600 20px sans-serif';
+                    ctx.letterSpacing = "2px";
+                    ctx.fillText('LITTLE TRIP', padding + (imageSize / 2), padding + imageSize - 20);
+                    ctx.letterSpacing = "0px";
+
+                    // Reset alignment for other texts
+                    ctx.textAlign = 'left';
+
+                    // 4. Draw Text Info
+                    ctx.fillStyle = '#1e293b';
+
+                    // Place Name (Bold)
+                    ctx.font = 'bold 48px sans-serif';
+                    ctx.fillText(inputPlace.value || '장소명 미입력', padding, imageSize + padding + 80);
+
+                    // Item Name
+                    ctx.font = '40px sans-serif';
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillText(inputItem.value || '항목 미입력', padding, imageSize + padding + 140);
+
+                    // Footer Side by Side
+                    const footerY = imageSize + padding + 220;
+
+                    // Price
+                    ctx.font = 'bold 44px sans-serif';
+                    ctx.fillStyle = '#10b981';
+                    ctx.fillText((Number(inputPrice.value).toLocaleString() || '0') + '원', padding, footerY);
+
+                    // Rating
+                    ctx.font = '44px sans-serif';
+                    ctx.fillStyle = '#fbbf24';
+                    const ratingStr = '★'.repeat(starRating) + '☆'.repeat(5 - starRating);
+                    const ratingWidth = ctx.measureText(ratingStr).width;
+                    ctx.fillText(ratingStr, frameWidth - padding - ratingWidth, footerY);
+
+                    // 4.5 Draw Memo (Wrapped Text)
+                    if (inputMemo.value) {
+                        ctx.font = 'italic 34px sans-serif';
+                        ctx.fillStyle = '#475569';
+                        const memoY = footerY + 80;
+                        const maxWidth = frameWidth - (padding * 2);
+                        const words = inputMemo.value.split(''); // Char-level split for CJK
+                        let line = '';
+                        let lineCount = 0;
+
+                        for (let n = 0; n < words.length; n++) {
+                            let testLine = line + words[n];
+                            let metrics = ctx.measureText(testLine);
+                            let testWidth = metrics.width;
+                            if (testWidth > maxWidth && n > 0) {
+                                ctx.fillText(line, padding, memoY + (lineCount * 50));
+                                line = words[n];
+                                lineCount++;
+                                if (lineCount >= 3) break; // Limit to 3 lines
+                            } else {
+                                line = testLine;
+                            }
+                        }
+                        if (lineCount < 3) {
+                            ctx.fillText(line, padding, memoY + (lineCount * 50));
+                        }
+                    }
+
+                    // 5. Save as Image
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = `review-${Date.now()}.png`;
+                    link.href = dataUrl;
+                    link.click();
+
+                    // Close modal after saving
+                    modal.classList.remove('active');
+                    setTimeout(() => modal.remove(), 300);
+                };
+            };
+        };
+
+        renderContent();
+        document.body.appendChild(modal);
+        setTimeout(() => modal.classList.add('active'), 10);
+    };
+    reader.readAsDataURL(imageFile);
 }
 
 // Map Popup with Leaflet
