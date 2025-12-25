@@ -339,7 +339,8 @@ function renderDays(days = [], allAccommodations = []) {
                     currentGroup = {
                         startTime: startTime,
                         endTime: event.endTime || '',
-                        events: []
+                        events: [],
+                        startEventIndex: index // Store the index of the first event in the group
                     };
                     eventGroups.push(currentGroup);
                 }
@@ -373,9 +374,10 @@ function renderDays(days = [], allAccommodations = []) {
                 <div class="events-list-view tip-content-wrapper" style="margin:0 !important; padding:0 !important;">
                     <div class="tip-content-inner" style="margin-top:5px;">
                         ${eventGroups.length > 0 ? eventGroups.map((group, gIndex) => {
+                const dayIndex = days.indexOf(day);
                 return `
                                 ${gIndex > 0 ? '<div class="event-divider"></div>' : ''}
-                                <div class="event-group" data-group-index="${gIndex}">
+                                <div class="event-group" data-group-index="${gIndex}" data-day-index="${dayIndex}" data-event-index="${group.startEventIndex}">
                                     ${group.events.map((event, eIndex) => {
                     const startTime = event.startTime || event.time || '';
                     const endTime = event.endTime || '';
@@ -598,19 +600,26 @@ function initSpotlightMode() {
         actionBar = document.createElement('div');
         actionBar.className = 'event-action-bar';
         actionBar.innerHTML = `
-            <div class="action-item" title="위치정보">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-            </div>
-            <div class="action-item" title="카메라">
+            <div class="action-item action-camera" title="카메라">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                     <circle cx="12" cy="13" r="4"></circle>
                 </svg>
             </div>
-            <div class="action-item" title="인원체크">
+            <div class="action-item action-location" title="위치정보">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+            </div>
+            <div class="action-item action-map" title="이동경로">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                    <line x1="8" y1="2" x2="8" y2="18"></line>
+                    <line x1="16" y1="6" x2="16" y2="22"></line>
+                </svg>
+            </div>
+            <div class="action-item action-members" title="인원체크">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
@@ -618,7 +627,7 @@ function initSpotlightMode() {
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
             </div>
-            <div class="action-item" title="정산">
+            <div class="action-item action-settlement" title="정산">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"></circle>
                     <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
@@ -636,6 +645,20 @@ function initSpotlightMode() {
         overlay.classList.remove('active');
         actionBar.classList.remove('active');
         document.body.style.overflow = ''; // Enable scroll
+    };
+
+    const updateActionStates = (group) => {
+        const schedule = getCurrentSchedule();
+        const dayIdx = group.dataset.dayIndex;
+        const eventIdx = group.dataset.eventIndex;
+        const firstEvent = schedule.days[dayIdx]?.events[eventIdx];
+
+        const locationBtn = actionBar.querySelector('.action-location');
+        if (firstEvent && firstEvent.coords) {
+            locationBtn.classList.add('active-red');
+        } else {
+            locationBtn.classList.remove('active-red');
+        }
     };
 
     eventGroups.forEach(group => {
@@ -662,10 +685,233 @@ function initSpotlightMode() {
             overlay.classList.add('active');
             actionBar.classList.add('active');
             document.body.style.overflow = 'hidden'; // Disable scroll
+
+            // Update button states for this group
+            updateActionStates(group);
         });
     });
 
+    // Location Picker Logic
+    actionBar.querySelector('.action-location').addEventListener('click', () => {
+        const activeGroup = document.querySelector('.event-group.active-spotlight');
+        if (!activeGroup) return;
+
+        const dayIdx = parseInt(activeGroup.dataset.dayIndex);
+        const eventIdx = parseInt(activeGroup.dataset.eventIndex);
+        const schedule = getCurrentSchedule();
+        const targetEvent = schedule.days[dayIdx].events[eventIdx];
+
+        if (targetEvent.coords) {
+            showCustomConfirm('저장된 위치 정보를 삭제할까요?', () => {
+                delete targetEvent.coords;
+                saveSchedule(schedule);
+                updateActionStates(activeGroup);
+            });
+        } else {
+            showCustomConfirm('현재 위치를 이 일정의 정보로 저장할까요?', () => {
+                if (!navigator.geolocation) {
+                    alert('Geolocation을 지원하지 않는 브라우저입니다.');
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition((position) => {
+                    targetEvent.coords = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy, // Added accuracy info
+                        timestamp: new Date().toISOString()
+                    };
+                    saveSchedule(schedule);
+                    updateActionStates(activeGroup);
+                }, (err) => {
+                    showCustomAlert('위치 정보를 가져오는데 실패했습니다: ' + err.message);
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            });
+        }
+    });
+
+    // Map Popup Logic
+    actionBar.querySelector('.action-map').addEventListener('click', () => {
+        showMapPopup();
+    });
+
     overlay.addEventListener('click', deactivateSpotlight);
+}
+
+// Custom Confirm Utility
+function showCustomConfirm(message, onConfirm) {
+    const modal = document.createElement('div');
+    modal.className = 'custom-confirm-overlay';
+    modal.innerHTML = `
+        <div class="custom-confirm-modal">
+            <div class="confirm-message">${message}</div>
+            <div class="confirm-actions">
+                <button class="btn-confirm-cancel">취소</button>
+                <button class="btn-confirm-ok">확인</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Animate in
+    setTimeout(() => modal.classList.add('active'), 10);
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    };
+
+    modal.querySelector('.btn-confirm-cancel').onclick = closeModal;
+    modal.querySelector('.btn-confirm-ok').onclick = () => {
+        onConfirm();
+        closeModal();
+    };
+    modal.onclick = (e) => {
+        if (e.target === modal) closeModal();
+    };
+}
+
+// Custom Alert Utility
+function showCustomAlert(message) {
+    const modal = document.createElement('div');
+    modal.className = 'custom-confirm-overlay'; // Reuse overlay style
+    modal.innerHTML = `
+        <div class="custom-confirm-modal">
+            <div class="confirm-message">${message}</div>
+            <div class="confirm-actions">
+                <button class="btn-confirm-ok" style="width: 100%;">확인</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Animate in
+    setTimeout(() => modal.classList.add('active'), 10);
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    };
+
+    modal.querySelector('.btn-confirm-ok').onclick = closeModal;
+    modal.onclick = (e) => {
+        if (e.target === modal) closeModal();
+    };
+}
+
+// Map Popup with Leaflet
+function showMapPopup() {
+    const schedule = getCurrentSchedule();
+    if (!schedule) return;
+
+    // Collect all coordinates in order
+    const locations = [];
+    schedule.days.forEach((day, dIdx) => {
+        day.events?.forEach((event, eIdx) => {
+            if (event.coords) {
+                locations.push({
+                    lat: event.coords.lat,
+                    lng: event.coords.lng,
+                    name: event.place || event.detail || `Day ${dIdx + 1}`,
+                    day: dIdx + 1,
+                    time: event.startTime || event.time || ''
+                });
+            }
+        });
+    });
+
+    if (locations.length === 0) {
+        showCustomAlert('저장된 위치 정보가 없습니다.<br>피커를 이용해 위치를 먼저 추가해 주세요!');
+        return;
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'map-popup-overlay';
+    modal.innerHTML = `
+        <div class="map-popup-container">
+            <div class="map-popup-header">
+                <h3>여행 경로 확인</h3>
+                <button class="btn-close-map">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div id="map" class="map-content"></div>
+            <div class="map-footer">
+                저장된 ${locations.length}개의 포인트가 연결되었습니다.
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+
+    const closeMap = () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    };
+
+    modal.querySelector('.btn-close-map').onclick = closeMap;
+
+    // Load Leaflet dynamically
+    loadLeaflet(() => {
+        const map = L.map('map').setView([locations[0].lat, locations[0].lng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        const latlngs = locations.map(loc => [loc.lat, loc.lng]);
+
+        // Add markers
+        locations.forEach((loc, i) => {
+            const marker = L.marker([loc.lat, loc.lng]).addTo(map);
+            marker.bindPopup(`
+                <div style="font-family: inherit; padding: 5px;">
+                    <strong style="color: #45B8AF;">Day ${loc.day}</strong><br>
+                    <strong>${loc.name}</strong><br>
+                    <small>${loc.time}</small>
+                </div>
+            `);
+            if (i === 0) marker.openPopup();
+        });
+
+        // Draw polyline
+        const polyline = L.polyline(latlngs, {
+            color: '#45B8AF',
+            weight: 4,
+            opacity: 0.7,
+            dashArray: '10, 10',
+            lineJoin: 'round'
+        }).addTo(map);
+
+        // Zoom to fit
+        map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+    });
+}
+
+function loadLeaflet(callback) {
+    if (window.L) {
+        callback();
+        return;
+    }
+
+    // Load CSS
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+
+    // Load JS
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = callback;
+    document.head.appendChild(script);
 }
 
 // 앱 시작

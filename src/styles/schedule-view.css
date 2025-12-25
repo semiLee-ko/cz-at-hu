@@ -702,6 +702,11 @@ body.spotlight-active .event-group.active-spotlight {
     color: #475569;
 }
 
+.action-item.active-red {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.1);
+}
+
 .action-item:active {
     transform: scale(0.9);
 }
@@ -714,4 +719,180 @@ body.spotlight-active .event-group.active-spotlight {
 /* Make body unscrollable when spotlight is active */
 body.spotlight-active {
     overflow: hidden !important;
+}
+/* Custom Confirm Modal */
+.custom-confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.custom-confirm-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.custom-confirm-modal {
+    background: white;
+    width: 85%;
+    max-width: 320px;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-confirm-overlay.active .custom-confirm-modal {
+    transform: scale(1);
+}
+
+.confirm-message {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    text-align: center;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.confirm-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-confirm-cancel {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.btn-confirm-ok {
+    background: #000;
+    color: #fff;
+}
+
+.btn-confirm-ok:active {
+    transform: scale(0.95);
+}
+
+/* Map Popup Modal */
+.map-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 4000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.map-popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.map-popup-container {
+    width: 92%;
+    height: 85%;
+    max-width: 500px;
+    background: white;
+    border-radius: 32px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    transform: translateY(30px) scale(0.95);
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.map-popup-overlay.active .map-popup-container {
+    transform: translateY(0) scale(1);
+}
+
+.map-popup-header {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.map-popup-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.btn-close-map {
+    background: #f8fafc;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-close-map:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.map-content {
+    flex: 1;
+    width: 100%;
+    background: #f1f5f9;
+}
+
+.map-footer {
+    padding: 15px;
+    background: #f8fafc;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #64748b;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Leaflet Customizations */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.leaflet-container {
+    font-family: inherit;
 }
