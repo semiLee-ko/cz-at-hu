@@ -636,6 +636,61 @@ function initSpotlightMode() {
             </div>
         `;
         document.body.appendChild(actionBar);
+
+        // --- NEW: Attach listeners ONLY ONCE when created ---
+        // Location Picker Logic
+        actionBar.querySelector('.action-location').addEventListener('click', () => {
+            const activeGroup = document.querySelector('.event-group.active-spotlight');
+            if (!activeGroup) return;
+
+            const dayIdx = parseInt(activeGroup.dataset.dayIndex);
+            const eventIdx = parseInt(activeGroup.dataset.eventIndex);
+            const schedule = getCurrentSchedule();
+            const targetEvent = schedule.days[dayIdx].events[eventIdx];
+
+            if (targetEvent.coords) {
+                showCustomConfirm('저장된 위치 정보를 삭제할까요?', () => {
+                    delete targetEvent.coords;
+                    saveSchedule(schedule);
+                    updateActionStates(activeGroup);
+                });
+            } else {
+                showCustomConfirm('현재 위치를 이 일정의 정보로 저장할까요?', () => {
+                    if (!navigator.geolocation) {
+                        alert('Geolocation을 지원하지 않는 브라우저입니다.');
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        targetEvent.coords = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            accuracy: position.coords.accuracy,
+                            timestamp: new Date().toISOString()
+                        };
+                        saveSchedule(schedule);
+                        updateActionStates(activeGroup);
+                    }, (err) => {
+                        showCustomAlert('위치 정보를 가져오는데 실패했습니다: ' + err.message);
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    });
+                });
+            }
+        });
+
+        // Map Popup Logic
+        actionBar.querySelector('.action-map').addEventListener('click', () => {
+            showMapPopup();
+        });
+
+        // Member Selection Logic
+        actionBar.querySelector('.action-members').addEventListener('click', () => {
+            const activeGroup = document.querySelector('.event-group.active-spotlight');
+            if (activeGroup) showMemberSelectionPopup(activeGroup, updateActionStates);
+        });
     }
 
     const deactivateSpotlight = () => {
@@ -658,6 +713,13 @@ function initSpotlightMode() {
             locationBtn.classList.add('active-red');
         } else {
             locationBtn.classList.remove('active-red');
+        }
+
+        const membersBtn = actionBar.querySelector('.action-members');
+        if (firstEvent && firstEvent.participants && firstEvent.participants.length > 0) {
+            membersBtn.classList.add('active-blue');
+        } else {
+            membersBtn.classList.remove('active-blue');
         }
     };
 
@@ -689,54 +751,6 @@ function initSpotlightMode() {
             // Update button states for this group
             updateActionStates(group);
         });
-    });
-
-    // Location Picker Logic
-    actionBar.querySelector('.action-location').addEventListener('click', () => {
-        const activeGroup = document.querySelector('.event-group.active-spotlight');
-        if (!activeGroup) return;
-
-        const dayIdx = parseInt(activeGroup.dataset.dayIndex);
-        const eventIdx = parseInt(activeGroup.dataset.eventIndex);
-        const schedule = getCurrentSchedule();
-        const targetEvent = schedule.days[dayIdx].events[eventIdx];
-
-        if (targetEvent.coords) {
-            showCustomConfirm('저장된 위치 정보를 삭제할까요?', () => {
-                delete targetEvent.coords;
-                saveSchedule(schedule);
-                updateActionStates(activeGroup);
-            });
-        } else {
-            showCustomConfirm('현재 위치를 이 일정의 정보로 저장할까요?', () => {
-                if (!navigator.geolocation) {
-                    alert('Geolocation을 지원하지 않는 브라우저입니다.');
-                    return;
-                }
-
-                navigator.geolocation.getCurrentPosition((position) => {
-                    targetEvent.coords = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy: position.coords.accuracy, // Added accuracy info
-                        timestamp: new Date().toISOString()
-                    };
-                    saveSchedule(schedule);
-                    updateActionStates(activeGroup);
-                }, (err) => {
-                    showCustomAlert('위치 정보를 가져오는데 실패했습니다: ' + err.message);
-                }, {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0
-                });
-            });
-        }
-    });
-
-    // Map Popup Logic
-    actionBar.querySelector('.action-map').addEventListener('click', () => {
-        showMapPopup();
     });
 
     overlay.addEventListener('click', deactivateSpotlight);
@@ -803,6 +817,97 @@ function showCustomAlert(message) {
     };
 }
 
+// Member Selection Popup
+function showMemberSelectionPopup(group, updateActionStatesCallback) {
+    const schedule = getCurrentSchedule();
+    if (!schedule) return;
+
+    const dayIdx = parseInt(group.dataset.dayIndex);
+    const eventIdx = parseInt(group.dataset.eventIndex);
+    const targetEvent = schedule.days[dayIdx].events[eventIdx];
+
+    // Get all trip members
+    const allMembers = [
+        ...(schedule.members?.adultList || []),
+        ...(schedule.members?.childList || [])
+    ];
+
+    // Current participants
+    let currentParticipants = targetEvent.participants || [];
+
+    const modal = document.createElement('div');
+    modal.className = 'member-selection-overlay';
+
+    const renderContent = () => {
+        const selected = currentParticipants;
+        const available = allMembers.filter(m => !selected.includes(m));
+
+        modal.innerHTML = `
+            <div class="member-selection-container">
+                <div class="member-selection-header">
+                    <h3>참여 인원 선택</h3>
+                    <button class="btn-close-members">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="member-selection-content">
+                    <div class="selection-section">
+                        <label>일정 참여자 <span class="count">${selected.length}</span></label>
+                        <div class="member-list selected-list">
+                            ${selected.length > 0 ? selected.map(name => `
+                                <div class="member-chip active" data-name="${name}">
+                                    ${name} <span class="chip-icon">×</span>
+                                </div>
+                            `).join('') : '<p class="empty-msg">목록에서 이름을 클릭해 추가하세요</p>'}
+                        </div>
+                    </div>
+                    <div class="selection-section">
+                        <label>전체 인원 <span class="count">${available.length}</span></label>
+                        <div class="member-list available-list">
+                            ${available.map(name => `
+                                <div class="member-chip" data-name="${name}">
+                                    ${name} <span class="chip-icon">+</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add events
+        modal.querySelector('.btn-close-members').onclick = () => {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        };
+
+        modal.querySelectorAll('.member-chip').forEach(chip => {
+            chip.onclick = () => {
+                const name = chip.dataset.name;
+                if (currentParticipants.includes(name)) {
+                    currentParticipants = currentParticipants.filter(p => p !== name);
+                } else {
+                    currentParticipants.push(name);
+                }
+
+                // Auto-save on every click
+                targetEvent.participants = currentParticipants;
+                saveSchedule(schedule);
+                if (updateActionStatesCallback) updateActionStatesCallback(group);
+
+                renderContent();
+            };
+        });
+    };
+
+    renderContent();
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
 // Map Popup with Leaflet
 function showMapPopup() {
     const schedule = getCurrentSchedule();
@@ -825,7 +930,7 @@ function showMapPopup() {
     });
 
     if (locations.length === 0) {
-        showCustomAlert('저장된 위치 정보가 없습니다.<br>피커를 이용해 위치를 먼저 추가해 주세요!');
+        showCustomAlert('저장된 위치 정보가 없습니다.<br>위치를 먼저 추가해 주세요!');
         return;
     }
 
