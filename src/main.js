@@ -337,8 +337,8 @@ function renderDays(days = [], allAccommodations = []) {
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                 </div>
-                <div class="events-list-view tip-content-wrapper">
-                    <div class="tip-content-inner">
+                <div class="events-list-view tip-content-wrapper" style="margin:0 !important; padding:0 !important;">
+                    <div class="tip-content-inner" style="margin-top:5px;">
                     ${day.events && day.events.length > 0 ? day.events.map((event, index) => {
                 // Support for multiple data structures (compatibility)
                 const startTime = event.startTime || event.time || '';
@@ -381,8 +381,8 @@ function renderDays(days = [], allAccommodations = []) {
                                     </svg>
                                 </div>
                                 <div class="tip-content-wrapper" style="background: #246367 !important;">
-                                    <div class="tip-content-inner" style="padding: 0 15px 15px 15px;">
-                                        <div class="acc-details" style="gap:2px !important;">
+                                    <div class="tip-content-inner">
+                                        <div class="acc-details" style="gap:2px !important; margin-left:15px; margin-right:15px;">
                                             ${acc.location ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> <span>${acc.location}</span></p>` : ''}
                                             ${acc.contact ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> <span>${acc.contact}</span></p>` : ''}
                                             ${acc.url ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> <a href="${acc.url}" target="_blank" style="color: #45B8AF; text-decoration: none; font-weight: 600;">홈페이지 방문</a></p>` : ''}
@@ -408,7 +408,7 @@ function renderChecklistsSection(checklists = []) {
     return `
         <div class="view-list-container" style="margin-top: 10px;">
             ${checklists.map(list => `
-                <div class="day-card collapsed" style="margin-bottom: 12px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
+                <div class="day-card collapsed" style="margin-bottom: 5px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
                     <div class="day-header" style="background: #456eb8; padding: 12px 15px;">
                         <div class="day-info">
                             <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">LIST</span>
@@ -419,10 +419,10 @@ function renderChecklistsSection(checklists = []) {
                         </svg>
                     </div>
                     <div class="tip-content-wrapper">
-                        <div class="tip-content-inner" style="padding: 10px;">
+                        <div class="tip-content-inner">
                             <ul style="list-style: none; padding: 0; margin: 0;">
                                 ${list.items && list.items.length > 0 ? list.items.map(item => `
-                                    <li style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+                                    <li style="display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #f0f0f0;">
                                         <div style="width: 18px; height: 18px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
                                             ${item.completed ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#456eb8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
                                         </div>
@@ -445,7 +445,7 @@ function renderTipsSection(tips = []) {
     return `
         <div class="view-list-container" style="margin-top: 10px;">
             ${tips.map(tip => `
-                <div class="day-card collapsed" style="margin-bottom: 12px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
+                <div class="day-card collapsed" style="margin-bottom: 5px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
                     <div class="day-header" style="background: #b89545; padding: 12px 15px;">
                         <div class="day-info">
                             <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">TIP</span>
@@ -456,8 +456,8 @@ function renderTipsSection(tips = []) {
                         </svg>
                     </div>
                     <div class="tip-content-wrapper">
-                        <div class="tip-content-inner" style="padding: 10px;">
-                            <div style="font-size: 0.95rem; color: #444; line-height: 1.6; white-space: pre-wrap;">${tip.content}</div>
+                        <div class="tip-content-inner">
+                            <div style="font-size: 0.95rem; padding: 8px; color: #444; line-height: 1.6; white-space: pre-wrap;">${tip.content}</div>
                         </div>
                     </div>
                 </div>
