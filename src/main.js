@@ -691,6 +691,12 @@ function initSpotlightMode() {
             const activeGroup = document.querySelector('.event-group.active-spotlight');
             if (activeGroup) showMemberSelectionPopup(activeGroup, updateActionStates);
         });
+
+        // Settlement Logic
+        actionBar.querySelector('.action-settlement').addEventListener('click', () => {
+            const activeGroup = document.querySelector('.event-group.active-spotlight');
+            if (activeGroup) showSettlementPopup(activeGroup, updateActionStates);
+        });
     }
 
     const deactivateSpotlight = () => {
@@ -720,6 +726,13 @@ function initSpotlightMode() {
             membersBtn.classList.add('active-blue');
         } else {
             membersBtn.classList.remove('active-blue');
+        }
+
+        const settlementBtn = actionBar.querySelector('.action-settlement');
+        if (firstEvent && firstEvent.expenses && firstEvent.expenses.length > 0) {
+            settlementBtn.classList.add('active-green');
+        } else {
+            settlementBtn.classList.remove('active-green');
         }
     };
 
@@ -843,11 +856,14 @@ function showMemberSelectionPopup(group, updateActionStatesCallback) {
         const available = allMembers.filter(m => !selected.includes(m));
 
         modal.innerHTML = `
-            <div class="member-selection-container">
+            <div class="member-selection-container compact">
                 <div class="member-selection-header">
-                    <h3>참여 인원 선택</h3>
+                    <div>
+                        <h3>참여 인원 선택</h3>
+                        <p class="total-summary">참여 ${selected.length}명 / 전체 ${allMembers.length}명</p>
+                    </div>
                     <button class="btn-close-members">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
@@ -898,6 +914,142 @@ function showMemberSelectionPopup(group, updateActionStatesCallback) {
                 saveSchedule(schedule);
                 if (updateActionStatesCallback) updateActionStatesCallback(group);
 
+                renderContent();
+            };
+        });
+    };
+
+    renderContent();
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+// Settlement Input Popup
+function showSettlementPopup(group, updateActionStatesCallback) {
+    const schedule = getCurrentSchedule();
+    if (!schedule) return;
+
+    const dayIdx = parseInt(group.dataset.dayIndex);
+    const eventIdx = parseInt(group.dataset.eventIndex);
+    const targetEvent = schedule.days[dayIdx].events[eventIdx];
+
+    // Check if participants exist
+    const participants = targetEvent.participants || [];
+    if (participants.length === 0) {
+        showCustomAlert('참여자가 설정되지 않았습니다.<br>먼저 인원 선택 메뉴에서 참여자를 선택해 주세요!');
+        return;
+    }
+
+    // Initialize expenses if not exists
+    if (!targetEvent.expenses) {
+        targetEvent.expenses = [];
+        // Migration: If old settlement exists, migrate it
+        if (targetEvent.settlement && targetEvent.settlement.amount) {
+            targetEvent.expenses.push({
+                payer: targetEvent.settlement.payer,
+                amount: targetEvent.settlement.amount,
+                id: Date.now()
+            });
+            delete targetEvent.settlement;
+            saveSchedule(schedule);
+        }
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'settlement-popup-overlay';
+
+    const renderContent = () => {
+        const totalAmount = targetEvent.expenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+
+        modal.innerHTML = `
+            <div class="settlement-popup-container compact">
+                <div class="settlement-popup-header">
+                    <div>
+                        <h3>경비 내역 관리</h3>
+                        <p class="total-summary">총 ${targetEvent.expenses.length}건 | ${totalAmount.toLocaleString()}원</p>
+                    </div>
+                    <button class="btn-close-settlement">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="settlement-popup-content">
+                    <!-- Input Area -->
+                    <div class="expense-input-card">
+                        <div class="input-row">
+                            <div class="field-item">
+                                <label>결제자</label>
+                                <select class="payer-select-sm">
+                                    <option value="">선택</option>
+                                    ${participants.map(name => `<option value="${name}">${name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="field-item flex-2">
+                                <label>금액 (원)</label>
+                                <input type="number" class="amount-input-sm" placeholder="0" inputmode="numeric">
+                            </div>
+                            <button class="btn-add-expense">추가</button>
+                        </div>
+                    </div>
+
+                    <!-- List Area -->
+                    <div class="expense-history-list">
+                        ${targetEvent.expenses.length > 0 ? targetEvent.expenses.map((exp, idx) => `
+                            <div class="expense-item" data-id="${exp.id}">
+                                <div class="exp-info">
+                                    <span class="exp-payer">${exp.payer || '미지정'}</span>
+                                    <span class="exp-amount">${Number(exp.amount).toLocaleString()}원</span>
+                                </div>
+                                <button class="btn-del-expense" data-idx="${idx}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        `).join('') : '<p class="empty-msg">등록된 내역이 없습니다</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Close
+        modal.querySelector('.btn-close-settlement').onclick = () => {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        };
+
+        // Add Expense
+        const btnAdd = modal.querySelector('.btn-add-expense');
+        btnAdd.onclick = () => {
+            const payer = modal.querySelector('.payer-select-sm').value;
+            const amount = modal.querySelector('.amount-input-sm').value;
+
+            if (!amount || amount <= 0) {
+                showCustomAlert('금액을 입력해 주세요.');
+                return;
+            }
+
+            targetEvent.expenses.push({
+                payer,
+                amount: Number(amount),
+                id: Date.now()
+            });
+
+            saveSchedule(schedule);
+            if (updateActionStatesCallback) updateActionStatesCallback(group);
+            renderContent();
+        };
+
+        // Delete Expense
+        modal.querySelectorAll('.btn-del-expense').forEach(btn => {
+            btn.onclick = () => {
+                const idx = btn.dataset.idx;
+                targetEvent.expenses.splice(idx, 1);
+                saveSchedule(schedule);
+                if (updateActionStatesCallback) updateActionStatesCallback(group);
                 renderContent();
             };
         });
