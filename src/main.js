@@ -329,6 +329,24 @@ function renderDays(days = [], allAccommodations = []) {
             acc.assignedDates && acc.assignedDates.includes(day.date)
         );
 
+        // Group events: A group starts when an event has a startTime
+        const eventGroups = [];
+        if (day.events && day.events.length > 0) {
+            let currentGroup = null;
+            day.events.forEach((event, index) => {
+                const startTime = event.startTime || event.time || '';
+                if (startTime || index === 0) {
+                    currentGroup = {
+                        startTime: startTime,
+                        endTime: event.endTime || '',
+                        events: []
+                    };
+                    eventGroups.push(currentGroup);
+                }
+                currentGroup.events.push(event);
+            });
+        }
+
         return `
             <div class="day-card" style="margin-left: 15px; margin-right: 15px;">
                 <div class="day-header">
@@ -354,30 +372,35 @@ function renderDays(days = [], allAccommodations = []) {
                 </div>
                 <div class="events-list-view tip-content-wrapper" style="margin:0 !important; padding:0 !important;">
                     <div class="tip-content-inner" style="margin-top:5px;">
-                    ${day.events && day.events.length > 0 ? day.events.map((event, index) => {
-                // Support for multiple data structures (compatibility)
-                const startTime = event.startTime || event.time || '';
-                const endTime = event.endTime || '';
-                const place = event.place || event.detail || '';
-                const desc = event.description || '';
-
+                        ${eventGroups.length > 0 ? eventGroups.map((group, gIndex) => {
                 return `
-                            ${index > 0 && startTime ? '<div class="event-divider"></div>' : ''}
-                            <div class="event">
-                                <div class="event-time-col">
-                                    ${startTime ? `
-                                        <span class="event-time-bullet"></span>
-                                        <span class="event-time-start">${startTime}</span>
-                                    ` : '<span class="event-time-spacer"></span>'}
-                                    <span class="event-time-dash">${startTime || endTime ? '-' : ''}</span>
-                                    <span class="event-time-end">${endTime}</span>
+                                ${gIndex > 0 ? '<div class="event-divider"></div>' : ''}
+                                <div class="event-group" data-group-index="${gIndex}">
+                                    ${group.events.map((event, eIndex) => {
+                    const startTime = event.startTime || event.time || '';
+                    const endTime = event.endTime || '';
+                    const place = event.place || event.detail || '';
+                    const desc = event.description || '';
+
+                    return `
+                                            <div class="event">
+                                                <div class="event-time-col">
+                                                    ${eIndex === 0 && startTime ? `
+                                                        <span class="event-time-bullet"></span>
+                                                        <span class="event-time-start">${startTime}</span>
+                                                    ` : '<span class="event-time-spacer"></span>'}
+                                                    <span class="event-time-dash">${(eIndex === 0 && (startTime || endTime)) ? '-' : ''}</span>
+                                                    <span class="event-time-end">${eIndex === 0 ? endTime : ''}</span>
+                                                </div>
+                                                <div class="event-detail-content">
+                                                    <span class="event-place">${place}</span>
+                                                    <span class="event-desc">${desc}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                }).join('')}
                                 </div>
-                                <div class="event-detail-content">
-                                    <span class="event-place">${place}</span>
-                                    <span class="event-desc">${desc}</span>
-                                </div>
-                            </div>
-                        `;
+                            `;
             }).join('') : '<div class="no-events">일정을 등록해 주세요</div>'}
                 
                     ${dayAccommodations.length > 0 ? `
@@ -541,19 +564,108 @@ function renderTipsSection(tips = []) {
 }
 
 // Initialize accordion functionality for day cards
+// Initialize accordion functionality for day cards
 function initDayAccordion() {
     const dayCards = document.querySelectorAll('.day-card, .day-card-under');
     dayCards.forEach(card => {
         const header = card.querySelector('.day-header');
-        const contentWrapper = card.querySelector('.tip-content-wrapper');
-        const collapseIcon = card.querySelector('.collapse-icon');
-
-        if (header && contentWrapper && collapseIcon) {
+        if (header) {
             header.addEventListener('click', () => {
                 card.classList.toggle('collapsed');
             });
         }
     });
+
+    initSpotlightMode();
+}
+
+// Spotlight & Itinerary Action Menu
+function initSpotlightMode() {
+    const eventGroups = document.querySelectorAll('.event-group');
+    if (eventGroups.length === 0) return;
+
+    // Create Spotlight Overlay if it doesn't exist
+    let overlay = document.querySelector('.spotlight-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'spotlight-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    // Create Action Bar if it doesn't exist
+    let actionBar = document.querySelector('.event-action-bar');
+    if (!actionBar) {
+        actionBar = document.createElement('div');
+        actionBar.className = 'event-action-bar';
+        actionBar.innerHTML = `
+            <div class="action-item" title="위치정보">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+            </div>
+            <div class="action-item" title="카메라">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+            </div>
+            <div class="action-item" title="인원체크">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <div class="action-item" title="정산">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+                    <line x1="12" y1="6" x2="12" y2="18"></line>
+                </svg>
+            </div>
+        `;
+        document.body.appendChild(actionBar);
+    }
+
+    const deactivateSpotlight = () => {
+        document.body.classList.remove('spotlight-active');
+        document.querySelectorAll('.event-group.active-spotlight').forEach(el => el.classList.remove('active-spotlight'));
+        document.querySelectorAll('.day-card.spotlight-parent').forEach(el => el.classList.remove('spotlight-parent'));
+        overlay.classList.remove('active');
+        actionBar.classList.remove('active');
+        document.body.style.overflow = ''; // Enable scroll
+    };
+
+    eventGroups.forEach(group => {
+        group.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            const parentCard = group.closest('.day-card');
+
+            // If already active, deactivate
+            if (group.classList.contains('active-spotlight')) {
+                deactivateSpotlight();
+                return;
+            }
+
+            // Deactivate others
+            document.querySelectorAll('.event-group.active-spotlight').forEach(el => el.classList.remove('active-spotlight'));
+            document.querySelectorAll('.day-card.spotlight-parent').forEach(el => el.classList.remove('spotlight-parent'));
+
+            // Activate current
+            group.classList.add('active-spotlight');
+            if (parentCard) parentCard.classList.add('spotlight-parent');
+
+            document.body.classList.add('spotlight-active');
+            overlay.classList.add('active');
+            actionBar.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Disable scroll
+        });
+    });
+
+    overlay.addEventListener('click', deactivateSpotlight);
 }
 
 // 앱 시작

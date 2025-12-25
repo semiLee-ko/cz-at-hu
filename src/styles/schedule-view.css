@@ -586,3 +586,132 @@
     box-shadow: none;
     border-color: transparent;
 }
+
+/* Spotlight & Event Group Styling */
+.day-card.spotlight-parent {
+    z-index: 2001 !important;
+    position: relative;
+}
+
+.event-group {
+    position: relative;
+    padding: 10px 5px;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    z-index: 10;
+}
+
+.event-group:active {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.event-group.active-spotlight {
+    background: white !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    transform: scale(1.02);
+    z-index: 2002 !important;
+    /* Higher than parent's z-index */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.spotlight-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    /* Changed to transparent for selective dimming */
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+.spotlight-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Selective Blur & Dimming */
+body.spotlight-active .app-header,
+body.spotlight-active .view-container .header,
+body.spotlight-active .view-container .stats,
+body.spotlight-active .view-tabs-container,
+body.spotlight-active .day-card:not(.spotlight-parent),
+body.spotlight-active .day-card.spotlight-parent>.day-header,
+body.spotlight-active .day-card.spotlight-parent .event-group:not(.active-spotlight),
+body.spotlight-active .day-card.spotlight-parent .hotel-card-nested {
+    filter: blur(5px) brightness(0.6);
+    /* Added brightness for dimming effect */
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Specific reset for spotlight target */
+/* Spotlight interaction complete */
+
+body.spotlight-active .event-group.active-spotlight {
+    filter: none !important;
+    background: white !important;
+}
+
+/* Event Action Bar - Bottom Sliding Menu */
+.event-action-bar {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    height: 75px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 15px;
+    z-index: 2002;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.event-action-bar.active {
+    bottom: 34px;
+}
+
+.action-item {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: #94a3b8;
+    background: transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.action-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: #475569;
+}
+
+.action-item:active {
+    transform: scale(0.9);
+}
+
+.action-item svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Make body unscrollable when spotlight is active */
+body.spotlight-active {
+    overflow: hidden !important;
+}
