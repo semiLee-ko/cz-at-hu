@@ -54,13 +54,13 @@
 
 /* Override btn-icon for Editor (Dark icons on White bg) */
 .editor-header-nav .btn-icon {
-    background: transparent;
+    background: transparent !important;
     border: none;
     color: var(--dark);
     border-radius: 50%;
     width: 40px;
     height: 40px;
-    transition: background 0.2s;
+    transition: color 0.2s, transform 0.2s;
     outline: none;
     cursor: pointer;
     display: flex;
@@ -70,9 +70,9 @@
 }
 
 .editor-header-nav .btn-icon:hover {
-    background: var(--bg-primary);
-    transform: none;
-    /* Reset lift effect if desired, or keep it */
+    background: transparent !important;
+    color: var(--secondary);
+    transform: scale(1.1);
 }
 
 /* Ensure form has padding for top and bottom fixed bars */
