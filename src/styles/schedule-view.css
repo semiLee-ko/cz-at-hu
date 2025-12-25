@@ -734,7 +734,7 @@ body.spotlight-active {
     height: 100vh;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    z-index: 3000;
+    z-index: 6000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1139,6 +1139,30 @@ body.spotlight-active {
     color: #0f172a;
 }
 
+.btn-close-settlement {
+    background: #f1f5f9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.btn-close-settlement:hover {
+    background: #e2e8f0;
+    transform: scale(1.05);
+}
+
+.btn-close-settlement svg {
+    display: block;
+}
+
 .settlement-popup-content {
     flex: 1;
     padding: 20px;
@@ -1148,40 +1172,17 @@ body.spotlight-active {
     gap: 20px;
 }
 
-/* Member Pool Management */
-.member-management-card {
+/* Unified Input Card */
+.settlement-input-card {
     background: #f8fafc;
-    border-radius: 20px;
-    padding: 16px;
-    border: 1px solid #e2e8f0;
-}
-
-.member-management-card label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #475569;
-    margin-bottom: 10px;
-    display: block;
-}
-
-.member-pool-chips {
+    border-radius: 24px;
+    padding: 20px;
+    border: 1.5px solid #e2e8f0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.member-chip.available {
-    background: white;
-    border-style: dashed;
-    color: #94a3b8;
-}
-
-.member-chip.available:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
-}
-
-/* Integrated Input Card */
 .expense-input-header {
     margin-bottom: 12px;
 }
@@ -1227,21 +1228,70 @@ body.spotlight-active {
     border-color: #3b82f6;
 }
 
-.input-row-group {
+.input-grid-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.field-row {
     display: flex;
     gap: 10px;
     align-items: flex-end;
 }
 
+.flex-1 {
+    flex: 1;
+}
+
+.usage-input-sm,
+.payer-select-sm,
+.amount-input-sm {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+    background: white;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.usage-input-sm:focus,
+.payer-select-sm:focus,
+.amount-input-sm:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.field-item label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 6px;
+    display: block;
+    padding-left: 2px;
+}
+
 .btn-add-expense-integrated {
-    padding: 12px 20px;
-    background: #1e293b;
+    height: 46px;
+    /* Match input height */
+    padding: 0 20px;
+    background: #0f172a;
     color: white;
     border: none;
     border-radius: 12px;
     font-weight: 700;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-add-expense-integrated:active {
+    transform: scale(0.96);
 }
 
 /* Enhanced History List */
@@ -1272,20 +1322,36 @@ body.spotlight-active {
     margin-bottom: 4px;
 }
 
-.exp-payer {
-    font-size: 0.85rem;
+.exp-usage {
+    font-size: 0.95rem;
+    font-weight: 700;
     color: #1e293b;
 }
 
 .exp-date {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: #94a3b8;
+    font-weight: 500;
+}
+
+.exp-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.exp-payer-mini {
+    font-size: 0.75rem;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 6px;
 }
 
 .exp-participants-list {
     font-size: 0.75rem;
-    color: #64748b;
-    opacity: 0.8;
+    color: #94a3b8;
 }
 
 .exp-right {
@@ -1304,15 +1370,24 @@ body.spotlight-active {
     background: #fee2e2;
     color: #ef4444;
     border: none;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    font-size: 1.1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    padding: 0 0 2px 0;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.btn-del-expense-sm:hover {
+    background: #fecaca;
+    transform: scale(1.1);
+}
+
+.btn-del-expense-sm svg {
+    display: block;
 }
 
 /* Camera Popup Modal */
@@ -1695,22 +1770,36 @@ body.spotlight-active {
     color: white;
 }
 
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* Total Settlement (N-bbang) Popup */
 .total-settlement-overlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.6);
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 5000;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 12px;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+    transition: all 0.3s ease-out;
 }
 
 .total-settlement-overlay.active {
@@ -1720,65 +1809,73 @@ body.spotlight-active {
 
 .total-settlement-container {
     width: 92%;
-    max-width: 440px;
+    max-width: 480px;
     max-height: 85vh;
-    background: #f8fafc;
-    border-radius: 32px;
+    background: white;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4);
-    transform: translateY(40px) scale(0.95);
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-}
-
-.total-settlement-overlay.active .total-settlement-container {
-    transform: translateY(0) scale(1);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .total-settlement-header {
-    padding: 24px;
+    padding: 20px 20px 14px;
     background: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #f1f5f9;
 }
 
 .total-settlement-header h3 {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 800;
-    color: #0f172a;
+    color: #1e293b;
+    letter-spacing: -0.025em;
 }
 
 .trip-total-amount {
     margin: 4px 0 0 0;
     font-size: 0.9rem;
-    color: #10b981;
+    color: var(--secondary);
     font-weight: 700;
 }
 
 .btn-close-total-settlement {
     background: #f1f5f9;
     border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
     color: #64748b;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.btn-close-total-settlement:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+    transform: rotate(90deg);
+}
+
+.btn-close-total-settlement svg {
+    display: block;
 }
 
 .total-settlement-content {
     flex: 1;
-    padding: 20px;
+    padding: 0 20px 24px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 /* N-bbang Summary Card */
@@ -1795,6 +1892,48 @@ body.spotlight-active {
     font-size: 0.95rem;
     color: #334155;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settlement-summary-card h4 svg {
+    color: var(--secondary-dark);
+}
+
+.settlement-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.settlement-header-row h4 {
+    margin: 0;
+}
+
+.btn-copy-settlement {
+    background: #f1f5f9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.btn-copy-settlement:hover {
+    background: var(--secondary);
+    color: white;
+}
+
+.btn-copy-settlement svg {
+    display: block;
 }
 
 .transfer-list {
@@ -1815,13 +1954,25 @@ body.spotlight-active {
 
 .transfer-main {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
 }
 
 .transfer-from {
     font-size: 0.8rem;
     color: #64748b;
+}
+
+.transfer-arrow {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 4px;
+    color: var(--secondary);
+}
+
+.transfer-arrow svg {
+    display: block;
 }
 
 .transfer-to {
@@ -1833,7 +1984,7 @@ body.spotlight-active {
 .transfer-amount {
     font-size: 1.05rem;
     font-weight: 800;
-    color: #059669;
+    color: var(--secondary);
 }
 
 /* History Section */
@@ -1842,6 +1993,13 @@ body.spotlight-active {
     font-size: 0.95rem;
     color: #334155;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settlement-history-section h4 svg {
+    color: var(--secondary-dark);
 }
 
 .history-list {
@@ -1889,32 +2047,49 @@ body.spotlight-active {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.exp-who {
+.history-exp-row:last-child {
+    border-bottom: none;
+}
+
+.exp-left {
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.exp-payer-name {
-    font-weight: 700;
-    color: #475569;
-}
-
-.exp-participants {
-    color: #94a3b8;
-    font-size: 0.75rem;
-}
-
-.exp-cost {
+.exp-usage-main {
+    font-size: 0.85rem;
     font-weight: 700;
     color: #1e293b;
 }
 
+.exp-who-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+}
+
+.exp-payer-name {
+    color: #64748b;
+}
+
+.exp-participants {
+    color: #94a3b8;
+}
+
+.exp-cost {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--secondary);
+}
+
 .total-settlement-footer {
-    padding: 20px 24px;
+    padding: 16px 20px;
     background: white;
     border-top: 1px solid #f1f5f9;
 }
@@ -1922,13 +2097,19 @@ body.spotlight-active {
 .btn-confirm-total-settlement {
     width: 100%;
     padding: 16px;
-    background: #1e293b;
+    background: var(--secondary);
     color: white;
     border: none;
-    border-radius: 16px;
+    border-radius: 12px;
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-confirm-total-settlement:hover {
+    background: var(--secondary-dark);
+    transform: translateY(-1px);
 }
 
 .empty-results,

@@ -893,50 +893,42 @@ function showSettlementPopup(group, updateActionStatesCallback) {
                 </div>
 
                 <div class="settlement-popup-content">
-                    <!-- Member Management Pool -->
-                    <div class="member-management-card">
-                        <label>이 일정 참여 인원 <span class="count">${tempParticipants.length}명</span></label>
-                        <div class="member-pool-chips">
-                            ${tempParticipants.map(name => `
-                                <div class="member-chip active" data-name="${name}">
-                                    ${name} <span class="chip-icon">×</span>
+                    <!-- Integrated Input Card -->
+                    <div class="settlement-input-card">
+                        <!-- New Expense Input -->
+                        <div class="expense-input-section">
+                            <div class="expense-input-header">
+                                <label>신규 지출 추가</label>
+                            </div>
+                            <div class="participants-toggle-area">
+                                <p class="small-label">정산 참여 인원 선택 (기본: 전체) <span class="count">${tempParticipants.length}명</span></p>
+                                <div class="mini-chips">
+                                    ${allMembers.map(name => `
+                                        <div class="mini-chip ${tempParticipants.includes(name) ? 'selected' : ''}" data-name="${name}">${name}</div>
+                                    `).join('')}
+                                    ${allMembers.length === 0 ? '<p class="empty-msg-sm">여행 멤버를 먼저 등록해주세요</p>' : ''}
                                 </div>
-                            `).join('')}
-                            ${available.map(name => `
-                                <div class="member-chip available" data-name="${name}">
-                                    ${name} <span class="chip-icon">+</span>
+                            </div>
+                            <div class="input-grid-group">
+                                <div class="field-item">
+                                    <label>사용처 (항목)</label>
+                                    <input type="text" class="usage-input-sm" placeholder="예: 점심 식사, 기차표 등">
                                 </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- New Expense Input -->
-                    <div class="expense-input-card">
-                        <div class="expense-input-header">
-                            <label>신규 지출 추가</label>
-                        </div>
-                        <div class="participants-toggle-area">
-                            <p class="small-label">정산 참여 인원 선택 (기본: 전체)</p>
-                            <div class="mini-chips">
-                                ${tempParticipants.map(name => `
-                                    <div class="mini-chip selected" data-name="${name}">${name}</div>
-                                `).join('')}
-                                ${tempParticipants.length === 0 ? '<p class="empty-msg-sm">참여 인원을 먼저 추가해주세요</p>' : ''}
+                                <div class="field-row">
+                                    <div class="field-item flex-1">
+                                        <label>결제자</label>
+                                        <select class="payer-select-sm">
+                                            ${tempParticipants.map(p => `<option value="${p}">${p}</option>`).join('')}
+                                            ${tempParticipants.length === 0 ? '<option value="">인원 없음</option>' : ''}
+                                        </select>
+                                    </div>
+                                    <div class="field-item flex-1">
+                                        <label>금액 (원)</label>
+                                        <input type="number" class="amount-input-sm" placeholder="0" inputmode="numeric">
+                                    </div>
+                                    <button class="btn-add-expense-integrated">추가</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="input-row-group">
-                            <div class="field-item">
-                                <label>결제자</label>
-                                <select class="payer-select-sm">
-                                    ${tempParticipants.map(p => `<option value="${p}">${p}</option>`).join('')}
-                                    ${tempParticipants.length === 0 ? '<option value="">인원 없음</option>' : ''}
-                                </select>
-                            </div>
-                            <div class="field-item">
-                                <label>금액 (원)</label>
-                                <input type="number" class="amount-input-sm" placeholder="0" inputmode="numeric">
-                            </div>
-                            <button class="btn-add-expense-integrated">추가</button>
                         </div>
                     </div>
 
@@ -949,16 +941,22 @@ function showSettlementPopup(group, updateActionStatesCallback) {
                             <div class="expense-item-card">
                                 <div class="exp-main">
                                     <div class="exp-header">
-                                        <span class="exp-payer"><b>${exp.payer}</b> 결제</span>
+                                        <span class="exp-usage">${exp.usage || '지출 내역'}</span>
                                         <span class="exp-date">${new Date(exp.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
-                                    <div class="exp-participants-list">
-                                        참여: ${exp.participants?.join(', ') || '전체'}
+                                    <div class="exp-meta">
+                                        <span class="exp-payer-mini"><b>${exp.payer}</b> 결제</span>
+                                        <span class="exp-participants-list">참여: ${exp.participants?.join(', ') || '전체'}</span>
                                     </div>
                                 </div>
                                 <div class="exp-right">
                                     <span class="exp-amount">${Number(exp.amount).toLocaleString()}원</span>
-                                    <button class="btn-del-expense-sm" data-index="${idx}">×</button>
+                                    <button class="btn-del-expense-sm" data-index="${idx}">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         `).reverse().join('')}
@@ -967,8 +965,8 @@ function showSettlementPopup(group, updateActionStatesCallback) {
             </div>
         `;
 
-        // 1. Member Pool Clicks
-        modal.querySelectorAll('.member-chip').forEach(chip => {
+        // 1. Mini Chips (Event Participant Management)
+        modal.querySelectorAll('.mini-chip').forEach(chip => {
             chip.onclick = () => {
                 const name = chip.dataset.name;
                 if (tempParticipants.includes(name)) {
@@ -984,24 +982,18 @@ function showSettlementPopup(group, updateActionStatesCallback) {
             };
         });
 
-        // 2. Mini Chips (Per-expense participants)
-        modal.querySelectorAll('.mini-chip').forEach(chip => {
-            chip.onclick = () => {
-                chip.classList.toggle('selected');
-            };
-        });
-
-        // 3. Close logic
+        // 2. Close logic
         modal.querySelector('.btn-close-settlement').onclick = () => {
             modal.classList.remove('active');
             setTimeout(() => modal.remove(), 300);
         };
 
-        // 4. Add Expense
+        // 3. Add Expense
         const btnAdd = modal.querySelector('.btn-add-expense-integrated');
         if (btnAdd) {
             btnAdd.onclick = () => {
                 const amount = modal.querySelector('.amount-input-sm').value.trim();
+                const usage = modal.querySelector('.usage-input-sm').value.trim();
                 const payer = modal.querySelector('.payer-select-sm').value;
                 const selectedParticipants = Array.from(modal.querySelectorAll('.mini-chip.selected')).map(c => c.dataset.name);
 
@@ -1020,6 +1012,7 @@ function showSettlementPopup(group, updateActionStatesCallback) {
 
                 event.expenses.push({
                     payer: payer,
+                    usage: usage || '지출 내역', // Default usage if empty
                     amount: parseInt(amount),
                     participants: selectedParticipants, // Bundle participants with expense
                     timestamp: new Date().toISOString()
@@ -1031,7 +1024,7 @@ function showSettlementPopup(group, updateActionStatesCallback) {
             };
         }
 
-        // 5. Delete Expense
+        // 4. Delete Expense
         modal.querySelectorAll('.btn-del-expense-sm').forEach(btn => {
             btn.onclick = () => {
                 const idx = parseInt(btn.dataset.index);
@@ -1144,7 +1137,24 @@ function showTotalSettlementPopup() {
             <div class="total-settlement-content">
                 <!-- N-bbang Summary Card -->
                 <div class="settlement-summary-card">
-                    <h4>💰 정산 결과 (엔빵)</h4>
+                    <div class="settlement-header-row">
+                        <h4>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+                                <line x1="12" y1="6" x2="12" y2="18"></line>
+                            </svg>
+                            정산 결과
+                        </h4>
+                        ${transfers.length > 0 ? `
+                            <button class="btn-copy-settlement" title="정산 내역 복사">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
                     ${transfers.length === 0 ? `
                         <div class="empty-results">정산할 내역이 없습니다. 모두 공평하게 지출했거나 지출이 없어요!</div>
                     ` : `
@@ -1152,9 +1162,14 @@ function showTotalSettlementPopup() {
                             ${transfers.map(t => `
                                 <div class="transfer-item">
                                     <div class="transfer-main">
-                                        <span class="transfer-from"><b>${t.from}</b> 님이</span>
-                                        <span class="transfer-arrow">👉</span>
-                                        <span class="transfer-to"><b>${t.to}</b> 님에게</span>
+                                        <span class="transfer-from"><b>${t.from}</b></span>
+                                        <span class="transfer-arrow">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                <polyline points="12 5 19 12 12 19"></polyline>
+                                            </svg>
+                                        </span>
+                                        <span class="transfer-to"><b>${t.to}</b></span>
                                     </div>
                                     <span class="transfer-amount">${t.amount.toLocaleString()}원</span>
                                 </div>
@@ -1165,7 +1180,15 @@ function showTotalSettlementPopup() {
 
                 <!-- Detailed History by Day -->
                 <div class="settlement-history-section">
-                    <h4>📅 상세 지출 내역</h4>
+                    <h4>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        상세 지출 내역
+                    </h4>
                     <div class="history-list">
                         ${schedule.days.map((day, dIdx) => {
         const dayExpenses = [];
@@ -1182,13 +1205,15 @@ function showTotalSettlementPopup() {
                                     <div class="day-label">Day ${dIdx + 1}</div>
                                     ${dayExpenses.map(item => `
                                         <div class="history-event-card">
-                                            <div class="event-title">${item.event.title}</div>
                                             <div class="event-expense-items">
                                                 ${item.expenses.map(exp => `
                                                     <div class="history-exp-row">
-                                                        <div class="exp-who">
-                                                            <span class="exp-payer-name">${exp.payer}</span>
-                                                            <span class="exp-participants">(${exp.participants?.join(', ') || item.event.participants?.join(', ') || '전체'})</span>
+                                                        <div class="exp-left">
+                                                            <div class="exp-usage-main">${exp.usage || '지출 내역'}</div>
+                                                            <div class="exp-who-meta">
+                                                                <span class="exp-payer-name"><b>${exp.payer}</b> 결제</span>
+                                                                <span class="exp-participants">(${exp.participants?.join(', ') || item.event.participants?.join(', ') || '전체'})</span>
+                                                            </div>
                                                         </div>
                                                         <span class="exp-cost">${Number(exp.amount).toLocaleString()}원</span>
                                                     </div>
@@ -1218,6 +1243,20 @@ function showTotalSettlementPopup() {
 
     modal.querySelector('.btn-close-total-settlement').onclick = closeModal;
     modal.querySelector('.btn-confirm-total-settlement').onclick = closeModal;
+
+    // Copy settlement results
+    const btnCopy = modal.querySelector('.btn-copy-settlement');
+    if (btnCopy) {
+        btnCopy.onclick = async () => {
+            const text = transfers.map(t => `${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
+            try {
+                await navigator.clipboard.writeText(text);
+                showCustomAlert('정산 내역이 복사되었습니다!');
+            } catch (err) {
+                showCustomAlert('복사에 실패했습니다.');
+            }
+        };
+    }
 
     document.body.appendChild(modal);
     setTimeout(() => modal.classList.add('active'), 10);
