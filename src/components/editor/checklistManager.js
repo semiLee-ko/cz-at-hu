@@ -88,11 +88,11 @@ export function createChecklistManager(container, schedule) {
                             <div class="checklist-items-container">
                                 ${cat.items.length === 0 ? '<p class="no-items">항목이 없습니다.</p>' : ''}
                                 ${cat.items.map(item => `
-                                    <div class="checklist-item-row ${item.checked ? 'checked' : ''}" data-item-id="${item.id}">
-                                        <label class="item-checkbox-wrapper">
-                                            <input type="checkbox" ${item.checked ? 'checked' : ''} data-category-id="${cat.id}" data-item-id="${item.id}">
+                                    <div class="checklist-item-row" data-item-id="${item.id}">
+                                        <div class="item-content-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="color: #45B8AF; font-size: 1.2rem; line-height: 1;">•</span>
                                             <span class="item-text text-truncate">${item.text}</span>
-                                        </label>
+                                        </div>
                                         <div class="item-actions">
                                             <select class="priority-dropdown priority-${item.priority}" data-category-id="${cat.id}" data-item-id="${item.id}">
                                                 <option value="high" ${item.priority === 'high' ? 'selected' : ''}>상</option>
@@ -201,12 +201,6 @@ export function createChecklistManager(container, schedule) {
             });
         });
 
-        // Toggle Item
-        checklistsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.addEventListener('change', () => {
-                toggleItem(cb.dataset.categoryId, cb.dataset.itemId, cb.checked);
-            });
-        });
 
         // Delete Item
         checklistsContainer.querySelectorAll('.btn-delete-item-small').forEach(btn => {
@@ -383,13 +377,6 @@ export function createChecklistManager(container, schedule) {
         renderChecklists();
     }
 
-    function toggleItem(catId, itemId, checked) {
-        const cat = categories.find(c => c.id === catId);
-        if (!cat) return;
-        const item = cat.items.find(i => i.id === itemId);
-        if (item) item.checked = checked;
-        renderChecklists();
-    }
 
     function updatePriority(catId, itemId, priority) {
         const cat = categories.find(c => c.id === catId);

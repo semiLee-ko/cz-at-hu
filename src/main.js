@@ -3,7 +3,7 @@
 import './style.css';
 import './styles/tip-form.css';
 import './styles/checklist-form.css';
-import { getCurrentSchedule, getSchedule, setCurrentSchedule } from './storage.js';
+import { getCurrentSchedule, getSchedule, setCurrentSchedule, saveSchedule } from './storage.js';
 import { loadFromShareUrl, uploadFromJson } from './share.js';
 import { renderScheduleList } from './components/ScheduleList.js';
 import { renderScheduleEditor } from './components/ScheduleEditor.js';
@@ -300,6 +300,9 @@ function renderScheduleView(container, scheduleId) {
         });
     }
 
+    // Initialize checklist interaction
+    initChecklistInteraction(schedule);
+
     // Initialize day accordion
     initDayAccordion();
 }
@@ -420,10 +423,10 @@ function renderChecklistsSection(checklists = []) {
     return `
         <div class="view-list-container" style="margin-top: 10px;">
             ${checklists.map(list => `
-                <div class="day-card collapsed" style="margin-bottom: 5px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
+                <div class="day-card" style="margin-bottom: 5px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
                     <div class="day-header" style="background: #456eb8; padding: 12px 15px;">
                         <div class="day-info">
-                            <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">LIST</span>
+                            <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">${list.type === 'todo' ? '할일' : '준비물'}</span>
                             <span class="day-date" style="font-size: 0.95rem; font-weight: 800; color: white;">${list.name || 'Checklist'}</span>
                         </div>
                         <svg class="collapse-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -434,13 +437,17 @@ function renderChecklistsSection(checklists = []) {
                         <div class="tip-content-inner">
                             <ul style="list-style: none; padding: 0; margin: 0;">
                                 ${list.items && list.items.length > 0 ? list.items.map(item => `
-                                    <li style="display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #f0f0f0;">
-                                        <div style="width: 18px; height: 18px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                                            ${item.completed ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#456eb8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                                    <li class="view-checklist-item" style="display: flex; align-items: center; gap: 10px; padding: 12px 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: all 0.2s; background-color: ${(() => {
+            if (item.checked) return 'transparent';
+            const colors = { high: '#fef2f2', medium: '#fffbeb', low: '#ecfdf5' };
+            return colors[item.priority] || 'transparent';
+        })()};" data-cat-id="${list.id}" data-item-id="${item.id}">
+                                        <div class="checklist-checkbox ${item.checked ? 'checked' : ''}" style="width: 20px; height: 20px; border-radius: 6px; border: 2px solid ${item.checked ? '#456eb8' : '#ddd'}; background: ${item.checked ? '#f0f4ff' : 'white'}; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                            ${item.checked ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#456eb8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
                                         </div>
-                                        <span style="font-size: 0.95rem; color: #333; ${item.completed ? 'text-decoration: line-through; color: #aaa;' : ''}">${item.text}</span>
+                                        <span class="checklist-text" style="font-size: 0.95rem; color: ${item.checked ? '#aaa' : '#333'}; font-weight: ${item.priority === 'high' && !item.checked ? '600' : 'normal'}; transition: all 0.2s; ${item.checked ? 'text-decoration: line-through;' : ''}">${item.text}</span>
                                     </li>
-                                `).join('') : '<li style="color: #999; font-size: 0.9rem;">항목이 없습니다.</li>'}
+                                `).join('') : '<li style="color: #999; font-size: 0.9rem; padding: 10px;">항목이 없습니다.</li>'}
                             </ul>
                         </div>
                     </div>
@@ -448,6 +455,57 @@ function renderChecklistsSection(checklists = []) {
             `).join('')}
         </div>
     `;
+}
+
+// 체크리스트 상호작용 초기화
+function initChecklistInteraction(schedule) {
+    const items = document.querySelectorAll('.view-checklist-item');
+
+    items.forEach(item => {
+        item.addEventListener('click', (e) => {
+            const catId = item.dataset.catId;
+            const itemId = item.dataset.itemId;
+
+            // 데이터 구조에서 해당 항목 찾기
+            const list = schedule.checklists.find(l => l.id === catId);
+            if (!list) return;
+
+            const checkItem = list.items.find(i => i.id === itemId);
+            if (!checkItem) return;
+
+            // 상태 토글
+            checkItem.checked = !checkItem.checked;
+
+            // UI 업데이트
+            const checkbox = item.querySelector('.checklist-checkbox');
+            const text = item.querySelector('.checklist-text');
+
+            if (checkItem.checked) {
+                checkbox.classList.add('checked');
+                checkbox.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#456eb8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                text.style.textDecoration = 'line-through';
+                text.style.color = '#aaa';
+                text.style.fontWeight = 'normal';
+                checkbox.style.borderColor = '#456eb8';
+                checkbox.style.background = '#f0f4ff';
+                item.style.backgroundColor = 'transparent';
+            } else {
+                checkbox.classList.remove('checked');
+                checkbox.innerHTML = '';
+                text.style.textDecoration = 'none';
+                text.style.color = '#333';
+                text.style.fontWeight = checkItem.priority === 'high' ? '600' : 'normal';
+                checkbox.style.borderColor = '#ddd';
+                checkbox.style.background = 'white';
+
+                const colors = { high: '#fef2f2', medium: '#fffbeb', low: '#ecfdf5' };
+                item.style.backgroundColor = colors[checkItem.priority] || 'transparent';
+            }
+
+            // 저장
+            saveSchedule(schedule);
+        });
+    });
 }
 
 // 꿀팁 섹션 렌더링
@@ -460,7 +518,11 @@ function renderTipsSection(tips = []) {
                 <div class="day-card collapsed" style="margin-bottom: 5px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
                     <div class="day-header" style="background: #b89545; padding: 12px 15px;">
                         <div class="day-info">
-                            <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">TIP</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-right: 5px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
                             <span class="day-date" style="font-size: 0.95rem; font-weight: 800; color: white;">${tip.title}</span>
                         </div>
                         <svg class="collapse-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
