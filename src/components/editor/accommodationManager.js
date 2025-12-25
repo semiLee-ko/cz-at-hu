@@ -74,37 +74,68 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
                 <div class="events-list tip-content-wrapper">
                     <div class="tip-content-inner">
                         <div class="tip-body">
-                            <div class="acc-details">
-                                ${acc.location ? `<p class="acc-detail-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${acc.location}</p>` : ''}
-                                ${acc.contact ? `<p class="acc-detail-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${acc.contact}</p>` : ''}
-                                ${acc.price ? `<p class="acc-detail-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> ₩${Number(acc.price.replace(/,/g, '')).toLocaleString()}</p>` : ''}
-                                ${acc.url ? `<p class="acc-detail-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> <a href="${acc.url}" target="_blank" rel="noopener noreferrer">홈페이지</a></p>` : ''}
-                                ${acc.checkIn || acc.checkOut ? `<p class="acc-detail-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> IN: ${acc.checkIn || '미지정'} / OUT: ${acc.checkOut || '미지정'}</p>` : ''}
-                                ${acc.notes ? `<p class="acc-notes">${acc.notes}</p>` : ''}
-                            </div>
-                            
-                            <div class="acc-actions">
-                                <button type="button" class="btn-assign-dates" data-acc-id="${acc.id}" title="일정 선택">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <div class="acc-actions-top">
+                                <button type="button" class="btn-assign-dates-compact" data-acc-id="${acc.id}" title="일정 선택">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                                         <line x1="16" y1="2" x2="16" y2="6"></line>
                                         <line x1="8" y1="2" x2="8" y2="6"></line>
                                         <line x1="3" y1="10" x2="21" y2="10"></line>
                                     </svg>
+                                    <span>${acc.assignedDates?.length > 0
+                    ? acc.assignedDates.map(date => `Day ${getDayNumber(date)}`).join(', ')
+                    : '일정 선택'}</span>
                                 </button>
-                                <button type="button" class="btn-delete-acc-icon" data-acc-id="${acc.id}" title="삭제">
+                                <button type="button" class="btn-delete-acc-ghost" data-acc-id="${acc.id}" title="삭제">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="3 6 5 6 21 6"></polyline>
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                     </svg>
                                 </button>
                             </div>
-                            
-                            ${acc.assignedDates?.length > 0 ? `
-                                <div class="assigned-dates-badges">
-                                    ${acc.assignedDates.map(date => `<span class="date-badge">Day ${getDayNumber(date)}</span>`).join('')}
+
+                            <div class="acc-details">
+                                ${acc.location ? `
+                                    <p class="acc-detail-item full-width" title="위치">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> 
+                                        <span>${acc.location}</span>
+                                    </p>` : ''}
+                                ${acc.contact ? `
+                                    <p class="acc-detail-item full-width" title="연락처">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> 
+                                        <span>${acc.contact}</span>
+                                    </p>` : ''}
+                                
+                                <div class="acc-detail-row">
+                                    ${acc.price ? `
+                                        <p class="acc-detail-item" title="가격">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 
+                                            <span>${(() => {
+                        const cleanPrice = acc.price.replace(/,/g, '');
+                        return isNaN(cleanPrice) || cleanPrice === '' ? acc.price : `₩${Number(cleanPrice).toLocaleString()}`;
+                    })()}</span>
+                                        </p>` : ''}
+                                    ${acc.url ? `
+                                        <p class="acc-detail-item" title="URL">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> 
+                                            <a href="${acc.url.startsWith('http') ? acc.url : 'https://' + acc.url}" target="_blank" rel="noopener noreferrer">홈페이지</a>
+                                        </p>` : ''}
                                 </div>
-                            ` : ''}
+
+                                <div class="acc-detail-row">
+                                    ${acc.checkIn ? `
+                                        <p class="acc-detail-item" title="체크인">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
+                                            <span>IN: ${acc.checkIn}</span>
+                                        </p>` : ''}
+                                    ${acc.checkOut ? `
+                                        <p class="acc-detail-item" title="체크아웃">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
+                                            <span>OUT: ${acc.checkOut}</span>
+                                        </p>` : ''}
+                                </div>
+                            </div>
+                            ${acc.notes ? `<div class="acc-notes-display">${acc.notes}</div>` : ''}
                         </div>
                     </div>
                 </div>
@@ -147,18 +178,18 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
             }
         });
 
-        accommodationList.querySelectorAll('.btn-delete-acc-icon').forEach(btn => {
+        accommodationList.querySelectorAll('.btn-delete-acc-ghost').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const accId = btn.dataset.accId || btn.closest('.btn-delete-acc-icon').dataset.accId;
+                const accId = btn.dataset.accId || btn.closest('.btn-delete-acc-ghost').dataset.accId;
                 deleteAccommodation(accId);
             });
         });
 
-        accommodationList.querySelectorAll('.btn-assign-dates').forEach(btn => {
+        accommodationList.querySelectorAll('.btn-assign-dates-compact').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const accId = btn.dataset.accId || btn.closest('.btn-assign-dates').dataset.accId;
+                const accId = btn.dataset.accId || btn.closest('.btn-assign-dates-compact').dataset.accId;
                 openDateModal(accId);
             });
         });

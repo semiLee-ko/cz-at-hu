@@ -68,10 +68,10 @@
 }
 
 .acc-details {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 5px;
 }
 
 .acc-detail-item {
@@ -80,6 +80,21 @@
     gap: 8px;
     font-size: 0.9rem;
     color: var(--text-secondary);
+    min-width: 0;
+}
+
+.acc-detail-item.full-width {
+    width: 100%;
+}
+
+.acc-detail-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.acc-detail-row .acc-detail-item {
+    flex: 1;
 }
 
 .acc-detail-label {
@@ -301,33 +316,58 @@
     }
 }
 
-/* Icon Buttons - Added for better visibility */
-.btn-delete-acc-icon,
-.btn-assign-dates {
-    background: white;
-    border: 1px solid #ddd;
-    width: 36px;
-    height: 36px;
+/* Action Buttons Top - Refined */
+.acc-actions-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.btn-assign-dates-compact {
+    background: #f1f5f9;
+    border: none;
+    padding: 6px 12px;
     border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.btn-assign-dates-compact:hover {
+    background: #e2e8f0;
+    color: var(--secondary);
+}
+
+.btn-assign-dates-compact svg {
+    color: var(--secondary);
+}
+
+.btn-delete-acc-ghost {
+    background: transparent;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    color: #94a3b8;
     padding: 0;
-    color: #666;
 }
 
-.btn-delete-acc-icon:hover {
+.btn-delete-acc-ghost:hover {
     background: rgba(255, 107, 107, 0.1);
-    border-color: var(--primary);
     color: var(--primary);
-}
-
-.btn-assign-dates:hover {
-    background: rgba(78, 205, 196, 0.1);
-    border-color: var(--secondary);
-    color: var(--secondary);
 }
 
 /* Fix link styling in accommodation details */
@@ -341,4 +381,18 @@
 .acc-detail-item a:hover {
     color: var(--secondary);
     border-bottom-color: var(--secondary);
+}
+
+.acc-notes-display {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border-left: 3px solid var(--secondary);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    margin-top: 15px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--secondary);
 }
