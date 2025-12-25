@@ -18,37 +18,53 @@ export function showChatBot(schedule) {
         tripType: schedule.tripType === 'domestic' ? '국내' : '해외',
         countries: schedule.countries ? schedule.countries.join(', ') : '',
         members: `성인 ${schedule.members?.adults || 0}명, 아동 ${schedule.members?.children || 0}명`,
-        itinerary: (schedule.days || []).map(day => `Day ${day.day}: ${day.events.map(e => `[${e.startTime || e.time || ''}] ${e.place || ''} (${e.description || ''})`).join(', ')}`).join('\n'),
-        accommodations: (schedule.accommodations || []).map(acc => `${acc.name} (${acc.location || ''}, 체크인: ${acc.checkIn || ''})`).join('\n'),
-        checklist: (schedule.checklists || []).map(cl => `${cl.name}: ${cl.items.map(i => i.text).join(', ')}`).join('\n'),
+        memberNames: {
+            adults: schedule.members?.adultList?.join(', ') || '없음',
+            children: schedule.members?.childList?.join(', ') || '없음'
+        },
+        itinerary: (schedule.days || []).map(day =>
+            `Day ${day.day} (${day.date}): ` +
+            day.events.map(e => `[${e.startTime || e.time || ''}~${e.endTime || ''}] ${e.place || ''} (${e.description || ''}) - 위치: ${e.location || ''}`).join(', ')
+        ).join('\n'),
+        accommodations: (schedule.accommodations || []).map(acc =>
+            `- 숙소명: ${acc.name}\n  유형: ${acc.type || '미지정'}\n  위치: ${acc.location || '정보 없음'}\n  연락처: ${acc.contact || '정보 없음'}\n  가격: ${acc.price || '정보 없음'}\n  URL: ${acc.url || '정보 없음'}\n  체크인: ${acc.checkIn || '미지정'}\n  체크아웃: ${acc.checkOut || '미지정'}\n  메모: ${acc.notes || '없음'}\n  배정날짜: ${acc.assignedDates?.join(', ') || '미배정'}`
+        ).join('\n\n'),
+        checklist: (schedule.checklists || []).map(cl =>
+            `${cl.name} (${cl.type === 'todo' ? '할 일' : '준비물'}): ` +
+            cl.items.map(i => `${i.text} [${i.checked ? '완료' : '미완료'}/우선순위:${i.priority}]`).join(', ')
+        ).join('\n'),
         tips: (schedule.tips || []).map(tip => `[${tip.title}] ${tip.content}`).join('\n')
     };
 
     const contextString = `
 [여행 제목] ${tripContext.title}
 [날짜] ${tripContext.startDate} ~ ${tripContext.endDate}
-[인원] ${tripContext.members}
+[인원 구성] ${tripContext.members}
+[성인 명단] ${tripContext.memberNames.adults}
+[아동 명단] ${tripContext.memberNames.children}
 [방문국가/도시] ${tripContext.countries}
-[일정]
+[상세 일정]
 ${tripContext.itinerary || "일정 정보가 없습니다."}
-[숙소]
+[숙소 및 캠핑장 상세 정보]
 ${tripContext.accommodations || "숙소 정보가 없습니다."}
-[체크리스트]
+[체크리스트 상태]
 ${tripContext.checklist || "체크리스트 정보가 없습니다."}
-[꿀팁]
+[여행 꿀팁]
 ${tripContext.tips || "팁 정보가 없습니다."}
     `.trim();
 
     overlay.innerHTML = `
         <div class="chatbot-container">
             <div class="chatbot-header">
-                <h3>
+                <h3 class="chat-title">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="11" width="18" height="10" rx="2"></rect>
                         <circle cx="12" cy="5" r="2"></circle>
                         <path d="M12 7v4"></path>
+                        <line x1="8" y1="16" x2="8" y2="16"></line>
+                        <line x1="16" y1="16" x2="16" y2="16"></line>
                     </svg>
-                    여행 비서 (Gemma AI)
+                    AI 여행 비서
                 </h3>
                 <button class="btn-close-chat">&times;</button>
             </div>
@@ -75,8 +91,11 @@ ${tripContext.tips || "팁 정보가 없습니다."}
     const btnCloseChat = overlay.querySelector('.btn-close-chat');
 
     function closeChat() {
-        overlay.classList.add('fade-out'); // Optional transition
-        setTimeout(() => overlay.remove(), 300);
+        overlay.classList.add('closing');
+        // Wait for animation to finish (300ms)
+        setTimeout(() => {
+            overlay.remove();
+        }, 300);
     }
 
     btnCloseChat.addEventListener('click', closeChat);
@@ -140,8 +159,10 @@ async function callGroqAPI(message, context) {
     }
 
     const systemPrompt = `당신은 여행 일정을 완벽하게 숙지하고 있는 친절한 '여행 비서'입니다. 
-사용자의 질문에 대해 제공된 [현재 여행 정보]를 바탕으로 다정하고 명확하게 한국어로 대답해주세요.
-직관적이고 유용한 조언을 곁들여주세요.
+반드시 제공된 [현재 여행 정보]만을 바탕으로 답변해야 하며, 정보에 없는 내용을 추측하거나 지어내지 마세요.
+모든 답변은 반드시 질문한 언어로만 답변해주세요. 다른언어는 사용하지 마세요.
+사용자가 모든 숙소 정보를 요청하면 '배정날짜' 항목이 입력 되어있는 숙소 정보만 출력해주세요. 특정 날짜의 숙소 정보를 요청하면 해당 날짜의 숙소 정보만 출력해주세요. 배정날짜가 등록되지 않은 숙소도 물어보면 그때 대답해주세요.
+만약 질문에 대한 정보가 [현재 여행 정보]에 없다면, "해당 정보는 여행 계획에 포함되어 있지 않습니다" 또는 "내용을 확인할 수 없어 답변해 드리기 어렵습니다"와 같이 정보가 없음을 명확하고 정중하게 한국어로 대답해주세요.
 
 [현재 여행 정보]
 ${context}

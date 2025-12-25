@@ -12,7 +12,11 @@
     justify-content: center;
     z-index: 1000;
     padding: 20px;
-    animation: fadeIn 0.3s ease;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.chatbot-modal-overlay.closing {
+    animation: fadeOut 0.3s ease forwards;
 }
 
 .chatbot-container {
@@ -25,7 +29,11 @@
     flex-direction: column;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    animation: slideUp 0.3s ease;
+    animation: slideUp 0.3s ease forwards;
+}
+
+.chatbot-modal-overlay.closing .chatbot-container {
+    animation: slideDown 0.3s ease forwards;
 }
 
 .chatbot-header {
@@ -171,6 +179,26 @@
     }
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
 @keyframes slideUp {
     from {
         transform: translateY(20px);
@@ -180,5 +208,17 @@
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(20px);
+        opacity: 0;
     }
 }
