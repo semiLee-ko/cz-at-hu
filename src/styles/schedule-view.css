@@ -1644,3 +1644,54 @@ body.spotlight-active {
     transform: scale(0.98);
     background: #2563eb;
 }
+
+/* Floating Action Group (Map & Receipt) */
+.view-container .floating-action-group {
+    position: fixed;
+    bottom: 32px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 1000;
+}
+
+.view-container .btn-floating {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    color: #1e293b;
+    padding: 0;
+}
+
+.view-container .btn-floating:hover {
+    transform: scale(1.1) translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.view-container .btn-floating:active {
+    transform: scale(0.9);
+}
+
+.view-container .btn-floating svg {
+    width: 24px;
+    height: 24px;
+}
+
+.view-container .btn-floating.action-map-floating {
+    background: #3b82f6;
+    color: white;
+}
+
+.view-container .btn-floating.action-receipt-floating {
+    background: #10b981;
+    color: white;
+}
