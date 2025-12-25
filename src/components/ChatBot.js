@@ -136,7 +136,7 @@ ${tripContext.tips || "팁 정보가 없습니다."}
 async function callGroqAPI(message, context) {
     const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
     if (!API_KEY) {
-        throw new Error("VITE_GROQ_API_KEY가 설정되지 않았습니다.");
+        throw new Error("VITE_GROQ_API_KEY가 설정되지 않았습니다. .env 파일을 확인해 주세요.");
     }
 
     const systemPrompt = `당신은 여행 일정을 완벽하게 숙지하고 있는 친절한 '여행 비서'입니다. 
@@ -154,7 +154,7 @@ ${context}
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            model: "gemma2-9b-it",
+            model: "llama-3.3-70b-versatile",
             messages: [
                 { role: "system", content: systemPrompt },
                 { role: "user", content: message }
@@ -163,12 +163,13 @@ ${context}
         })
     });
 
+    const data = await response.json().catch(() => ({}));
+
     if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Groq API Error:", errorData);
-        throw new Error("API 호출 실패");
+        console.error("Groq API Error Detail:", data);
+        const errorMsg = data.error?.message || response.statusText || "Unknown Error";
+        throw new Error(`API 호출 실패: ${errorMsg} (${response.status})`);
     }
 
-    const data = await response.json();
     return data.choices[0].message.content;
 }
