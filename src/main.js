@@ -315,7 +315,7 @@ function renderDays(days = [], allAccommodations = []) {
         );
 
         return `
-            <div class="day-card">
+            <div class="day-card" style="margin-left: 15px; margin-right: 15px;">
                 <div class="day-header">
                     <div class="day-info">
                         <span class="day-badge">Day ${day.day}</span>
@@ -401,43 +401,6 @@ function renderDays(days = [], allAccommodations = []) {
     }).join('');
 }
 
-// 숙소 섹션 렌더링
-function renderAccommodationsSection(accommodations = []) {
-    if (!accommodations || accommodations.length === 0) return '';
-
-    return `
-        <div class="section-divider" style="margin-top: 20px; margin-bottom: 12px;">
-            <span>ACCOMMODATIONS</span>
-        </div>
-        <div class="view-list-container">
-            ${accommodations.map(acc => `
-                <div class="day-card collapsed" style="margin-bottom: 12px;">
-                    <div class="day-header" style="background: rgba(69, 184, 175, 0.05);">
-                        <div class="day-info">
-                            <span class="day-badge" style="color: #45B8AF; font-size: 0.8rem;">${acc.type || '숙소'}</span>
-                            <span class="day-date" style="font-size: 1rem;">${acc.name}</span>
-                        </div>
-                        <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </div>
-                    <div class="tip-content-wrapper">
-                        <div class="tip-content-inner" style="padding: 16px 20px;">
-                            <div class="acc-details">
-                                ${acc.location ? `<p class="acc-detail-item" style="font-size: 0.9rem; margin-bottom: 8px; color: #666;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${acc.location}</p>` : ''}
-                                ${acc.contact ? `<p class="acc-detail-item" style="font-size: 0.9rem; margin-bottom: 8px; color: #666;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${acc.contact}</p>` : ''}
-                                ${acc.url ? `<p class="acc-detail-item" style="font-size: 0.9rem; margin-bottom: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> <a href="${acc.url}" target="_blank" style="color: #45B8AF; text-decoration: none;">홈페이지 방문</a></p>` : ''}
-                                ${acc.checkIn || acc.checkOut ? `<p class="acc-detail-item" style="font-size: 0.9rem; margin-bottom: 8px; color: #666;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 체크인 ${acc.checkIn || '미지정'} / 체크아웃 ${acc.checkOut || '미지정'}</p>` : ''}
-                                ${acc.notes ? `<div class="acc-notes" style="font-size: 0.9rem; color: #444; background: #f9f9f9; padding: 12px; border-radius: 8px; white-space: pre-wrap;">${acc.notes}</div>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-    `;
-}
-
 // 체크리스트 섹션 렌더링
 function renderChecklistsSection(checklists = []) {
     if (!checklists || checklists.length === 0) return '';
@@ -445,7 +408,7 @@ function renderChecklistsSection(checklists = []) {
     return `
         <div class="view-list-container" style="margin-top: 10px;">
             ${checklists.map(list => `
-                <div class="day-card collapsed" style="margin-bottom: 12px; border: 1px solid #e2e8f0;">
+                <div class="day-card collapsed" style="margin-bottom: 12px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
                     <div class="day-header" style="background: #456eb8; padding: 12px 15px;">
                         <div class="day-info">
                             <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">LIST</span>
@@ -482,7 +445,7 @@ function renderTipsSection(tips = []) {
     return `
         <div class="view-list-container" style="margin-top: 10px;">
             ${tips.map(tip => `
-                <div class="day-card collapsed" style="margin-bottom: 12px; border: 1px solid #e2e8f0;">
+                <div class="day-card collapsed" style="margin-bottom: 12px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
                     <div class="day-header" style="background: #b89545; padding: 12px 15px;">
                         <div class="day-info">
                             <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.75rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">TIP</span>

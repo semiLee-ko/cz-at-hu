@@ -69,7 +69,8 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 ${schedule.tripType === 'domestic' ? '도시' : '국가'} <span class="hint"> (입력 후 엔터)</span>
                             </label>
                             <input type="text" id="locationInput" class="tag-input" 
-                                   placeholder="${schedule.tripType === 'domestic' ? '예: 서울 (입력 후 엔터)' : '예: 미국 (입력 후 엔터)'}" maxlength="10">
+                                   placeholder="${schedule.tripType === 'domestic' ? '예: 서울 (입력 후 엔터)' : '예: 미국 (입력 후 엔터)'}" 
+                                   maxlength="10" enterkeyhint="done">
                             <div class="error-message" id="locationError"></div>
                             <div class="tags-container" id="locationsContainer" style="${(schedule.countries && schedule.countries.length > 0) ? '' : 'display: none;'}">
                                 ${(schedule.countries || []).map(location => `
@@ -101,13 +102,13 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     <div class="form-row">
                         <div class="form-group">
                             <label>성인 <span id="adultCountLabel" class="count-badge">(0명)</span> <span class="hint">(입력 후 엔터)</span></label>
-                            <input type="text" id="adultInput" placeholder="이름 입력" maxlength="10">
+                            <input type="text" id="adultInput" placeholder="이름 입력" maxlength="10" enterkeyhint="done">
                             <div class="error-message" id="adultError"></div>
                             <div class="tags-container" id="adultsContainer" style="display: none;"></div>
                         </div>
                         <div class="form-group">
                             <label>아동 <span id="childCountLabel" class="count-badge">(0명)</span> <span class="hint">(입력 후 엔터)</span></label>
-                            <input type="text" id="childInput" placeholder="이름 입력" maxlength="10">
+                            <input type="text" id="childInput" placeholder="이름 입력" maxlength="10" enterkeyhint="done">
                             <div class="error-message" id="childError"></div>
                             <div class="tags-container" id="childrenContainer" style="display: none;"></div>
                         </div>
@@ -127,7 +128,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
                     <div class="form-group">
                         <label>해시태그 <span class="hint">(입력 후 엔터)</span></label>
-                        <input type="text" id="tagInput" class="tag-input" placeholder="태그 입력 후 엔터" maxlength="10">
+                        <input type="text" id="tagInput" class="tag-input" placeholder="태그 입력 후 엔터" maxlength="10" enterkeyhint="done">
                         <div class="error-message" id="tagError"></div>
                         <div class="tags-container" id="tagsContainer" style="${(schedule.tags && schedule.tags.length > 0) ? '' : 'display: none;'}">
                             ${(schedule.tags || []).map(tag => `
@@ -261,9 +262,6 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 <!-- Step 5: Tips -->
                 <div class="form-step" data-step="5" style="display: none;">
                     <div class="tip-section">
-                        <h3 class="section-title">팁 & 유의사항</h3>
-                        <p class="section-subtitle">여행에 필요한 유용한 정보나 주의할 점을 기록하세요.</p>
-                        
                         <!-- Tip Form -->
                          <div class="tip-form-section">
                             <h4 id="tipFormTitle">새 팁 작성</h4>
@@ -651,12 +649,51 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             stepManager.goToStep(targetStep, callbacks);
             updateHeaderTitle(targetStep);
             updateStatus();
+
+            // Setup time formatting delegation
+            setupTimeFormatting(container);
         });
     });
 
-    // Real-time Validation Listeners
-    // Step 1 Inputs
-    // Real-time Validation Listeners
+    function setupTimeFormatting(container) {
+        const form = container.querySelector('#scheduleForm');
+        if (!form || form.dataset.timeFormattingAttached) return;
+
+        form.addEventListener('input', (e) => {
+            if (e.target.classList.contains('event-start-time') ||
+                e.target.classList.contains('event-end-time') ||
+                e.target.id === 'accCheckIn' ||
+                e.target.id === 'accCheckOut') {
+
+                let val = e.target.value.replace(/[^0-9]/g, '');
+                if (val.length > 4) val = val.slice(0, 4);
+
+                if (val.length >= 3) {
+                    val = val.slice(0, 2) + ':' + val.slice(2);
+                }
+
+                e.target.value = val;
+            }
+        });
+
+        // Handle backspace for cleaner UX
+        form.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' &&
+                (e.target.classList.contains('event-start-time') ||
+                    e.target.classList.contains('event-end-time') ||
+                    e.target.id === 'accCheckIn' ||
+                    e.target.id === 'accCheckOut')) {
+
+                const val = e.target.value;
+                if (val.length === 3 && val.endsWith(':')) {
+                    e.target.value = val.slice(0, 2);
+                }
+            }
+        });
+
+        form.dataset.timeFormattingAttached = 'true';
+    }
+
     // Step 1 Inputs
     const inputsStep1 = container.querySelectorAll('input[name="title"], input[name="startDate"], input[name="endDate"]');
     inputsStep1.forEach(input => {
@@ -683,6 +720,11 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     // Initial Status & Title Update
     updateStatus();
     updateHeaderTitle(1);
+
+    // Initial time formatting setup if we start at step 2 (unlikely but safe)
+    if (stepManager.currentStep === 2) {
+        setupTimeFormatting(container);
+    }
 
     // ------------------------------------
 
@@ -854,7 +896,13 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     // 위치 입력 이벤트
     locationInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.keyCode === 13) {
-            e.preventDefault(); // Stop form submit or focus jump
+            e.preventDefault();
+            addLocation(locationInput.value);
+        }
+    });
+
+    locationInput.addEventListener('blur', () => {
+        if (locationInput.value.trim()) {
             addLocation(locationInput.value);
         }
     });
@@ -995,6 +1043,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 addMember(type, input.value);
             }
         });
+
+        input.addEventListener('blur', () => {
+            if (input.value.trim()) {
+                addMember(type, input.value);
+            }
+        });
     });
 
     function addTag(tagText) {
@@ -1038,6 +1092,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         if (e.key === 'Enter' || e.keyCode === 13) {
             e.preventDefault();
             e.stopPropagation();
+            addTag(tagInput.value);
+        }
+    });
+
+    tagInput.addEventListener('blur', () => {
+        if (tagInput.value.trim() && tagInput.value.trim() !== '#') {
             addTag(tagInput.value);
         }
     });
@@ -1193,14 +1253,13 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 const locationCheckbox = eventItem.querySelector('.location-checkboxes input[type="checkbox"]:checked');
                 const location = locationCheckbox ? locationCheckbox.value : '';
 
-                const place = eventItem.querySelector('.event-place').value;
-                const startTime = eventItem.querySelector('.event-start-time').value;
-                const endTime = eventItem.querySelector('.event-end-time').value;
-                const description = eventItem.querySelector('.event-description').value;
+                const place = eventItem.querySelector('.event-place').value.trim();
+                const startTime = eventItem.querySelector('.event-start-time').value.trim();
+                const endTime = eventItem.querySelector('.event-end-time').value.trim();
+                const description = eventItem.querySelector('.event-description').value.trim();
 
-                // Only save events that have at least one of: place or description
-                // Location (city/country checkbox) and time alone are NOT enough
-                if (place || description) {
+                // Only save events that have at least one of: location, place, description, start time, end time
+                if (location || place || description || startTime || endTime) {
                     events.push({
                         location,
                         place,
@@ -1209,8 +1268,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                         description
                     });
                 } else {
-                    // Count empty events (no place or description)
-                    // This includes events that only have location checkbox or time values
+                    // Count empty events (absolutely nothing filled)
                     emptyEventCount++;
                 }
             });
@@ -1237,11 +1295,17 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         const daysContainer = containerElement.querySelector('#daysContainer');
         const timeOptions = stepManager.generateTimeOptions(); // Use shared helper
 
-        daysContainer.innerHTML = `
-            <datalist id="time-options">
-                ${timeOptions.map(time => `<option value="${time}">`).join('')}
-            </datalist>
-        ` + days.map((day, dayIndex) => `
+        daysContainer.innerHTML = days.map((day, dayIndex) => {
+            // Ensure at least one event if day is empty
+            const eventsToRender = day.events.length > 0 ? day.events : [{
+                location: '',
+                place: '',
+                startTime: '',
+                endTime: '',
+                description: ''
+            }];
+
+            return `
             <div class="day-card" data-day="${day.day}">
                 <div class="day-header" data-toggle="day">
                     <div class="day-info">
@@ -1254,9 +1318,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 </div>
                 
                 <div class="events-list" id="events-day-${day.day}">
-                    ${day.events.length > 0 ? day.events.map((event, eventIndex) =>
-            renderEventItem(event, eventIndex, locationsList, timeOptions, day.day)
-        ).join('') : '<p class="no-events">일정을 추가해주세요</p>'}
+                    ${eventsToRender.map((event, eventIndex) =>
+                renderEventItem(event, eventIndex, locationsList, timeOptions, day.day)
+            ).join('')}
                     <button type="button" class="btn-add-event-floating" data-day="${day.day}" title="일정 추가">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor">
                             <path d="M8 3V13M3 8H13" stroke-width="2" stroke-linecap="round"/>
@@ -1265,7 +1329,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 </div>
 
             </div>
-        `).join('');
+        `}).join('');
 
         // Add collapse/expand functionality for day cards
         daysContainer.querySelectorAll('[data-toggle="day"]').forEach(header => {
@@ -1376,19 +1440,25 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     
                     <div class="form-group-compact">
                         <label>위치</label>
-                        <input type="text" class="event-place" value="${event.place || ''}" placeholder="예: 프라하 공항">
+                        <input type="text" class="event-place" value="${(() => {
+                // Data Mapping Logic: Support detail, or location if it's a string not in checkboxes
+                if (event.place) return event.place;
+                if (event.detail) return event.detail;
+                if (event.location && !locationsList.includes(event.location)) return event.location;
+                return '';
+            })()}" placeholder="예: 프라하 공항">
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group-compact">
                             <label>시작 시간</label>
-                            <input type="text" class="event-start-time" value="${event.startTime || ''}" 
-                                   list="time-options" placeholder="00:00">
+                            <input type="text" class="event-start-time" value="${event.startTime || event.time || ''}" 
+                                   inputmode="numeric" maxlength="5" placeholder="00:00">
                         </div>
                         <div class="form-group-compact">
                             <label>종료 시간</label>
                             <input type="text" class="event-end-time" value="${event.endTime || ''}" 
-                                   list="time-options" placeholder="00:00">
+                                   inputmode="numeric" maxlength="5" placeholder="00:00">
                         </div>
                     </div>
                     

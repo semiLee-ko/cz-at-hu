@@ -55,11 +55,18 @@
 /* Override btn-icon for Editor (Dark icons on White bg) */
 .editor-header-nav .btn-icon {
     background: transparent;
+    border: none;
     color: var(--dark);
     border-radius: 50%;
     width: 40px;
     height: 40px;
     transition: background 0.2s;
+    outline: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
 .editor-header-nav .btn-icon:hover {

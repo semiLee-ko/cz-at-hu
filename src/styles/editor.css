@@ -28,6 +28,18 @@
     box-sizing: border-box;
 }
 
+.btn-icon {
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .form-group {
     margin-bottom: 16px;
 }
@@ -208,11 +220,6 @@
 .radio-option:has(input[type="radio"]:checked) {
     border-color: #45B8AF;
     background: #e6f7f6;
-}
-
-/* ========== Day Items ========== */
-#daysContainer {
-    margin-top: 16px;
 }
 
 .day-item {
