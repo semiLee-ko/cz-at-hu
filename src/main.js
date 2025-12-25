@@ -8,6 +8,8 @@ import { loadFromShareUrl, uploadFromJson } from './share.js';
 import { renderScheduleList } from './components/ScheduleList.js';
 import { renderScheduleEditor } from './components/ScheduleEditor.js';
 import { showShareModal, showImportModal } from './components/ShareModal.js';
+import { showChatBot } from './components/ChatBot.js';
+import './styles/chatbot.css';
 
 // 앱 상태
 let currentView = 'list'; // 'list', 'view', 'edit'
@@ -142,6 +144,15 @@ function renderScheduleView(container, scheduleId) {
                             <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
                         </svg>
                     </button>
+                    <button class="btn-icon" id="btnChatBot" aria-label="챗봇">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                            <circle cx="12" cy="5" r="2"></circle>
+                            <path d="M12 7v4"></path>
+                            <line x1="8" y1="16" x2="8" y2="16"></line>
+                            <line x1="16" y1="16" x2="16" y2="16"></line>
+                        </svg>
+                    </button>
                 </div>
                 <div class="header-back-fixed">
                     <button class="btn-header-back" id="btnBack">
@@ -215,6 +226,7 @@ function renderScheduleView(container, scheduleId) {
     container.querySelector('#btnBack').addEventListener('click', () => showView('list'));
     container.querySelector('#btnEdit').addEventListener('click', () => showView('edit', schedule.id));
     container.querySelector('#btnShare').addEventListener('click', () => showShareModal(schedule.id));
+    container.querySelector('#btnChatBot').addEventListener('click', () => showChatBot(schedule));
 
     // Tabs functionality
     const tabs = container.querySelectorAll('.view-tab');
