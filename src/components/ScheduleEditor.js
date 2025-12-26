@@ -415,6 +415,71 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     // Initialize managers
     const stepManager = createStepManager(container, schedule, locations);
+
+    // --- Validation Logic (Moved Up) ---
+    const VALIDATION_RULES = {
+        title: {
+            regex: /^[가-힣a-zA-Z0-9\s~!%^&*()\-_+=:"',.\[\]]+$/,
+            maxLength: 20,
+            msg: '특수문자는 ~!%^&*()-+=:"\',.[] 만 허용됩니다. (최대 20자)'
+        },
+        location: {
+            regex: /^[가-힣a-zA-Z]+$/, // Korean, English only, No Space
+            maxLength: 10,
+            noSpace: true,
+            msg: '한글, 영문만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
+        },
+        member: {
+            regex: /^[가-힣a-zA-Z0-9]+$/, // Korean, English, Number, No Space
+            maxLength: 10,
+            noSpace: true,
+            msg: '한글, 영문, 숫자만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
+        },
+        hashtag: {
+            regex: /^[가-힣a-zA-Z]+$/, // Korean, English, No Space
+            maxLength: 10,
+            noSpace: true,
+            msg: '한글, 영문만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
+        }
+    };
+
+    function validateInput(value, type) {
+        if (!value) return { valid: false, msg: '' }; // Empty is handled by required/red
+
+        const rule = VALIDATION_RULES[type];
+        if (!rule) return { valid: true };
+
+        // Space Check
+        if (rule.noSpace && /\s/.test(value)) {
+            return { valid: false, msg: '띄어쓰기는 허용되지 않습니다.' };
+        }
+
+        // Length Check
+        if (value.length > rule.maxLength) {
+            return { valid: false, msg: `최대 ${rule.maxLength}자까지 입력 가능합니다.` };
+        }
+
+        // Regex Check
+        if (!rule.regex.test(value)) {
+            return { valid: false, msg: rule.msg };
+        }
+
+        return { valid: true };
+    }
+
+    function updateErrorUI(input, errorId, isValid, msg = '') {
+        const titleError = container.querySelector(`#${errorId}`);
+        if (titleError) {
+            titleError.textContent = msg;
+            if (isValid) {
+                titleError.classList.remove('visible');
+                input.classList.remove('input-error-border'); // Optional extra style?
+            } else {
+                titleError.classList.add('visible');
+                // input.classList.add('input-error-border');
+            }
+        }
+    }
     const accommodationManager = createAccommodationManager(container, schedule, stepManager.generateDaysFromDateRange);
     const checklistManager = createChecklistManager(container, schedule);
     const tipManager = createTipManager(container, schedule);
@@ -455,14 +520,18 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             }
         };
 
-        toggleError('title', !!title);
+        // Validate Title Logic
+        const titleValidation = validateInput(title, 'title');
+        const isTitleValid = title && titleValidation.valid;
+        toggleError('title', isTitleValid);
+
         toggleError('startDate', !!startDate);
         toggleError('endDate', !!endDate);
+
+        // ...
+
         // Explicitly handle Tag Inputs (Adult/Child) by ID
         const adultInput = form.querySelector('#adultInput');
-
-        // Children (Optional but requested visual feedback?)
-        // User asked for "Adult and Child required" -> So red if empty.
         const childInput = form.querySelector('#childInput');
 
         if (adultInput) {
@@ -470,7 +539,6 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             else adultInput.classList.remove('input-error');
         }
 
-        // Child input is optional - no error highlighting needed
         if (childInput) {
             childInput.classList.remove('input-error');
         }
@@ -483,7 +551,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             locationInput.classList.remove('input-error');
         }
 
-        const isStep1Valid = title && startDate && endDate && hasLocations && (adultMembers.size > 0);
+        const isStep1Valid = isTitleValid && startDate && endDate && hasLocations && (adultMembers.size > 0);
         statuses[1] = isStep1Valid ? 'valid' : 'invalid'; // Mandatory
 
         // Step 2: Days (Optional)
@@ -759,70 +827,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         });
     });
 
-    // --- Validation Logic ---
-    const VALIDATION_RULES = {
-        title: {
-            regex: /^[가-힣a-zA-Z0-9~!%^&*()\-_+=:"',.\[\]]+$/,
-            maxLength: 20,
-            msg: '특수문자는 ~!%^&*()-+=:"\',.[] 만 허용됩니다. (최대 20자)'
-        },
-        location: {
-            regex: /^[가-힣a-zA-Z]+$/, // Korean, English only, No Space
-            maxLength: 10,
-            noSpace: true,
-            msg: '한글, 영문만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
-        },
-        member: {
-            regex: /^[가-힣a-zA-Z0-9]+$/, // Korean, English, Number, No Space
-            maxLength: 10,
-            noSpace: true,
-            msg: '한글, 영문, 숫자만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
-        },
-        hashtag: {
-            regex: /^[가-힣a-zA-Z]+$/, // Korean, English, No Space
-            maxLength: 10,
-            noSpace: true,
-            msg: '한글, 영문만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
-        }
-    };
 
-    function validateInput(value, type) {
-        if (!value) return { valid: false, msg: '' }; // Empty is handled by required/red
-
-        const rule = VALIDATION_RULES[type];
-        if (!rule) return { valid: true };
-
-        // Space Check
-        if (rule.noSpace && /\s/.test(value)) {
-            return { valid: false, msg: '띄어쓰기는 허용되지 않습니다.' };
-        }
-
-        // Length Check
-        if (value.length > rule.maxLength) {
-            return { valid: false, msg: `최대 ${rule.maxLength}자까지 입력 가능합니다.` };
-        }
-
-        // Regex Check
-        if (!rule.regex.test(value)) {
-            return { valid: false, msg: rule.msg };
-        }
-
-        return { valid: true };
-    }
-
-    function updateErrorUI(input, errorId, isValid, msg = '') {
-        const titleError = container.querySelector(`#${errorId}`);
-        if (titleError) {
-            titleError.textContent = msg;
-            if (isValid) {
-                titleError.classList.remove('visible');
-                input.classList.remove('input-error-border'); // Optional extra style?
-            } else {
-                titleError.classList.add('visible');
-                // input.classList.add('input-error-border');
-            }
-        }
-    }
 
     // Real-time Validation Binding
     const titleInput = container.querySelector('input[name="title"]');
@@ -1119,12 +1124,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         }
     });
 
-    // 자동 # 추가
-    tagInput.addEventListener('input', (e) => {
-        if (e.target.value && !e.target.value.startsWith('#')) {
-            e.target.value = '#' + e.target.value;
-        }
-    });
+
 
     // 기존 태그 삭제 버튼
     container.querySelectorAll('.tag-remove').forEach(btn => {
@@ -1293,7 +1293,6 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                         location,
                         place,
                         startTime,
-                        endTime,
                         endTime,
                         description,
                         coords // Save Coords

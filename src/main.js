@@ -430,6 +430,9 @@ function renderDays(days = [], allAccommodations = [], startDate = null) {
                     const place = event.place || event.detail || '';
                     const desc = event.description || '';
 
+                    // Debug
+                    if (startTime) console.log('Event render:', { startTime, endTime, eIndex });
+
                     return `
                                             <div class="event">
                                                 <div class="event-time-col">
@@ -440,11 +443,11 @@ function renderDays(days = [], allAccommodations = [], startDate = null) {
                                                         </div>
                                                         <span class="event-time-start">${startTime}</span>
                                                     ` : '<span class="event-time-spacer"></span>'}
-                                                    <span class="event-time-dash">${(eIndex === 0 && (startTime || endTime)) ? '-' : ''}</span>
-                                                    <span class="event-time-end">${eIndex === 0 ? endTime : ''}</span>
+                                                    <span class="event-time-dash">${(eIndex === 0 && startTime) || endTime ? '-' : ''}</span>
+                                                    <span class="event-time-end">${endTime}</span>
                                                 </div>
                                                 <div class="event-detail-content">
-                                                    <span class="event-place">${place}</span>
+                                                    <span class="event-place" style="height:20px !important;">${place}</span>
                                                     <span class="event-desc">${desc}</span>
                                                 </div>
                                             </div>
@@ -791,15 +794,19 @@ function initSpotlightMode(schedule) {
                     if (weather) {
                         weatherDisplay.innerHTML = `${getWeatherSVG(weather.code)} <span style="margin-left:4px;">${weather.min}° / ${weather.max}°</span>`;
                         weatherDisplay.style.opacity = 1;
+                        weatherDisplay.style.display = 'flex'; // Show and allow flex layout
                     } else {
                         weatherDisplay.innerHTML = '';
+                        weatherDisplay.style.display = 'none'; // Hide to allow justify-around to work
                     }
                 });
             } else {
                 weatherDisplay.innerHTML = '';
+                weatherDisplay.style.display = 'none';
             }
         } else {
             weatherDisplay.innerHTML = '';
+            weatherDisplay.style.display = 'none';
         }
     };
 
@@ -1623,7 +1630,7 @@ function showMapPopup(scheduleId) {
         <div class="map-popup-container">
             <div class="map-popup-header">
                 <h3>여행 경로 확인</h3>
-                <button class="btn-close-map">
+                <button class="btn-close">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1644,7 +1651,7 @@ function showMapPopup(scheduleId) {
         setTimeout(() => modal.remove(), 300);
     };
 
-    modal.querySelector('.btn-close-map').onclick = closeMap;
+    modal.querySelector('.btn-close').onclick = closeMap;
 
     // Load Leaflet dynamically
     loadLeaflet(() => {
@@ -1658,10 +1665,32 @@ function showMapPopup(scheduleId) {
 
         // Add markers
         locations.forEach((loc, i) => {
-            const marker = L.marker([loc.lat, loc.lng]).addTo(map);
+            // Create Numbered Icon
+            const numberIcon = L.divIcon({
+                className: 'custom-map-marker',
+                html: `<div style="
+                    background-color: #45B8AF;
+                    color: white;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    border: 2px solid white;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 14px;
+                ">${i + 1}</div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+                popupAnchor: [0, -12]
+            });
+
+            const marker = L.marker([loc.lat, loc.lng], { icon: numberIcon }).addTo(map);
             marker.bindPopup(`
                 <div style="font-family: inherit; padding: 5px;">
-                    <strong style="color: #45B8AF;">Day ${loc.day}</strong><br>
+                    <strong style="color: #45B8AF;">${i + 1}. Day ${loc.day}</strong><br>
                     <strong>${loc.name}</strong><br>
                     <small>${loc.time}</small>
                 </div>
@@ -1711,7 +1740,7 @@ window.showLocationPicker = function (initialLat, initialLng, callback) {
         <div class="map-popup-container">
             <div class="map-popup-header">
                 <h3>위치 선택</h3>
-                <button class="btn-close-map">
+                <button class="btn-close">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1745,7 +1774,7 @@ window.showLocationPicker = function (initialLat, initialLng, callback) {
         setTimeout(() => modal.remove(), 300);
     };
 
-    modal.querySelector('.btn-close-map').onclick = closeModal;
+    modal.querySelector('.btn-close').onclick = closeModal;
 
     // Load Leaflet
     loadLeaflet(() => {
