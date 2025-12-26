@@ -221,6 +221,23 @@ function renderScheduleView(container, scheduleId) {
                 </div>
             </div>
 
+            <!-- Guide Notice Section -->
+            <div class="schedule-guide-notice entry-stagger-3">
+                <div class="notice-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>안내사항</span>
+                </div>
+                <ul class="notice-list">
+                    <li>각 상세일정을 클릭해서 일정별 상세 기능을 확인하세요!</li>
+                    <li>날씨 정보는 오늘부터 14일 이전 데이터만 확인 가능해요.</li>
+                    <li>날씨정보를 확인하시려면 일정 편집 화면에서 각 일정마다 위치정보를 입력하세요.</li>
+                </ul>
+            </div>
+
 
         </div>
         <!-- Floating Action Group (Moved outside view-container to prevent fixed positioning issues) -->
@@ -968,9 +985,22 @@ function showSettlementPopup(group, updateActionStatesCallback, scheduleId) {
                                 </div>
                             </div>
                             <div class="input-grid-group">
-                                <div class="field-item">
-                                    <label>사용처 (항목)</label>
-                                    <input type="text" class="usage-input-sm" placeholder="예: 점심 식사, 기차표 등">
+                                <div class="field-row">
+                                    <div class="field-item" style="width: 105px; flex-shrink: 0;">
+                                        <label>카테고리</label>
+                                        <select class="category-select-sm">
+                                            <option value="식비">식비</option>
+                                            <option value="교통비">교통비</option>
+                                            <option value="숙박비">숙박비</option>
+                                            <option value="쇼핑">쇼핑</option>
+                                            <option value="문화/체험">문화/체험</option>
+                                            <option value="기타">기타</option>
+                                        </select>
+                                    </div>
+                                    <div class="field-item flex-1">
+                                        <label>사용처 (항목)</label>
+                                        <input type="text" class="usage-input-sm" placeholder="점심 식사">
+                                    </div>
                                 </div>
                                 <div class="field-row">
                                     <div class="field-item flex-1">
@@ -1052,6 +1082,7 @@ function showSettlementPopup(group, updateActionStatesCallback, scheduleId) {
             btnAdd.onclick = () => {
                 const amount = modal.querySelector('.amount-input-sm').value.trim();
                 const usage = modal.querySelector('.usage-input-sm').value.trim();
+                const category = modal.querySelector('.category-select-sm').value;
                 const payer = modal.querySelector('.payer-select-sm').value;
                 const selectedParticipants = Array.from(modal.querySelectorAll('.mini-chip.selected')).map(c => c.dataset.name);
 
@@ -1070,6 +1101,7 @@ function showSettlementPopup(group, updateActionStatesCallback, scheduleId) {
 
                 event.expenses.push({
                     payer: payer,
+                    category: category,
                     usage: usage || '지출 내역', // Default usage if empty
                     amount: parseInt(amount),
                     participants: selectedParticipants, // Bundle participants with expense
@@ -1177,6 +1209,61 @@ function showTotalSettlementPopup(scheduleId) {
 
     const { totalTripExpense, transfers } = calculateResults();
 
+    // --- Chart Calculation ---
+    const categoryTotals = { '식비': 0, '교통비': 0, '숙박비': 0, '쇼핑': 0, '문화/체험': 0, '기타': 0 };
+    let hasExpenses = false;
+
+    schedule.days.forEach(day => {
+        day.events.forEach(event => {
+            if (event.expenses) {
+                event.expenses.forEach(exp => {
+                    const cat = exp.category || '기타';
+                    const amount = Number(exp.amount) || 0;
+                    if (amount > 0) {
+                        categoryTotals[cat] = (categoryTotals[cat] || 0) + amount;
+                        hasExpenses = true;
+                    }
+                });
+            }
+        });
+    });
+
+    // Generate Conic Gradient & Legend
+    const CAT_COLORS = {
+        '식비': '#FF6B6B',      // Red
+        '교통비': '#4ECDC4',    // Teal
+        '숙박비': '#45B7D1',    // Blue
+        '쇼핑': '#FFEEAD',      // Yellow
+        '문화/체험': '#96CEB4', // Green
+        '기타': '#D4A5A5'       // Gray
+    };
+
+    let gradientSegments = [];
+    let legendHTML = '';
+    let currentPercent = 0;
+    const sortedCats = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]); // Descending
+
+    sortedCats.forEach(([cat, amount]) => {
+        if (amount > 0) {
+            const percent = (amount / totalTripExpense) * 100;
+            const start = currentPercent;
+            const end = currentPercent + percent;
+            gradientSegments.push(`${CAT_COLORS[cat] || '#ccc'} ${start}% ${end}%`);
+            currentPercent += percent;
+
+            legendHTML += `
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #555;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: ${CAT_COLORS[cat] || '#ccc'};"></div>
+                    <span style="font-weight: 600;">${cat}</span>
+                    <span style="color: #888;">${Math.round(percent)}% (${amount.toLocaleString()}원)</span>
+                </div>
+            `;
+        }
+    });
+
+    const gradientString = gradientSegments.join(', ');
+    // --- End Chart Calculation ---
+
     modal.innerHTML = `
         <div class="total-settlement-container">
             <div class="total-settlement-header">
@@ -1236,6 +1323,34 @@ function showTotalSettlementPopup(scheduleId) {
                     `}
                 </div>
 
+                <!-- Chart Card (New) -->
+                ${hasExpenses ? `
+                    <div class="settlement-summary-card" style="margin-top: 16px;">
+                        <div class="settlement-header-row">
+                            <h4>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                                    <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                                </svg>
+                                카테고리별 지출 통계
+                            </h4>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 24px; padding: 15px 0; flex-wrap: wrap;">
+                            <!-- Donut -->
+                            <div style="width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(${gradientString}); position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-shrink: 0;">
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85px; height: 85px; background: white; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: #555; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);">
+                                    <span style="font-size: 0.7rem; color: #999;">TOTAL</span>
+                                    <span>Expenses</span>
+                                </div>
+                            </div>
+                            <!-- Legend -->
+                            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 140px;">
+                                ${legendHTML}
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+
                 <!-- Detailed History by Day -->
                 <div class="settlement-history-section">
                     <h4>
@@ -1285,9 +1400,6 @@ function showTotalSettlementPopup(scheduleId) {
                     </div>
                 </div>
             </div>
-            <div class="total-settlement-footer">
-                <button class="btn-confirm-total-settlement">닫기</button>
-            </div>
         </div>
     `;
 
@@ -1300,7 +1412,6 @@ function showTotalSettlementPopup(scheduleId) {
     };
 
     modal.querySelector('.btn-close-total-settlement').onclick = closeModal;
-    modal.querySelector('.btn-confirm-total-settlement').onclick = closeModal;
 
     // Copy settlement results
     const btnCopy = modal.querySelector('.btn-copy-settlement');

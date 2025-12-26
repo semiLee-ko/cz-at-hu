@@ -87,6 +87,8 @@
     transition: grid-template-rows 0.3s ease-out;
     background: white;
     overflow: hidden;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
 .tip-content-inner {
@@ -389,6 +391,8 @@
     background: white;
     margin-bottom: 0;
     position: relative;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
 /* Floating Add Button */

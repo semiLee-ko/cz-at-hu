@@ -223,3 +223,108 @@
     background: linear-gradient(to right, transparent, #e2e8f0, transparent);
     margin: 24px 0;
 }
+
+/* Settlement Popup Inputs */
+.settlement-popup-container .usage-input-sm,
+.settlement-popup-container .amount-input-sm,
+.settlement-popup-container .payer-select-sm,
+.settlement-popup-container .category-select-sm {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    transition: all 0.2s;
+    height: 42px;
+    /* Force consistent height */
+    box-sizing: border-box;
+    /* Ensure padding doesn't affect width */
+}
+
+/* Fix Dropdown Arrow Alignment */
+.settlement-popup-container .payer-select-sm,
+.settlement-popup-container .category-select-sm {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 32px;
+    /* Space for arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    cursor: pointer;
+}
+
+.settlement-popup-container .usage-input-sm:focus,
+.settlement-popup-container .amount-input-sm:focus,
+.settlement-popup-container .payer-select-sm:focus,
+.settlement-popup-container .category-select-sm:focus {
+    outline: none;
+    border-color: #45B8AF;
+    box-shadow: 0 0 0 3px rgba(69, 184, 175, 0.1);
+}
+
+.settlement-popup-container .field-item label {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.settlement-popup-container .input-grid-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settlement-popup-container .field-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    /* Align button with inputs */
+}
+
+.settlement-popup-container .flex-1 {
+    flex: 1;
+}
+
+/* Add Button in Popup */
+.settlement-popup-container .btn-add-expense-integrated {
+    height: 42px;
+    padding: 0 20px;
+    background: #1e293b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Mini Chips Styiling from main.js (Ensure visibility if missing) */
+.settlement-popup-container .mini-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+}
+
+.settlement-popup-container .mini-chip {
+    padding: 4px 10px;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.settlement-popup-container .mini-chip.selected {
+    background: #e0f2fe;
+    color: #0284c7;
+    font-weight: 600;
+}
