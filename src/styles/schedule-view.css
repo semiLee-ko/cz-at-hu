@@ -608,11 +608,13 @@
 
 .event-group.active-spotlight {
     background: white !important;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 20px 40px rgba(69, 184, 175, 0.3);
     transform: scale(1.02);
     z-index: 2002 !important;
     /* Higher than parent's z-index */
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 3px solid #45B8AF;
+    border-bottom: 3px solid #45B8AF;
+    border-radius: 0;
 }
 
 .spotlight-overlay {
