@@ -541,6 +541,54 @@
     margin-bottom: 8px;
 }
 
+/* Event Location Picker Alignment */
+.event-place {
+    height: 35px !important;
+    /* Force height to match button */
+    padding: 0 10px !important;
+    /* Adjust padding for fixed height */
+}
+
+.btn-pick-location {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    /* Match input radius */
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.2s;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.btn-pick-location:hover {
+    background: #f9fafb;
+    border-color: #45B8AF;
+    color: #45B8AF;
+}
+
+.btn-pick-location svg {
+    stroke: currentColor;
+    /* Override strict color if possible, or reliance on JS removal */
+}
+
+.btn-pick-location.active {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    background: #fff5f5;
+}
+
+.btn-pick-location.active:hover {
+    background: #ffe3e3;
+    border-color: #fa5252;
+    color: #fa5252;
+}
+
 .btn-add-event {
     width: 100%;
     padding: 10px;

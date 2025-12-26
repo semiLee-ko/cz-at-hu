@@ -1722,17 +1722,20 @@ body.spotlight-active {
 }
 
 /* Floating Action Group (Map & Receipt) */
-.view-container .floating-action-group {
+.floating-action-group {
     position: fixed;
     bottom: 32px;
     right: 24px;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    z-index: 1000;
+    z-index: 5001;
+    /* Increased z-index */
+    transform: translateZ(0);
+    /* Force GPU layer */
 }
 
-.view-container .btn-floating {
+.btn-floating {
     width: 52px;
     height: 52px;
     border-radius: 50%;
@@ -1748,26 +1751,26 @@ body.spotlight-active {
     padding: 0;
 }
 
-.view-container .btn-floating:hover {
+.btn-floating:hover {
     transform: scale(1.1) translateY(-4px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
 }
 
-.view-container .btn-floating:active {
+.btn-floating:active {
     transform: scale(0.9);
 }
 
-.view-container .btn-floating svg {
+.btn-floating svg {
     width: 24px;
     height: 24px;
 }
 
-.view-container .btn-floating.action-map-floating {
+.btn-floating.action-map-floating {
     background: #3b82f6;
     color: white;
 }
 
-.view-container .btn-floating.action-receipt-floating {
+.btn-floating.action-receipt-floating {
     background: #45B8AF;
     color: white;
 }

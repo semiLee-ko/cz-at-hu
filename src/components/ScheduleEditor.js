@@ -1439,6 +1439,10 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     window.showLocationPicker(currentLat, currentLng, (coords) => {
                         latInput.value = coords.lat;
                         lngInput.value = coords.lng;
+
+                        // Update visual state (Add red active class)
+                        pickBtn.classList.add('active');
+
                         // Optional: if place is empty, maybe fill with something? 
                         // But we don't return address yet.
                     });
@@ -1504,8 +1508,8 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 if (event.location && !locationsList.includes(event.location)) return event.location;
                 return '';
             })()}" placeholder="예: 프라하 공항" style="flex: 1;">
-                            <button type="button" class="btn-pick-location" title="지도에서 선택" style="width: 40px; border: 1px solid #ddd; background: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <button type="button" class="btn-pick-location ${event.coords ? 'active' : ''}" title="지도에서 선택">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                                     <circle cx="12" cy="10" r="3"></circle>
                                 </svg>

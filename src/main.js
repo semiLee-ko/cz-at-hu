@@ -221,24 +221,25 @@ function renderScheduleView(container, scheduleId) {
                 </div>
             </div>
 
-            <!-- Floating Action Group -->
-            <div class="floating-action-group">
-                <button class="btn-floating action-map-floating" title="이동경로">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
-                        <line x1="8" y1="2" x2="8" y2="18"></line>
-                        <line x1="16" y1="6" x2="16" y2="22"></line>
-                    </svg>
-                </button>
-                <button class="btn-floating action-receipt-floating" title="영수증/정산 목록">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"></path>
-                        <path d="M16 8h-8"></path>
-                        <path d="M16 12h-8"></path>
-                        <path d="M13 16h-5"></path>
-                    </svg>
-                </button>
-            </div>
+
+        </div>
+        <!-- Floating Action Group (Moved outside view-container to prevent fixed positioning issues) -->
+        <div class="floating-action-group">
+            <button class="btn-floating action-map-floating" title="이동경로">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                    <line x1="8" y1="2" x2="8" y2="18"></line>
+                    <line x1="16" y1="6" x2="16" y2="22"></line>
+                </svg>
+            </button>
+            <button class="btn-floating action-receipt-floating" title="영수증/정산 목록">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"></path>
+                    <path d="M16 8h-8"></path>
+                    <path d="M16 12h-8"></path>
+                    <path d="M13 16h-5"></path>
+                </svg>
+            </button>
         </div>
     `;
 
@@ -248,6 +249,7 @@ function renderScheduleView(container, scheduleId) {
     container.querySelector('#btnChatBot').addEventListener('click', () => showChatBot(schedule));
 
     // Floating Buttons
+    // Floating Buttons (Scoped to container, but now they are direct children)
     container.querySelector('.action-map-floating').addEventListener('click', () => {
         showMapPopup(schedule.id);
     });
