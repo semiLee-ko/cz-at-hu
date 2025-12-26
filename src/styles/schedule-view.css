@@ -1873,7 +1873,7 @@ body.spotlight-active {
 
 .total-settlement-content {
     flex: 1;
-    padding: 0 20px 24px;
+    padding: 0 10px 24px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -1883,7 +1883,7 @@ body.spotlight-active {
 /* N-bbang Summary Card */
 .settlement-summary-card {
     background: white;
-    padding: 20px;
+    padding: 10px;
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     border: 1px solid #f1f5f9;
@@ -1984,7 +1984,7 @@ body.spotlight-active {
 }
 
 .transfer-amount {
-    font-size: 1.05rem;
+    font-size: 0.8rem;
     font-weight: 800;
     color: var(--secondary);
 }

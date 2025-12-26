@@ -400,7 +400,7 @@ function renderDays(days = [], allAccommodations = []) {
                     </svg>
                 </div>
                 <div class="events-list-view tip-content-wrapper" style="margin:0 !important; padding:0 !important;">
-                    <div class="tip-content-inner" style="margin-top:5px;">
+                    <div class="tip-content-inner">
                         ${eventGroups.length > 0 ? eventGroups.map((group, gIndex) => {
                 const dayIndex = days.indexOf(day);
                 return `
@@ -453,7 +453,8 @@ function renderDays(days = [], allAccommodations = []) {
                                         <div class="acc-details" style="gap:2px !important; margin-left:15px; margin-right:15px;">
                                             ${acc.location ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: flex-start; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> <span>${acc.location}</span></p>` : ''}
                                             ${acc.contact ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> <span>${acc.contact}</span></p>` : ''}
-                                            ${acc.url ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> <a href="${acc.url}" target="_blank" style="color: #45B8AF; text-decoration: none; font-weight: 600;">홈페이지 방문</a></p>` : ''}
+                                            ${acc.price ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg> <span>${Number(acc.price) ? Number(acc.price).toLocaleString() + '원' : acc.price}</span></p>` : ''}
+                                            ${acc.url ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg> <a href="${acc.url}" target="_blank" style="color: #45B8AF; text-decoration: none; font-weight: 600;">홈페이지 방문</a></p>` : ''}
                                             ${acc.checkIn || acc.checkOut ? `<p class="acc-detail-item" style="font-size: 0.85rem; margin-top: 2px; margin-bottom: 2px; color: #ffffff; display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> <span>체크인 ${acc.checkIn || '미지정'} / 체크아웃 ${acc.checkOut || '미지정'}</span></p>` : ''}
                                             ${acc.notes ? `<div class="acc-notes" style="font-size: 0.85rem; color: #6a6a6a; background: #fff; padding: 12px; border-radius: 8px; white-space: pre-wrap; line-height: 1.5; margin-top: 8px;">${acc.notes}</div>` : ''}
                                         </div>
@@ -698,37 +699,20 @@ function initSpotlightMode(schedule) {
             if (!schedule) return;
             const targetEvent = schedule.days[dayIdx].events[eventIdx];
 
-            if (targetEvent.coords) {
-                showCustomConfirm('저장된 위치 정보를 삭제할까요?', () => {
-                    delete targetEvent.coords;
-                    saveSchedule(schedule);
-                    updateActionStates(activeGroup);
-                });
-            } else {
-                showCustomConfirm('현재 위치를 이 일정의 정보로 저장할까요?', () => {
-                    if (!navigator.geolocation) {
-                        alert('Geolocation을 지원하지 않는 브라우저입니다.');
-                        return;
-                    }
+            // Location Picker Logic
+            // NEW: Always open picker (Edit Mode)
+            const currentLat = targetEvent.coords ? targetEvent.coords.lat : null;
+            const currentLng = targetEvent.coords ? targetEvent.coords.lng : null;
 
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        targetEvent.coords = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy,
-                            timestamp: new Date().toISOString()
-                        };
-                        saveSchedule(schedule);
-                        updateActionStates(activeGroup);
-                    }, (err) => {
-                        showCustomAlert('위치 정보를 가져오는데 실패했습니다: ' + err.message);
-                    }, {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
-                    });
-                });
-            }
+            window.showLocationPicker(currentLat, currentLng, (coords) => {
+                targetEvent.coords = {
+                    lat: coords.lat,
+                    lng: coords.lng,
+                    timestamp: new Date().toISOString()
+                };
+                saveSchedule(schedule);
+                updateActionStates(activeGroup);
+            });
         });
 
 
@@ -1272,7 +1256,8 @@ function showTotalSettlementPopup(scheduleId) {
     const btnCopy = modal.querySelector('.btn-copy-settlement');
     if (btnCopy) {
         btnCopy.onclick = async () => {
-            const text = transfers.map(t => `${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
+            const header = `LITTLE TRIP에서 ${schedule.title}의 정산 결과를 가져왔어요!\n\n`;
+            const text = header + transfers.map(t => `${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`).join('\n');
             try {
                 await navigator.clipboard.writeText(text);
                 showCustomAlert('정산 내역이 복사되었습니다!');
@@ -1673,6 +1658,144 @@ function loadLeaflet(callback) {
     script.onload = callback;
     document.head.appendChild(script);
 }
+
+// Location Picker with Search
+window.showLocationPicker = function (initialLat, initialLng, callback) {
+    // 1. Create Modal UI
+    const modal = document.createElement('div');
+    modal.className = 'map-popup-overlay'; // Reuse map popup style
+    modal.innerHTML = `
+        <div class="map-popup-container">
+            <div class="map-popup-header">
+                <h3>위치 선택</h3>
+                <button class="btn-close-map">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="map-search-bar" style="padding: 10px 15px; display: flex; gap: 8px; border-bottom: 1px solid #eee;">
+                <input type="text" id="mapSearchInput" placeholder="장소 검색 (예: 프라하 성)" style="flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                <button id="btnMapSearch" style="padding: 8px 16px; background: #45B8AF; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">검색</button>
+            </div>
+
+            <div id="pickerMap" class="map-content" style="height: 300px;"></div>
+            
+            <div class="map-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="locationStatus" style="font-size: 12px; color: #666;">지도를 클릭하여 위치를 선택하세요</span>
+                <button id="btnSelectLocation" style="padding: 8px 20px; background: #333; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">이 위치로 선택</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+
+    let selectedCoords = null;
+    let map = null;
+    let marker = null;
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    };
+
+    modal.querySelector('.btn-close-map').onclick = closeModal;
+
+    // Load Leaflet
+    loadLeaflet(() => {
+        // Default: Prague or provided coords
+        const defaultLat = 50.0755;
+        const defaultLng = 14.4378;
+
+        let targetLat = initialLat || defaultLat;
+        let targetLng = initialLng || defaultLng;
+
+        map = L.map('pickerMap').setView([targetLat, targetLng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Marker Logic
+        const updateMarker = (lat, lng) => {
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+
+                // Handle Drag
+                marker.on('dragend', (e) => {
+                    const pos = e.target.getLatLng();
+                    selectedCoords = { lat: pos.lat, lng: pos.lng };
+                    document.getElementById('locationStatus').textContent = `선택됨: ${pos.lat.toFixed(4)}, ${pos.lng.toFixed(4)}`;
+                });
+            }
+            selectedCoords = { lat, lng };
+            map.panTo([lat, lng]);
+            document.getElementById('locationStatus').textContent = `선택됨: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        };
+
+        if (initialLat && initialLng) {
+            updateMarker(initialLat, initialLng);
+        } else if (navigator.geolocation && !initialLat) {
+            // Try geolocation if no initial coords
+            navigator.geolocation.getCurrentPosition((pos) => {
+                updateMarker(pos.coords.latitude, pos.coords.longitude);
+            }, () => {
+                // Fail silently, stay at default
+            }, { enableHighAccuracy: true });
+        }
+
+        // Map Click
+        map.on('click', (e) => {
+            updateMarker(e.latlng.lat, e.latlng.lng);
+        });
+
+        // Search Logic
+        const handleSearch = () => {
+            const query = document.getElementById('mapSearchInput').value.trim();
+            if (!query) return;
+
+            // Use local proxy to avoid CORS and add User-Agent
+            fetch(`/api/nominatim/search?q=${encodeURIComponent(query)}&format=json`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lon = parseFloat(data[0].lon);
+                        updateMarker(lat, lon);
+                        map.setView([lat, lon], 15);
+                    } else {
+                        alert('장소를 찾을 수 없습니다.');
+                    }
+                })
+                .catch(() => alert('검색 중 오류가 발생했습니다.'));
+        };
+
+        document.getElementById('btnMapSearch').onclick = handleSearch;
+        document.getElementById('mapSearchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSearch();
+        });
+
+        // Confirm Selection
+        document.getElementById('btnSelectLocation').onclick = () => {
+            if (selectedCoords) {
+                callback(selectedCoords);
+                closeModal();
+            } else {
+                alert('위치를 선택해주세요.');
+            }
+        };
+
+        // Invalidate size to fix rendering issues
+        setTimeout(() => map.invalidateSize(), 200);
+    });
+};
+
+
 
 // 앱 시작
 init();

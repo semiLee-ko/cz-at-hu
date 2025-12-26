@@ -1275,6 +1275,10 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 const endTime = eventItem.querySelector('.event-end-time').value.trim();
                 const description = eventItem.querySelector('.event-description').value.trim();
 
+                const lat = eventItem.querySelector('.event-lat')?.value;
+                const lng = eventItem.querySelector('.event-lng')?.value;
+                const coords = (lat && lng) ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null;
+
                 // Only save events that have at least one of: location, place, description, start time, end time
                 if (location || place || description || startTime || endTime) {
                     events.push({
@@ -1282,7 +1286,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                         place,
                         startTime,
                         endTime,
-                        description
+                        endTime,
+                        description,
+                        coords // Save Coords
                     });
                 } else {
                     // Count empty events (absolutely nothing filled)
@@ -1409,6 +1415,31 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             });
         });
 
+        // NEW: Location Picker Delegation
+        daysContainer.addEventListener('click', (e) => {
+            const pickBtn = e.target.closest('.btn-pick-location');
+            if (pickBtn) {
+                const eventItem = pickBtn.closest('.event-item');
+                const latInput = eventItem.querySelector('.event-lat');
+                const lngInput = eventItem.querySelector('.event-lng');
+                const placeInput = eventItem.querySelector('.event-place');
+
+                const currentLat = latInput.value ? parseFloat(latInput.value) : null;
+                const currentLng = lngInput.value ? parseFloat(lngInput.value) : null;
+
+                if (window.showLocationPicker) {
+                    window.showLocationPicker(currentLat, currentLng, (coords) => {
+                        latInput.value = coords.lat;
+                        lngInput.value = coords.lng;
+                        // Optional: if place is empty, maybe fill with something? 
+                        // But we don't return address yet.
+                    });
+                } else {
+                    alert('지도 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                }
+            }
+        });
+
         // Add collapse/expand functionality for event items
         daysContainer.querySelectorAll('[data-toggle="event"]').forEach(header => {
             header.addEventListener('click', () => {
@@ -1457,13 +1488,23 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     
                     <div class="form-group-compact">
                         <label>위치</label>
-                        <input type="text" class="event-place" value="${(() => {
-                // Data Mapping Logic: Support detail, or location if it's a string not in checkboxes
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" class="event-place" value="${(() => {
+                // Data Mapping Logic
                 if (event.place) return event.place;
                 if (event.detail) return event.detail;
                 if (event.location && !locationsList.includes(event.location)) return event.location;
                 return '';
-            })()}" placeholder="예: 프라하 공항">
+            })()}" placeholder="예: 프라하 공항" style="flex: 1;">
+                            <button type="button" class="btn-pick-location" title="지도에서 선택" style="width: 40px; border: 1px solid #ddd; background: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                        <input type="hidden" class="event-lat" value="${event.coords?.lat || ''}">
+                        <input type="hidden" class="event-lng" value="${event.coords?.lng || ''}">
                     </div>
                     
                     <div class="form-row">

@@ -694,6 +694,7 @@
 .day-card.dragging {
     opacity: 0.5;
     background: #f9fafb;
+    pointer-events: none;
 }
 
 /* Tip Header Specific Layout Fixes */
