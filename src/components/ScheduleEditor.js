@@ -1277,6 +1277,14 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
                 const lat = eventItem.querySelector('.event-lat')?.value;
                 const lng = eventItem.querySelector('.event-lng')?.value;
+
+                // Debug Log
+                if (lat || lng) {
+                    console.log(`[Debug] Found coords in DOM: ${lat}, ${lng}`);
+                } else {
+                    // console.log('[Debug] No coords in DOM for this item');
+                }
+
                 const coords = (lat && lng) ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null;
 
                 // Only save events that have at least one of: location, place, description, start time, end time

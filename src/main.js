@@ -211,7 +211,7 @@ function renderScheduleView(container, scheduleId) {
             
             <div class="view-sections entry-stagger-2">
                 <div class="view-section active" id="section-itinerary">
-                    ${renderDays(schedule.days, schedule.accommodations)}
+                    ${renderDays(schedule.days, schedule.accommodations, schedule.startDate)}
                 </div>
                 <div class="view-section" id="section-checklist">
                     ${renderChecklistsSection(schedule.checklists)}
@@ -333,6 +333,9 @@ function renderScheduleView(container, scheduleId) {
 
     // Initialize day accordion
     initDayAccordion(schedule);
+
+    // Initialize weather
+    initWeatherDisplay();
 }
 
 // 일정 일수 계산
@@ -346,7 +349,7 @@ function calculateDuration(startDate, endDate) {
 }
 
 // 일별 일정 렌더링
-function renderDays(days = [], allAccommodations = []) {
+function renderDays(days = [], allAccommodations = [], startDate = null) {
     if (days.length === 0) {
         return '<div class="empty-state"><p>아직 일정이 없습니다</p></div>';
     }
@@ -361,6 +364,15 @@ function renderDays(days = [], allAccommodations = []) {
         const eventGroups = [];
         if (day.events && day.events.length > 0) {
             let currentGroup = null;
+            let dateStr = day.date; // Fallback
+            if (startDate) {
+                try {
+                    const d = new Date(startDate);
+                    d.setDate(d.getDate() + (day.day - 1));
+                    dateStr = d.toISOString().split('T')[0];
+                } catch (e) { }
+            }
+
             day.events.forEach((event, index) => {
                 const startTime = event.startTime || event.time || '';
                 if (startTime || index === 0) {
@@ -368,13 +380,16 @@ function renderDays(days = [], allAccommodations = []) {
                         startTime: startTime,
                         endTime: event.endTime || '',
                         events: [],
-                        startEventIndex: index // Store the index of the first event in the group
+                        startEventIndex: index,
+                        dateStr: dateStr // Pass to group
                     };
                     eventGroups.push(currentGroup);
                 }
                 currentGroup.events.push(event);
             });
         }
+
+
 
         return `
             <div class="day-card" style="margin-left: 15px; margin-right: 15px;">
@@ -394,6 +409,7 @@ function renderDays(days = [], allAccommodations = []) {
                     return day.date;
                 }
             })()}</span>
+                        ${/* Old Weather Container Removed */ ''}
                     </div>
                     <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
@@ -416,7 +432,10 @@ function renderDays(days = [], allAccommodations = []) {
                                             <div class="event">
                                                 <div class="event-time-col">
                                                     ${eIndex === 0 && startTime ? `
-                                                        <span class="event-time-bullet"></span>
+                                                        <div class="marker-wrapper" style="position: relative; width: 12px; height: 12px; margin-right: 6px; display: flex; align-items: center; justify-content: center;">
+                                                            <span class="event-time-bullet" style="margin: 0; position: absolute;"></span>
+                                                            ${event.coords ? `<div class="weather-container-event" data-lat="${event.coords.lat}" data-lng="${event.coords.lng}" data-date="${group.dateStr}" style="position: absolute; z-index: 5; transform: translateX(-3px);"></div>` : ''}
+                                                        </div>
                                                         <span class="event-time-start">${startTime}</span>
                                                     ` : '<span class="event-time-spacer"></span>'}
                                                     <span class="event-time-dash">${(eIndex === 0 && (startTime || endTime)) ? '-' : ''}</span>
@@ -645,6 +664,7 @@ function initSpotlightMode(schedule) {
         actionBar = document.createElement('div');
         actionBar.className = 'event-action-bar';
         actionBar.innerHTML = `
+            <div class="weather-spotlight-display" style="margin-right: auto; display: flex; align-items: center; gap: 8px; padding-left: 10px; font-weight: 600; font-size: 0.9rem; color: #333;"></div>
             <div class="action-item action-camera" title="카메라">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -757,6 +777,27 @@ function initSpotlightMode(schedule) {
             settlementBtn.classList.add('active-green');
         } else {
             settlementBtn.classList.remove('active-green');
+        }
+
+        // Spotlight Weather Update
+        const weatherDisplay = actionBar.querySelector('.weather-spotlight-display');
+        if (firstEvent && firstEvent.coords) {
+            // Find weather container to get valid date
+            const wContainer = group.querySelector('.weather-container-event');
+            if (wContainer && wContainer.dataset.date) {
+                fetchWeather(firstEvent.coords.lat, firstEvent.coords.lng, wContainer.dataset.date).then(weather => {
+                    if (weather) {
+                        weatherDisplay.innerHTML = `${getWeatherSVG(weather.code)} <span style="margin-left:4px;">${weather.min}° / ${weather.max}°</span>`;
+                        weatherDisplay.style.opacity = 1;
+                    } else {
+                        weatherDisplay.innerHTML = '';
+                    }
+                });
+            } else {
+                weatherDisplay.innerHTML = '';
+            }
+        } else {
+            weatherDisplay.innerHTML = '';
         }
     };
 
@@ -1796,6 +1837,105 @@ window.showLocationPicker = function (initialLat, initialLng, callback) {
 };
 
 
+
+// --- Weather Integration ---
+
+function getWeatherSVG(code) {
+    // Return SVG strings for cleaner look
+    const style = 'width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#45B8AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+
+    // Sun (0)
+    if (code === 0) return `<svg ${style} class="weather-icon-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+
+    // Cloud (1-3)
+    if (code >= 1 && code <= 3) return `<svg ${style} class="weather-icon-cloud"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>`;
+
+    // Rain (51-67, 80-82)
+    if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return `<svg ${style} class="weather-icon-rain"><line x1="16" y1="13" x2="16" y2="21"></line><line x1="8" y1="13" x2="8" y2="21"></line><line x1="12" y1="15" x2="12" y2="23"></line><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path></svg>`;
+
+    // Snow (71-77, 85-86)
+    if ((code >= 71 && code <= 77) || (code === 85 || code === 86)) return `<svg ${style} class="weather-icon-snow"><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line><line x1="19.07" y1="4.93" x2="4.93" y2="19.07"></line></svg>`;
+
+    // Thunder (95-99)
+    if (code >= 95) return `<svg ${style} class="weather-icon-thunder"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"></path><polyline points="13 11 9 17 15 17 11 23"></polyline></svg>`;
+
+    // Default Fog/Etc
+    return `<svg ${style} class="weather-icon-default"><path d="M5.5 10H8a2.5 2.5 0 0 1 0 5h-.5"></path><path d="M12 10h3.5a2.5 2.5 0 1 1 0 5H15"></path><path d="M19 10h.5a2.5 2.5 0 0 1 0 5H19"></path></svg>`;
+}
+
+async function fetchWeather(lat, lng, dateStr) {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const targetDate = new Date(dateStr);
+        targetDate.setHours(0, 0, 0, 0);
+
+        const diffTime = targetDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Only fetch for 0 to 14 days in future
+        if (diffDays < 0 || diffDays > 14) {
+            return null; // Out of forecast range
+        }
+
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&start_date=${dateStr}&end_date=${dateStr}`;
+
+        // Use browser fetch directly (Open-Meteo allows CORS)
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.daily && data.daily.weather_code && data.daily.weather_code.length > 0) {
+            return {
+                code: data.daily.weather_code[0],
+                max: Math.round(data.daily.temperature_2m_max[0]),
+                min: Math.round(data.daily.temperature_2m_min[0])
+            };
+        }
+        return null;
+    } catch (e) {
+        console.error("Weather fetch failed:", e);
+        return null;
+    }
+}
+
+
+function initWeatherDisplay() {
+    const containers = document.querySelectorAll('.weather-container-event');
+
+    containers.forEach(async container => {
+        const lat = container.dataset.lat;
+        const lng = container.dataset.lng;
+        const date = container.dataset.date;
+
+        if (!lat || !lng || !date) return;
+
+        // Prevent duplicate loads
+        if (container.dataset.loaded) return;
+        container.dataset.loaded = 'true';
+
+        const weather = await fetchWeather(lat, lng, date);
+        if (weather) {
+            container.innerHTML = `
+                <div class="weather-badge" style="display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: transparent; opacity: 0; animation: fadeIn 0.5s forwards;">
+                    ${getWeatherSVG(weather.code)}
+                </div>
+                <style>
+                    @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+                </style>
+            `;
+            container.style.opacity = 1;
+
+            // Hide the bullet underneath
+            const wrapper = container.parentElement;
+            if (wrapper && wrapper.classList.contains('marker-wrapper')) {
+                const bullet = wrapper.querySelector('.event-time-bullet');
+                if (bullet) bullet.style.visibility = 'hidden';
+            }
+        } else {
+            container.style.display = 'none';
+        }
+    });
+}
 
 // 앱 시작
 init();
