@@ -470,9 +470,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             else adultInput.classList.remove('input-error');
         }
 
+        // Child input is optional - no error highlighting needed
         if (childInput) {
-            if (childMembers.size === 0) childInput.classList.add('input-error');
-            else childInput.classList.remove('input-error');
+            childInput.classList.remove('input-error');
         }
 
         // Location Info Validation
@@ -483,7 +483,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             locationInput.classList.remove('input-error');
         }
 
-        const isStep1Valid = title && startDate && endDate && hasLocations && (adultMembers.size > 0) && (childMembers.size > 0);
+        const isStep1Valid = title && startDate && endDate && hasLocations && (adultMembers.size > 0);
         statuses[1] = isStep1Valid ? 'valid' : 'invalid'; // Mandatory
 
         // Step 2: Days (Optional)
@@ -553,10 +553,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         if (formData.get('startDate')) step1Checks++;
         if (formData.get('endDate')) step1Checks++;
         if (adultMembers.size > 0) step1Checks++;
-        if (childMembers.size > 0) step1Checks++;
         if (locations.size > 0) step1Checks++;
 
-        const totalStep1 = 6;
+        const totalStep1 = 5;
         const step1Percent = (step1Checks / totalStep1) * 100;
 
         container.querySelectorAll('.step-item').forEach(item => {

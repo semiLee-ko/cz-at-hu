@@ -9,6 +9,8 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
     let editingAccommodationId = null;
     let draggedItem = null;
     let placeholder = null;
+    let expandedAccommodations = new Set(); // Track expanded accommodation IDs
+    let clickListenerAttached = false; // Track if click listener is attached
 
     function generateAccommodationId() {
         return 'acc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -50,8 +52,10 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
         if (accommodations.length === 0) {
             accommodationList.innerHTML = '<p class="no-events">등록된 숙소가 없습니다. 새 숙소를 추가해보세요.</p>';
         } else {
-            accommodationList.innerHTML = accommodations.map(acc => `
-            <div class="day-card tip-card collapsed" draggable="true" data-acc-id="${acc.id}">
+            accommodationList.innerHTML = accommodations.map(acc => {
+                const isExpanded = expandedAccommodations.has(acc.id);
+                return `
+            <div class="day-card tip-card ${isExpanded ? '' : 'collapsed'}" draggable="true" data-acc-id="${acc.id}">
                 <div class="day-header" data-toggle="acc">
                     <div class="drag-handle" draggable="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -83,8 +87,8 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
                                         <line x1="3" y1="10" x2="21" y2="10"></line>
                                     </svg>
                                     <span>${acc.assignedDates?.length > 0
-                    ? acc.assignedDates.map(date => `Day ${getDayNumber(date)}`).join(', ')
-                    : '일정 선택'}</span>
+                        ? acc.assignedDates.map(date => `Day ${getDayNumber(date)}`).join(', ')
+                        : '일정 선택'}</span>
                                 </button>
                                 <button type="button" class="btn-delete-acc-ghost" data-acc-id="${acc.id}" title="삭제">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -111,9 +115,9 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
                                         <p class="acc-detail-item" title="가격">
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> 
                                             <span>${(() => {
-                        const cleanPrice = acc.price.replace(/,/g, '');
-                        return isNaN(cleanPrice) || cleanPrice === '' ? acc.price : `₩${Number(cleanPrice).toLocaleString()}`;
-                    })()}</span>
+                            const cleanPrice = acc.price.replace(/,/g, '');
+                            return isNaN(cleanPrice) || cleanPrice === '' ? acc.price : `₩${Number(cleanPrice).toLocaleString()}`;
+                        })()}</span>
                                         </p>` : ''}
                                     ${acc.url ? `
                                         <p class="acc-detail-item" title="URL">
@@ -139,7 +143,9 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
                         </div>
                     </div>
                 </div>
-            `).join('');
+            </div>
+            `;
+            }).join('');
         }
 
         // 2. Render Guide separately at the bottom
@@ -168,15 +174,43 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
         const accommodationList = stepRoot.querySelector('#accommodationList');
         const formSection = stepRoot.querySelector('.accommodation-form');
 
-        accommodationList.querySelectorAll('.day-header').forEach(header => {
-            if (!header.dataset.listenerAttached) {
-                header.addEventListener('click', (e) => {
-                    if (e.target.closest('.drag-handle')) return;
-                    header.closest('.day-card').classList.toggle('collapsed');
-                });
-                header.dataset.listenerAttached = 'true';
-            }
-        });
+        if (!accommodationList) {
+            console.warn('accommodationList not found');
+            return;
+        }
+
+
+        const headers = accommodationList.querySelectorAll('.day-header');
+        console.log('Found headers:', headers.length);
+
+        // Use event delegation instead of forEach
+        // Only add listener once using a flag
+        if (!clickListenerAttached) {
+            accommodationList.addEventListener('click', (e) => {
+                const header = e.target.closest('.day-header');
+                if (!header) return;
+
+                // Prevent toggle if clicking on drag handle or buttons
+                if (e.target.closest('.drag-handle') || e.target.closest('button')) return;
+
+                const card = header.closest('.day-card');
+                if (card) {
+                    e.stopPropagation();
+                    const accId = card.dataset.accId;
+
+                    const isClosing = !card.classList.contains('collapsed');
+                    if (isClosing) {
+                        expandedAccommodations.delete(accId);
+                        card.classList.add('collapsed');
+                    } else {
+                        expandedAccommodations.add(accId);
+                        card.classList.remove('collapsed');
+                    }
+                    console.log('Toggled:', accId, 'Collapsed:', card.classList.contains('collapsed'));
+                }
+            });
+            clickListenerAttached = true;
+        }
 
         accommodationList.querySelectorAll('.btn-delete-acc-ghost').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -411,6 +445,14 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
 
         const days = generateDaysFromDateRange(startDate, endDate);
         const acc = accommodations.find(a => a.id === accId);
+
+        // Calculate dates occupied by OTHER accommodations
+        const occupiedDates = new Set(
+            accommodations
+                .filter(a => a.id !== accId)
+                .flatMap(a => a.assignedDates || [])
+        );
+
         const modalHTML = `
             <div class="date-modal-overlay" id="dateModal">
                 <div class="date-modal-content">
@@ -419,12 +461,18 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
                         <button type="button" class="btn-close-modal" id="btnCloseModal">×</button>
                     </div>
                     <div class="date-checkboxes">
-                        ${days.map(day => `
-                            <label class="date-checkbox-label">
-                                <input type="checkbox" value="${day.date}" ${acc.assignedDates?.includes(day.date) ? 'checked' : ''}>
+                        ${days.map(day => {
+            const isOccupied = occupiedDates.has(day.date);
+            const isChecked = acc.assignedDates?.includes(day.date);
+
+            return `
+                            <label class="date-checkbox-label ${isOccupied ? 'disabled' : ''}" title="${isOccupied ? '다른 숙소에 이미 배정된 날짜입니다' : ''}">
+                                <input type="checkbox" value="${day.date}" ${isChecked ? 'checked' : ''} ${isOccupied ? 'disabled' : ''}>
                                 <span class="date-checkbox-text">Day ${day.day} - ${day.date} (${day.dayName})</span>
+                                ${isOccupied ? '<span style="font-size: 0.7rem; color: #ef4444; margin-left: auto;">배정됨</span>' : ''}
                             </label>
-                        `).join('')}
+                            `;
+        }).join('')}
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn-modal-cancel" id="btnModalCancel">취소</button>

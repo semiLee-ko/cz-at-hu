@@ -1643,7 +1643,7 @@ function showMapPopup(scheduleId) {
 
         // Draw polyline
         const polyline = L.polyline(latlngs, {
-            color: '#45B8AF',
+            color: '#ff0000ff',
             weight: 4,
             opacity: 0.7,
             dashArray: '10, 10',

@@ -560,8 +560,8 @@
     color: #1e40af;
 }
 
-.day-card.collapsed .events-list,
-.day-card.collapsed .btn-add-event {
+.day-card.collapsed:not(.tip-card) .events-list,
+.day-card.collapsed:not(.tip-card) .btn-add-event {
     display: none;
 }
 
@@ -625,10 +625,16 @@
     /* Context for absolute delete button */
 }
 
-/* Collapsed State for Tips (Override default display:none with animation) */
-.tip-card.collapsed .tip-content-wrapper {
+/* Expanded State - Explicit */
+.day-card.tip-card:not(.collapsed) .tip-content-wrapper {
     display: grid !important;
-    grid-template-rows: 0fr;
+    grid-template-rows: 1fr !important;
+}
+
+/* Collapsed State for Tips (Override default display:none with animation) */
+.day-card.tip-card.collapsed .tip-content-wrapper {
+    display: grid !important;
+    grid-template-rows: 0fr !important;
 }
 
 .tip-body {

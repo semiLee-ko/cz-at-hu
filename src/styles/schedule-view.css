@@ -1079,7 +1079,7 @@ body.spotlight-active {
 }
 
 .action-item.active-green {
-    color: #10b981 !important;
+    color: #45B8AF !important;
     background: rgba(16, 185, 129, 0.1);
 }
 
@@ -1364,7 +1364,7 @@ body.spotlight-active {
 
 .exp-amount {
     font-weight: 800;
-    color: #10b981;
+    color: #45B8AF;
     font-size: 0.95rem;
 }
 
@@ -1606,7 +1606,7 @@ body.spotlight-active {
 
 .price-preview {
     font-weight: 700;
-    color: #10b981;
+    color: #45B8AF;
     font-size: 0.9rem;
 }
 
@@ -1768,7 +1768,7 @@ body.spotlight-active {
 }
 
 .view-container .btn-floating.action-receipt-floating {
-    background: #10b981;
+    background: #45B8AF;
     color: white;
 }
 
