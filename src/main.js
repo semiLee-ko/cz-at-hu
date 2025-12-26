@@ -249,11 +249,11 @@ function renderScheduleView(container, scheduleId) {
 
     // Floating Buttons
     container.querySelector('.action-map-floating').addEventListener('click', () => {
-        showMapPopup();
+        showMapPopup(schedule.id);
     });
 
     container.querySelector('.action-receipt-floating').addEventListener('click', () => {
-        showTotalSettlementPopup();
+        showTotalSettlementPopup(schedule.id);
     });
 
     // Tabs functionality
@@ -332,7 +332,7 @@ function renderScheduleView(container, scheduleId) {
     initChecklistInteraction(schedule);
 
     // Initialize day accordion
-    initDayAccordion();
+    initDayAccordion(schedule);
 }
 
 // 일정 일수 계산
@@ -471,11 +471,23 @@ function renderDays(days = [], allAccommodations = []) {
 
 // 체크리스트 섹션 렌더링
 function renderChecklistsSection(checklists = []) {
-    if (!checklists || checklists.length === 0) return '';
+    // Handle both old object format and new array format
+    let checklistArray = [];
+
+    if (Array.isArray(checklists)) {
+        checklistArray = checklists;
+    } else if (checklists && typeof checklists === 'object') {
+        // Convert old format {packing: [...], todo: [...]} to new array format
+        const packing = checklists.packing || [];
+        const todo = checklists.todo || [];
+        checklistArray = [...packing, ...todo];
+    }
+
+    if (!checklistArray || checklistArray.length === 0) return '';
 
     return `
         <div class="view-list-container" style="margin-top: 10px;">
-            ${checklists.map(list => `
+            ${checklistArray.map(list => `
                 <div class="day-card" style="margin-bottom: 5px; margin-left: 15px; margin-right: 15px; border: 1px solid #e2e8f0;">
                     <div class="day-header" style="background: #456eb8; padding: 12px 15px;">
                         <div class="day-info">
@@ -594,8 +606,7 @@ function renderTipsSection(tips = []) {
 }
 
 // Initialize accordion functionality for day cards
-// Initialize accordion functionality for day cards
-function initDayAccordion() {
+function initDayAccordion(schedule) {
     const dayCards = document.querySelectorAll('.day-card, .day-card-under');
     dayCards.forEach(card => {
         const header = card.querySelector('.day-header');
@@ -606,13 +617,18 @@ function initDayAccordion() {
         }
     });
 
-    initSpotlightMode();
+    initSpotlightMode(schedule);
 }
 
 // Spotlight & Itinerary Action Menu
-function initSpotlightMode() {
+function initSpotlightMode(schedule) {
     const eventGroups = document.querySelectorAll('.event-group');
     if (eventGroups.length === 0) return;
+
+    // Store schedule ID in each event group for later reference
+    eventGroups.forEach(group => {
+        group.dataset.scheduleId = schedule.id;
+    });
 
     // Create Spotlight Overlay if it doesn't exist
     let overlay = document.querySelector('.spotlight-overlay');
@@ -675,9 +691,11 @@ function initSpotlightMode() {
             const activeGroup = document.querySelector('.event-group.active-spotlight');
             if (!activeGroup) return;
 
+            const scheduleId = activeGroup.dataset.scheduleId;
             const dayIdx = parseInt(activeGroup.dataset.dayIndex);
             const eventIdx = parseInt(activeGroup.dataset.eventIndex);
-            const schedule = getCurrentSchedule();
+            const schedule = getSchedule(scheduleId);
+            if (!schedule) return;
             const targetEvent = schedule.days[dayIdx].events[eventIdx];
 
             if (targetEvent.coords) {
@@ -718,7 +736,10 @@ function initSpotlightMode() {
         // Settlement Logic
         actionBar.querySelector('.action-settlement').addEventListener('click', () => {
             const activeGroup = document.querySelector('.event-group.active-spotlight');
-            if (activeGroup) showSettlementPopup(activeGroup, updateActionStates);
+            if (activeGroup) {
+                const scheduleId = activeGroup.dataset.scheduleId;
+                showSettlementPopup(activeGroup, updateActionStates, scheduleId);
+            }
         });
     }
 
@@ -732,7 +753,9 @@ function initSpotlightMode() {
     };
 
     const updateActionStates = (group) => {
-        const schedule = getCurrentSchedule();
+        const scheduleId = group.dataset.scheduleId;
+        const schedule = getSchedule(scheduleId);
+        if (!schedule) return;
         const dayIdx = group.dataset.dayIndex;
         const eventIdx = group.dataset.eventIndex;
         const firstEvent = schedule.days[dayIdx]?.events[eventIdx];
@@ -849,8 +872,9 @@ function showCustomAlert(message) {
 
 
 // Settlement Popup for Expense Management (Integrated with Members)
-function showSettlementPopup(group, updateActionStatesCallback) {
-    const schedule = getCurrentSchedule();
+function showSettlementPopup(group, updateActionStatesCallback, scheduleId) {
+    const schedule = getSchedule(scheduleId);
+    if (!schedule) return;
     const dayIdx = group.dataset.dayIndex;
     const eventIdx = group.dataset.eventIndex;
     const event = schedule.days[dayIdx]?.events[eventIdx];
@@ -1042,8 +1066,8 @@ function showSettlementPopup(group, updateActionStatesCallback) {
 }
 
 // Total Settlement (N-bbang) Popup
-function showTotalSettlementPopup() {
-    const schedule = getCurrentSchedule();
+function showTotalSettlementPopup(scheduleId) {
+    const schedule = getSchedule(scheduleId);
     if (!schedule) return;
 
     const modal = document.createElement('div');
@@ -1540,8 +1564,8 @@ function showCameraPopup(group, imageFile) {
 }
 
 // Map Popup with Leaflet
-function showMapPopup() {
-    const schedule = getCurrentSchedule();
+function showMapPopup(scheduleId) {
+    const schedule = getSchedule(scheduleId);
     if (!schedule) return;
 
     // Collect all coordinates in order
