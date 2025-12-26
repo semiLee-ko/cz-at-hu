@@ -715,7 +715,6 @@ body.spotlight-active .event-group.active-spotlight {
 
 .action-item.active-red {
     color: #ef4444 !important;
-    background: rgba(239, 68, 68, 0.1);
 }
 
 .action-item:active {
@@ -911,7 +910,6 @@ body.spotlight-active {
 
 .action-item.active-blue {
     color: #3b82f6 !important;
-    background: rgba(59, 130, 246, 0.1);
 }
 
 /* Member Selection Modal */
@@ -1085,7 +1083,6 @@ body.spotlight-active {
 
 .action-item.active-green {
     color: #45B8AF !important;
-    background: rgba(16, 185, 129, 0.1);
 }
 
 /* Settlement Popup Modal */

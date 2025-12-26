@@ -10,6 +10,26 @@ export function showChatBot(schedule) {
     const overlay = document.createElement('div');
     overlay.className = 'chatbot-modal-overlay';
 
+    // Calculate Total Expenses
+    let totalTripExpense = 0;
+    const accommodationExpenses = (schedule.accommodations || []).reduce((sum, acc) => {
+        const price = parseInt((acc.price || '0').replace(/[^0-9]/g, ''), 10);
+        return sum + (isNaN(price) ? 0 : price);
+    }, 0);
+    totalTripExpense += accommodationExpenses;
+
+    (schedule.days || []).forEach(day => {
+        (day.events || []).forEach(event => {
+            if (event.expenses) {
+                event.expenses.forEach(exp => {
+                    // Assuming exp.amount is number or string number
+                    const amount = typeof exp.amount === 'string' ? parseInt(exp.amount, 10) : exp.amount;
+                    if (!isNaN(amount)) totalTripExpense += amount;
+                });
+            }
+        });
+    });
+
     // Construct trip context for AI
     const tripContext = {
         title: schedule.title,
@@ -22,12 +42,27 @@ export function showChatBot(schedule) {
             adults: schedule.members?.adultList?.join(', ') || '없음',
             children: schedule.members?.childList?.join(', ') || '없음'
         },
+        totalExpense: totalTripExpense.toLocaleString() + '원',
         itinerary: (schedule.days || []).map(day =>
-            `Day ${day.day} (${day.date}): ` +
-            day.events.map(e => `[${e.startTime || e.time || ''}~${e.endTime || ''}] ${e.place || ''} (${e.description || ''}) - 위치: ${e.location || ''}`).join(', ')
-        ).join('\n'),
+            `Day ${day.day} (${day.date}):\n` +
+            day.events.map(e => {
+                let details = `  - [${e.startTime || '시간미정'}~${e.endTime || ''}] ${e.place || e.description || '장소명 없음'}`;
+                if (e.location) details += ` (위치: ${e.location})`;
+
+                // Expenses
+                if (e.expenses && e.expenses.length > 0) {
+                    const expDetails = e.expenses.map(ex => `${parseInt(ex.amount).toLocaleString()}원(결제:${ex.payer}, 방법:${ex.splitMethod})`).join(', ');
+                    details += `\n    └ 비용: ${expDetails}`;
+                }
+                // Memos
+                if (e.memo) {
+                    details += `\n    └ 메모: ${e.memo}`;
+                }
+                return details;
+            }).join('\n')
+        ).join('\n\n'),
         accommodations: (schedule.accommodations || []).map(acc =>
-            `- 숙소명: ${acc.name}\n  유형: ${acc.type || '미지정'}\n  위치: ${acc.location || '정보 없음'}\n  연락처: ${acc.contact || '정보 없음'}\n  가격: ${acc.price || '정보 없음'}\n  URL: ${acc.url || '정보 없음'}\n  체크인: ${acc.checkIn || '미지정'}\n  체크아웃: ${acc.checkOut || '미지정'}\n  메모: ${acc.notes || '없음'}\n  배정날짜: ${acc.assignedDates?.join(', ') || '미배정'}`
+            `- 숙소명: ${acc.name}\n  유형: ${acc.type || '미지정'}\n  위치: ${acc.location || '정보 없음'}\n  연락처: ${acc.contact || '정보 없음'}\n  가격: ${acc.price || '0'}원\n  URL: ${acc.url || '정보 없음'}\n  체크인: ${acc.checkIn || '미지정'}\n  체크아웃: ${acc.checkOut || '미지정'}\n  메모: ${acc.notes || '없음'}\n  배정날짜: ${acc.assignedDates?.join(', ') || '미배정'}`
         ).join('\n\n'),
         checklist: (schedule.checklists || []).map(cl =>
             `${cl.name} (${cl.type === 'todo' ? '할 일' : '준비물'}): ` +
@@ -43,15 +78,23 @@ export function showChatBot(schedule) {
 [성인 명단] ${tripContext.memberNames.adults}
 [아동 명단] ${tripContext.memberNames.children}
 [방문국가/도시] ${tripContext.countries}
-[상세 일정]
+[총 예상 지출] ${tripContext.totalExpense} (숙소 포함, 미입력 비용 제외)
+
+[상세 일정 및 지출]
 ${tripContext.itinerary || "일정 정보가 없습니다."}
+
 [숙소 및 캠핑장 상세 정보]
 ${tripContext.accommodations || "숙소 정보가 없습니다."}
+
 [체크리스트 상태]
 ${tripContext.checklist || "체크리스트 정보가 없습니다."}
+
 [여행 꿀팁]
 ${tripContext.tips || "팁 정보가 없습니다."}
     `.trim();
+
+    // For Debugging
+    console.log("Generatd Chatbot Context:", contextString);
 
     overlay.innerHTML = `
         <div class="chatbot-container">
