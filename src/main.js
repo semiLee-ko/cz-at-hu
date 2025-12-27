@@ -1814,7 +1814,10 @@ function showMapPopup(scheduleId) {
 
     // Load Leaflet dynamically
     loadLeaflet(() => {
-        const map = L.map('map', { zoomControl: true }).setView([locations[0].lat, locations[0].lng], 13);
+        const map = L.map('map', {
+            zoomControl: true,
+            preferCanvas: true // Use Canvas renderer to fix html2canvas offset issues
+        }).setView([locations[0].lat, locations[0].lng], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
@@ -1857,20 +1860,20 @@ function showMapPopup(scheduleId) {
             if (i === 0) marker.openPopup();
         });
 
-        // Draw polyline
+        // Draw polyline immediately
         const polyline = L.polyline(latlngs, {
-            color: '#FF6B6B', // Clean red
-            weight: 4,
-            opacity: 0.8,
+            color: '#FF0000', // Pure Red
+            weight: 5,
+            opacity: 1.0,
             dashArray: '10, 10',
             lineJoin: 'round'
         }).addTo(map);
 
-        // Zoom to fit after modal transition
+        // Simple invalidation after small delay to ensure container is ready
         setTimeout(() => {
             map.invalidateSize();
             map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
-        }, 500);
+        }, 100);
     });
 }
 
