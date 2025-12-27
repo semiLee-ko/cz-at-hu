@@ -302,7 +302,7 @@
     position: relative;
     display: flex;
     align-items: flex-start;
-    margin-left: 15px;
+    margin-left: 8px;
     margin-right: 15px;
     z-index: 1;
 }
@@ -311,8 +311,8 @@
 /* .timeline-node { ... } */
 
 .view-container .event-time-col {
-    width: 120px;
-    /* Increased to 120px to fit wider time slots */
+    width: 88px;
+    /* Decreased to 88px (12+2+34+6+34) */
     text-align: right;
     padding-right: 0;
     flex-shrink: 0;
@@ -326,8 +326,8 @@
     font-size: 0.85rem;
     color: var(--text-secondary);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    text-align: left;
-    width: 42px;
+    text-align: right;
+    width: 34px;
     /* Increased from 35px */
     flex-shrink: 0;
     display: inline-block;
@@ -338,8 +338,8 @@
 }
 
 .view-container .event-time-spacer {
-    width: 60px;
-    /* 42 (start) + 18 (marker+margin) */
+    width: 48px;
+    /* 34 (start) + 14 (marker 12 + margin 2) */
     flex-shrink: 0;
     display: inline-block;
 }
@@ -347,7 +347,7 @@
 .view-container .event-time-dash {
     font-size: 0.85rem;
     color: var(--text-secondary);
-    width: 10px;
+    width: 6px;
     text-align: center;
     flex-shrink: 0;
     display: inline-block;
@@ -361,8 +361,8 @@
     font-size: 0.85rem;
     color: var(--text-secondary);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    text-align: right;
-    width: 42px;
+    text-align: left;
+    width: 34px;
     /* Increased from 35px */
     flex-shrink: 0;
     display: inline-block;
@@ -376,7 +376,7 @@
 .view-container .event-detail-content,
 .view-container .event-detail-content * {
     flex: 1;
-    padding-left: 5px;
+    padding-left: 0;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
@@ -832,9 +832,9 @@ body.spotlight-active {
 }
 
 .map-popup-container {
-    width: 92%;
-    height: 85%;
-    max-width: 500px;
+    width: 98%;
+    height: 98%;
+    max-width: 750px;
     background: white;
     border-radius: 32px;
     overflow: hidden;
@@ -850,7 +850,7 @@ body.spotlight-active {
 }
 
 .map-popup-header {
-    padding: 20px 24px;
+    padding: 15px 15px 5px 15px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -859,7 +859,7 @@ body.spotlight-active {
 
 .map-popup-header h3 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.0rem;
     font-weight: 700;
     color: #1e293b;
 }

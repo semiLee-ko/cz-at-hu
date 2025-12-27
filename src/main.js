@@ -454,7 +454,7 @@ function renderDays(days = [], allAccommodations = [], startDate = null) {
                                             <div class="event">
                                                 <div class="event-time-col">
                                                     ${eIndex === 0 && startTime ? `
-                                                        <div class="marker-wrapper" style="position: relative; width: 12px; height: 12px; margin-right: 6px; display: flex; align-items: center; justify-content: center;">
+                                                        <div class="marker-wrapper" style="position: relative; width: 12px; height: 12px; margin-right: 2px; display: flex; align-items: center; justify-content: center;">
                                                             <span class="event-time-bullet" style="margin: 0; position: absolute;"></span>
                                                             ${event.coords ? `<div class="weather-container-event" data-lat="${event.coords.lat}" data-lng="${event.coords.lng}" data-date="${group.dateStr}" style="position: absolute; z-index: 5; transform: translateX(-3px);"></div>` : ''}
                                                         </div>
@@ -464,7 +464,7 @@ function renderDays(days = [], allAccommodations = [], startDate = null) {
                                                     <span class="event-time-end">${endTime}</span>
                                                 </div>
                                                 <div class="event-detail-content">
-                                                    <span class="event-place" style="height:20px !important;">${place}</span>
+                                                    <span class="event-place" style="height:20px !important; padding-left: 5px !important;">${place}</span>
                                                     <span class="event-desc">${desc}</span>
                                                 </div>
                                             </div>
@@ -1738,9 +1738,18 @@ function showMapPopup(scheduleId) {
     const modal = document.createElement('div');
     modal.className = 'map-popup-overlay';
     modal.innerHTML = `
-        <div class="map-popup-container">
+        <div class="map-popup-container" style="position: relative;">
             <div class="map-popup-header">
-                <h3>여행 경로 확인</h3>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <h3>여행 경로 확인</h3>
+                    <button class="btn-save-map" style="background:none; border:none; padding:4px; cursor:pointer; color:#45B8AF; display:flex; align-items:center;" aria-label="지도 저장">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
                 <button class="btn-close">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1748,7 +1757,15 @@ function showMapPopup(scheduleId) {
                     </svg>
                 </button>
             </div>
-            <div id="map" class="map-content"></div>
+            <div class="map-capture-area" style="position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column;">
+                 <div id="map" class="map-content" style="flex: 1;"></div>
+                 <div class="map-overlay-title" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; z-index: 1000; pointer-events: none; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    ${schedule.title} 이동경로
+                 </div>
+                 <div class="map-overlay-footer" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.7); padding: 3px 10px; border-radius: 12px; font-size: 10px; color: #666; z-index: 1000; pointer-events: none; white-space: nowrap; letter-spacing: 1px;">
+                    LITTLE TRIP
+                 </div>
+            </div>
             <div class="map-footer">
                 저장된 ${locations.length}개의 포인트가 연결되었습니다.
             </div>
@@ -1764,9 +1781,40 @@ function showMapPopup(scheduleId) {
 
     modal.querySelector('.btn-close').onclick = closeMap;
 
+    // Save Map Logic
+    modal.querySelector('.btn-save-map').onclick = () => {
+        const captureArea = modal.querySelector('.map-capture-area');
+
+        // Hide zoom control for capture
+        const zoomControl = captureArea.querySelector('.leaflet-control-zoom');
+        if (zoomControl) zoomControl.style.visibility = 'hidden';
+
+        html2canvas(captureArea, {
+            useCORS: true,
+            scale: 2, // High resolution
+            backgroundColor: null,
+            ignoreElements: (element) => {
+                // Ignore any buttons or extraneous UI if they slip in
+                return element.classList.contains('leaflet-control-zoom');
+            }
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `${schedule.title}_map.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            // Restore zoom control
+            if (zoomControl) zoomControl.style.visibility = 'visible';
+        }).catch(err => {
+            console.error('Map capture failed:', err);
+            showCustomAlert('지도 저장에 실패했습니다.');
+            if (zoomControl) zoomControl.style.visibility = 'visible';
+        });
+    };
+
     // Load Leaflet dynamically
     loadLeaflet(() => {
-        const map = L.map('map').setView([locations[0].lat, locations[0].lng], 13);
+        const map = L.map('map', { zoomControl: true }).setView([locations[0].lat, locations[0].lng], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
@@ -1811,15 +1859,18 @@ function showMapPopup(scheduleId) {
 
         // Draw polyline
         const polyline = L.polyline(latlngs, {
-            color: '#ff0000ff',
+            color: '#FF6B6B', // Clean red
             weight: 4,
-            opacity: 0.7,
+            opacity: 0.8,
             dashArray: '10, 10',
             lineJoin: 'round'
         }).addTo(map);
 
-        // Zoom to fit
-        map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+        // Zoom to fit after modal transition
+        setTimeout(() => {
+            map.invalidateSize();
+            map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+        }, 500);
     });
 }
 
@@ -2002,7 +2053,7 @@ function getWeatherSVG(code) {
     if (code >= 95) return `<svg ${style} class="weather-icon-thunder"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"></path><polyline points="13 11 9 17 15 17 11 23"></polyline></svg>`;
 
     // Default Fog/Etc
-    return `<svg ${style} class="weather-icon-default"><path d="M5.5 10H8a2.5 2.5 0 0 1 0 5h-.5"></path><path d="M12 10h3.5a2.5 2.5 0 1 1 0 5H15"></path><path d="M19 10h.5a2.5 2.5 0 0 1 0 5H19"></path></svg>`;
+    return `<svg ${style} class="weather-icon-fog"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="M16 17H7"></path><path d="M17 21H9"></path></svg>`;
 }
 
 async function fetchWeather(lat, lng, dateStr) {
