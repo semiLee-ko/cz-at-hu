@@ -542,7 +542,9 @@ function renderChecklistsSection(checklists = []) {
         checklistArray = [...packing, ...todo];
     }
 
-    if (!checklistArray || checklistArray.length === 0) return '';
+    if (!checklistArray || checklistArray.length === 0) {
+        return '<div class="no-events">등록된 내용이 없습니다.</div>';
+    }
 
     return `
         <div class="view-list-container" style="margin-top: 10px;">
@@ -634,7 +636,9 @@ function initChecklistInteraction(schedule) {
 
 // 꿀팁 섹션 렌더링
 function renderTipsSection(tips = []) {
-    if (!tips || tips.length === 0) return '';
+    if (!tips || tips.length === 0) {
+        return '<div class="no-events">등록된 내용이 없습니다.</div>';
+    }
 
     return `
         <div class="view-list-container" style="margin-top: 10px;">
@@ -1776,7 +1780,7 @@ function showMapPopup(scheduleId) {
             </div>
             <div class="map-capture-area" style="position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column;">
                  <div id="map" class="map-content" style="flex: 1;"></div>
-                 <div class="map-overlay-title" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; z-index: 1000; pointer-events: none; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                 <div class="map-overlay-title" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.7); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px; z-index: 1000; pointer-events: none; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #333;">
                     ${schedule.title} 이동경로
                  </div>
                  <div class="map-overlay-footer" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.7); padding: 3px 10px; border-radius: 12px; font-size: 10px; color: #666; z-index: 1000; pointer-events: none; white-space: nowrap; letter-spacing: 1px;">

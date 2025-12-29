@@ -65,7 +65,7 @@ export function createTipManager(container, schedule) {
         const tipsContainer = stepRoot.querySelector('#tipsContainer');
 
         if (tips.length === 0) {
-            tipsContainer.innerHTML = '<p class="no-events">작성된 팁이 없습니다. 새로운 팁을 추가해보세요.</p>';
+            tipsContainer.innerHTML = '<p class="no-events">등록된 내용이 없습니다.</p>';
         } else {
             tipsContainer.innerHTML = tips.map(tip => `
                 <div class="day-card tip-card collapsed" data-tip-id="${tip.id}">

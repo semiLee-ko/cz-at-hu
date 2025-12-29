@@ -58,7 +58,7 @@ export function createChecklistManager(container, schedule) {
         if (!checklistsContainer) return;
 
         if (categories.length === 0) {
-            checklistsContainer.innerHTML = '<p class="no-events">카테고리를 추가하여 여행 준비를 시작해보세요.</p>';
+            checklistsContainer.innerHTML = '<p class="no-events">등록된 내용이 없습니다.</p>';
         } else {
             checklistsContainer.innerHTML = categories.map(cat => {
                 const isExpanded = expandedCategories.has(cat.id);
