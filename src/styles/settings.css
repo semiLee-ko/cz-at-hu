@@ -1,0 +1,118 @@
+/* Settings Popup Specific Styles */
+.settings-group {
+    margin-bottom: 24px;
+}
+
+.settings-label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+/* Font Size Slider */
+.font-size-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.font-size-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    outline: none;
+}
+
+.font-size-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s;
+}
+
+.font-size-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.font-size-value {
+    font-weight: 700;
+    color: var(--secondary-dark);
+    min-width: 32px;
+    text-align: right;
+}
+
+/* Theme Toggle */
+.theme-options {
+    display: flex;
+    gap: 12px;
+}
+
+.theme-option {
+    flex: 1;
+    cursor: pointer;
+    position: relative;
+}
+
+.theme-option input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.theme-card {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.2s;
+    background: var(--bg-primary);
+}
+
+/* Selected state */
+.theme-option input:checked+.theme-card {
+    border-color: var(--secondary);
+    background: rgba(78, 205, 196, 0.05);
+}
+
+.theme-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.theme-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: block;
+}
+
+/* Preview colors for theme cards */
+.theme-preview-white {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    margin: 0 auto 8px;
+    display: block;
+}
+
+.theme-preview-black {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    margin: 0 auto 8px;
+    display: block;
+}

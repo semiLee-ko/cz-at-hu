@@ -9,6 +9,7 @@ import { renderScheduleList } from './components/ScheduleList.js';
 import { renderScheduleEditor } from './components/ScheduleEditor.js';
 import { showShareModal, showImportModal } from './components/ShareModal.js';
 import { showChatBot } from './components/ChatBot.js';
+import { showSettingsPopup, applySettings } from './components/SettingsPopup.js';
 import './styles/chatbot.css';
 
 // 앱 상태
@@ -16,6 +17,9 @@ let currentView = 'list'; // 'list', 'view', 'edit'
 
 // 앱 초기화
 function init() {
+    // 설정 초기화 (폰트/테마 적용)
+    applySettings();
+
     // URL 공유 링크 확인
     const sharedSchedule = loadFromShareUrl();
     if (sharedSchedule) {
@@ -39,6 +43,9 @@ function setupNavigation() {
 
     // 로고 클릭 시 목록으로 이동
     document.querySelector('.app-logo')?.addEventListener('click', () => showView('list'));
+
+    // 설정 버튼 이벤트
+    document.getElementById('btnSettings')?.addEventListener('click', () => showSettingsPopup());
 }
 
 // 뷰 전환
@@ -1862,10 +1869,10 @@ function showMapPopup(scheduleId) {
 
         // Draw polyline immediately
         const polyline = L.polyline(latlngs, {
-            color: '#FF0000', // Pure Red
-            weight: 5,
-            opacity: 1.0,
-            dashArray: '10, 10',
+            color: '#ff0000ff', // Clean red
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '10, 5',
             lineJoin: 'round'
         }).addTo(map);
 

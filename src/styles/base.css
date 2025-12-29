@@ -24,6 +24,38 @@
     --radius-md: 12px;
     --radius-lg: 16px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Settings Defaults */
+    --font-scale: 0px;
+}
+
+[data-theme="dark"] {
+    --primary: #FF8585;
+    /* Sligthly lighter for dark mode */
+    --primary-dark: #FF6B6B;
+    --secondary: #6EE7DE;
+    /* Brighter teal */
+    --secondary-dark: #4ECDC4;
+    --accent: #FFE66D;
+    --dark: #ECF0F1;
+    /* Inverted logic for 'dark' variable might be tricky, but let's override text colors mainly */
+    --dark-light: #BDC3C7;
+
+    --text-primary: #ECF0F1;
+    --text-secondary: #BDC3C7;
+    --text-light: #95A5A6;
+
+    --bg-primary: #121212;
+    --bg-secondary: #1E1E1E;
+
+    --border: #333333;
+    --shadow-sm: 0 2px 4px rgba(255, 255, 255, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+html {
+    font-size: calc(16px + var(--font-scale));
 }
 
 * {
