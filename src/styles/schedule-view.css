@@ -311,8 +311,8 @@
 /* .timeline-node { ... } */
 
 .view-container .event-time-col {
-    width: 88px;
-    /* Decreased to 88px (12+2+34+6+34) */
+    width: calc(88px + (var(--font-scale-factor, 0) * 12px));
+    /* Base 88px + 12px per font scale step */
     text-align: right;
     padding-right: 0;
     flex-shrink: 0;
@@ -327,8 +327,7 @@
     color: var(--text-secondary);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     text-align: right;
-    width: 34px;
-    /* Increased from 35px */
+    width: calc(34px + (var(--font-scale-factor, 0) * 5px));
     flex-shrink: 0;
     display: inline-block;
 }
@@ -338,8 +337,7 @@
 }
 
 .view-container .event-time-spacer {
-    width: 48px;
-    /* 34 (start) + 14 (marker 12 + margin 2) */
+    width: calc(48px + (var(--font-scale-factor, 0) * 5px));
     flex-shrink: 0;
     display: inline-block;
 }
@@ -347,7 +345,7 @@
 .view-container .event-time-dash {
     font-size: 0.85rem;
     color: var(--text-secondary);
-    width: 6px;
+    width: calc(6px + (var(--font-scale-factor, 0) * 2px));
     text-align: center;
     flex-shrink: 0;
     display: inline-block;
@@ -362,8 +360,7 @@
     color: var(--text-secondary);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     text-align: left;
-    width: 34px;
-    /* Increased from 35px */
+    width: calc(34px + (var(--font-scale-factor, 0) * 5px));
     flex-shrink: 0;
     display: inline-block;
 }

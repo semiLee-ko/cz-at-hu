@@ -29,10 +29,13 @@ export function applySettings(settings = null) {
     if (!settings) settings = getSettings();
 
     // Font Scale
-    document.documentElement.style.setProperty('--font-scale', `${settings.fontScale}px`);
+    const scale = parseInt(settings.fontScale) || 0;
+    document.documentElement.style.setProperty('--font-scale', `${scale}px`);
+    document.documentElement.style.setProperty('--font-scale-factor', scale);
 
     // Theme
     document.documentElement.setAttribute('data-theme', settings.theme);
+    console.log('Applied Settings:', settings, 'Font Scale Factor:', document.documentElement.style.getPropertyValue('--font-scale-factor'));
 }
 
 // 팝업 표시
@@ -60,6 +63,7 @@ export function showSettingsPopup() {
                         <span style="font-size: 0.8rem">가</span>
                         <input type="range" class="font-size-slider" min="0" max="3" step="1" value="${settings.fontScale}">
                         <span style="font-size: 1.2rem; font-weight: bold;">가</span>
+                        <span class="font-size-value" style="min-width: 30px; text-align: center; margin-left: 10px; font-weight: bold; color: #FF6B6B;">+${settings.fontScale}px</span>
                     </div>
                 </div>
 
