@@ -27,7 +27,7 @@
 }
 
 .modal-content {
-    background: white;
+    background: var(--bg-secondary);
     border-radius: 20px;
     max-width: 480px;
     width: 100%;
@@ -62,7 +62,7 @@
     margin: 0;
     font-size: 1.25rem;
     font-weight: 800;
-    color: #1e293b;
+    color: var(--text-primary);
     letter-spacing: -0.025em;
 }
 
@@ -73,9 +73,11 @@
 .share-section {
     margin-top: 24px;
     padding: 20px;
-    background: #f8fafc;
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--bg-primary);
     border-radius: 16px;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border);
 }
 
 .share-section:first-child {
@@ -86,7 +88,7 @@
     margin: 0 0 8px 0;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #334155;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -98,7 +100,7 @@
 
 .share-section .hint {
     font-size: 0.8rem;
-    color: #64748b;
+    color: var(--text-secondary);
     margin-bottom: 16px;
 }
 
@@ -111,11 +113,11 @@
 .url-box input {
     flex: 1;
     padding: 10px 14px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border);
     border-radius: 10px;
     font-size: 0.85rem;
-    background: white;
-    color: #475569;
+    background: var(--bg-primary);
+    color: var(--text-primary);
     transition: all 0.2s;
 }
 
@@ -151,20 +153,20 @@
 }
 
 .btn-secondary-modal {
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: #475569;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
     width: 100%;
 }
 
 .btn-secondary-modal:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
+    background: var(--bg-primary);
+    border-color: var(--border);
 }
 
 /* Close button styling */
 .btn-close {
-    background: #f1f5f9;
+    background: var(--bg-primary);
     border: none;
     width: 32px;
     height: 32px;
@@ -175,13 +177,13 @@
     cursor: pointer;
     transition: all 0.2s ease;
     padding: 0;
-    color: #64748b;
+    color: var(--text-secondary);
     font-size: 18px;
 }
 
 .btn-close:hover {
-    background: #e2e8f0;
-    color: #1e293b;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     transform: rotate(90deg);
 }
 
@@ -210,10 +212,10 @@
 .file-name {
     margin-top: 12px;
     font-size: 0.85rem;
-    color: #64748b;
+    color: var(--text-secondary);
     padding: 8px 12px;
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
     border-radius: 10px;
     text-align: center;
 }
@@ -234,7 +236,9 @@
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 0.9rem;
-    background: white;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: var(--bg-primary);
     transition: all 0.2s;
     height: 42px;
     /* Force consistent height */
@@ -257,12 +261,19 @@
     cursor: pointer;
 }
 
+[data-theme="dark"] .settlement-popup-container .payer-select-sm,
+[data-theme="dark"] .settlement-popup-container .category-select-sm {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
 .settlement-popup-container .usage-input-sm:focus,
 .settlement-popup-container .amount-input-sm:focus,
 .settlement-popup-container .payer-select-sm:focus,
 .settlement-popup-container .category-select-sm:focus {
     outline: none;
-    border-color: #45B8AF;
+    border-color: var(--secondary-dark);
     box-shadow: 0 0 0 3px rgba(69, 184, 175, 0.1);
 }
 

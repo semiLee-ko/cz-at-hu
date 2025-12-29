@@ -326,6 +326,16 @@ function renderScheduleView(container, scheduleId) {
                     s.classList.add('active');
                 }
             });
+
+            // Toggle Guide Notice
+            const guideNotice = container.querySelector('.schedule-guide-notice');
+            if (guideNotice) {
+                if (target === 'itinerary') {
+                    guideNotice.style.display = 'block';
+                } else {
+                    guideNotice.style.display = 'none';
+                }
+            }
         });
     });
 
@@ -693,7 +703,7 @@ function initSpotlightMode(schedule) {
         actionBar = document.createElement('div');
         actionBar.className = 'event-action-bar';
         actionBar.innerHTML = `
-            <div class="weather-spotlight-display" style="margin-right: auto; display: flex; align-items: center; gap: 8px; padding-left: 10px; font-weight: 600; font-size: 0.9rem; color: #333;"></div>
+            <div class="weather-spotlight-display" style="margin-right: auto; display: flex; align-items: center; gap: 8px; padding-left: 10px; font-weight: 600; font-size: 0.9rem;"></div>
             <div class="action-item action-camera" title="카메라">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>

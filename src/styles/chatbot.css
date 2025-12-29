@@ -37,7 +37,7 @@
 }
 
 .chatbot-header {
-    background: #45B8AF;
+    background: var(--secondary-dark);
     color: white;
     padding: 16px 20px;
     display: flex;
@@ -91,7 +91,7 @@
 
 .message.user {
     align-self: flex-end;
-    background: #45B8AF;
+    background: var(--secondary-dark);
     color: white;
     border-bottom-right-radius: 2px;
 }
@@ -115,11 +115,11 @@
 }
 
 .chat-input:focus {
-    border-color: #45B8AF;
+    border-color: var(--secondary-dark);
 }
 
 .btn-send-chat {
-    background: #45B8AF;
+    background: var(--secondary-dark);
     color: white;
     border: none;
     width: 40px;

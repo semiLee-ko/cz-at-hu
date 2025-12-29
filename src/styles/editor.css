@@ -18,7 +18,7 @@
     margin: 0;
     font-size: 1.5rem;
     font-weight: 800;
-    color: var(--dark);
+    color: var(--text-primary);
 }
 
 .schedule-form {
@@ -49,7 +49,7 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-weight: 600;
     margin-bottom: 6px;
     position: relative;
@@ -64,7 +64,7 @@
     transform: translateY(-50%);
     width: 4px;
     height: 4px;
-    background: #45B8AF;
+    background: var(--secondary-dark);
     border-radius: 50%;
 }
 
@@ -72,18 +72,19 @@
 .form-group textarea {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-radius: 4px;
     font-size: 0.85rem;
     font-family: inherit;
     transition: border-color 0.2s;
-    background: white;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #45B8AF;
+    border-color: var(--secondary-dark);
     box-shadow: 0 0 0 2px rgba(69, 184, 175, 0.1);
 }
 
@@ -118,16 +119,17 @@
     min-height: 35px;
     height: 35px;
     margin: 0;
-    background: white !important;
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
     -webkit-appearance: none;
     appearance: none;
-    border: 1px solid #e5e7eb !important;
+    border: 1px solid var(--border) !important;
     border-radius: 4px !important;
     box-sizing: border-box;
 }
 
 .date-input:focus {
-    border-color: #45B8AF !important;
+    border-color: var(--secondary-dark) !important;
     box-shadow: 0 0 0 2px rgba(69, 184, 175, 0.1);
     outline: none;
 }
@@ -178,7 +180,7 @@
 
 .hint {
     font-size: 0.7rem;
-    color: #9ca3af;
+    color: var(--text-secondary);
     margin-top: 0;
     display: inline;
     margin-left: 6px;
@@ -199,17 +201,19 @@
     align-items: center;
     justify-content: center;
     padding: 10px 16px;
-    border: 1px solid #e5e7eb;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
-    background: white;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     position: relative;
 }
 
 .radio-option:hover {
-    border-color: #45B8AF;
-    background: #f9fafb;
+    border-color: var(--secondary-dark);
+    background: var(--bg-primary);
 }
 
 .radio-option input[type="radio"] {
@@ -238,7 +242,7 @@
     content: '';
     width: 16px;
     height: 16px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-radius: 50%;
     display: inline-block;
     transition: all 0.2s;
@@ -246,19 +250,35 @@
 }
 
 .radio-option input[type="radio"]:checked+span {
-    color: #45B8AF;
+    color: var(--secondary-dark);
     font-weight: 600;
 }
 
 .radio-option input[type="radio"]:checked+span::before {
-    border-color: #45B8AF;
-    background: #45B8AF;
+    border-color: var(--secondary-dark);
+    background: var(--secondary-dark);
     box-shadow: inset 0 0 0 3px white;
 }
 
 .radio-option:has(input[type="radio"]:checked) {
-    border-color: #45B8AF;
+    border-color: var(--secondary-dark);
     background: #e6f7f6;
+}
+
+[data-theme="dark"] .radio-option:has(input[type="radio"]:checked) {
+    background: #266768;
+    border-color: #475569;
+    color: white;
+}
+
+[data-theme="dark"] .radio-option input[type="radio"]:checked+span {
+    color: white;
+}
+
+[data-theme="dark"] .radio-option input[type="radio"]:checked+span::before {
+    border-color: white;
+    background: white;
+    box-shadow: inset 0 0 0 3px #334155;
 }
 
 .day-item {
@@ -277,8 +297,17 @@
 }
 
 .day-item-header strong {
-    color: var(--dark);
+    color: var(--text-primary);
     font-size: 1rem;
+}
+
+[data-theme="dark"] .day-item {
+    background: var(--bg-secondary);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .day-item-header strong {
+    color: var(--text-primary);
 }
 
 .day-item input,
@@ -299,6 +328,18 @@
     border-color: var(--secondary);
 }
 
+[data-theme="dark"] .day-item input,
+[data-theme="dark"] .day-item textarea {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .day-item input:focus,
+[data-theme="dark"] .day-item textarea:focus {
+    border-color: var(--secondary-dark);
+}
+
 /* ========== Tags System ========== */
 .tags-container {
     display: flex;
@@ -307,16 +348,19 @@
     margin-bottom: 8px;
     min-height: 36px;
     padding: 6px;
-    border: 1px dashed #e5e7eb;
+    margin-bottom: 8px;
+    min-height: 36px;
+    padding: 6px;
+    border: 1px dashed var(--border);
     border-radius: 4px;
-    background: white;
+    background: var(--bg-secondary);
 }
 
 .tag-item {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(135deg, #45B8AF, #3da89f);
+    background: linear-gradient(135deg, var(--secondary-dark), #3da89f);
     color: white;
     padding: 5px 10px;
     border-radius: 16px;
@@ -367,17 +411,18 @@
 .tag-input {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-radius: 4px;
     font-size: 0.85rem;
     font-family: inherit;
     transition: border-color 0.2s;
-    background: white;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .tag-input:focus {
     outline: none;
-    border-color: #45B8AF;
+    border-color: var(--secondary-dark);
     box-shadow: 0 0 0 2px rgba(69, 184, 175, 0.1);
 }
 
@@ -404,9 +449,16 @@
     /* Use padding for vertical centering */
 }
 
+[data-theme="dark"] .form-group select {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    border-color: var(--border);
+}
+
 .form-group select:focus {
     outline: none;
-    border-color: #45B8AF;
+    border-color: var(--secondary-dark);
     box-shadow: 0 0 0 2px rgba(69, 184, 175, 0.1);
 }
 
@@ -422,6 +474,18 @@
 
 .error-message.visible {
     display: block;
+}
+
+/* Error State for Inputs */
+.input-error {
+    border-color: #ff6b6b !important;
+}
+
+[data-theme="dark"] .input-error {
+    background-color: #450a0a !important;
+    /* Dark Red */
+    border-color: #ff6b6b !important;
+    color: white !important;
 }
 
 /* Accordion Arrow Fix */
@@ -441,8 +505,8 @@
 /* ========================================= */
 
 .day-card {
-    background: white;
-    border: 1px solid #e5e7eb;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
     border-radius: 6px;
     margin-bottom: 30px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -496,14 +560,14 @@
 }
 
 .events-list {
-    background: white;
+    background: var(--bg-secondary);
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
 }
 
 .event-item {
     padding: 12px 16px;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid var(--border);
 }
 
 .event-item:last-child {
@@ -515,7 +579,9 @@
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
     font-weight: 600;
     margin-bottom: 4px;
 }
@@ -525,11 +591,157 @@
     width: 100%;
     padding: 6px 10px;
     font-size: 0.85rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border);
     border-radius: 4px;
     font-family: inherit;
     transition: border-color 0.2s;
-    background: white;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .event-item input,
+[data-theme="dark"] .event-item textarea {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .event-item {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .day-card {
+    background: var(--bg-secondary) !important;
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .event-header,
+[data-theme="dark"] .day-header {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .event-header span,
+[data-theme="dark"] .day-info {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-pick-location {
+    background: var(--bg-primary);
+    background: var(--bg-primary);
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-pick-location.active {
+    background: var(--bg-primary);
+    /* Keep background black */
+    border-color: var(--border);
+    color: #ef4444;
+    /* Only icon color changes */
+}
+
+/* Fill SVG paths when active */
+.btn-pick-location.active svg path {
+    fill: #ef4444;
+    /* Fill pin body with red */
+    stroke: none;
+}
+
+/* Default (Light Mode): Inner circle is WHITE */
+.btn-pick-location.active svg circle {
+    fill: white;
+    stroke: none;
+}
+
+/* Dark Mode: Inner circle is BLACK */
+[data-theme="dark"] .btn-pick-location.active svg circle {
+    fill: black;
+    stroke: none;
+}
+
+/* Ensure default state is stroked */
+.btn-pick-location svg path,
+.btn-pick-location svg circle {
+    fill: none;
+    stroke: currentColor;
+}
+
+[data-theme="dark"] .checkbox-label {
+    background-color: #334155;
+    /* Dark Gray BG */
+    border-color: #475569;
+    color: white;
+    /* White Text */
+}
+
+[data-theme="dark"] .checkbox-label:hover {
+    background-color: #475569;
+}
+
+[data-theme="dark"] .location-checkboxes input[type="checkbox"] {
+    accent-color: black;
+    /* Black Checkbox when checked */
+    /* Note: Unchecked color is browser dependent, can't easily force black without custom appearance */
+    filter: invert(1) hue-rotate(180deg);
+    /* Hack to try making it look darker */
+}
+
+
+[data-theme="dark"] .event-item {
+    border-bottom: 1px dashed var(--border);
+    position: relative;
+    /* Punching Effect Mask */
+    --mask: radial-gradient(circle at left, transparent 6px, black 6.5px) left,
+        radial-gradient(circle at right, transparent 6px, black 6.5px) right;
+    --mask-size: 51% 100%;
+
+    /* We can't apply mask directly to .event-item as it clips content. 
+       We add a pseudo element for the border line if we want "holes".
+       But user said "punching inner color". 
+       Let's assume they want the HOLE to be dark gray. 
+       This implies the background BEHIND the hole is visible.
+       
+       Simpler approach: Add semi-circles on the sides.
+    */
+}
+
+/* Add Punching Holes */
+[data-theme="dark"] .event-item::after,
+[data-theme="dark"] .event-item::before {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--bg-secondary);
+    /* Match page background OR dark gray "inner" color */
+    border-radius: 50%;
+    z-index: 1;
+    /* If the hole needs to be "Dark Gray", it means the circle itself is dark gray sitting on top of the border line */
+    background-image: none;
+    /* Reset light mode SVG */
+}
+
+[data-theme="dark"] .event-item::before {
+    left: -6px;
+    background-color: #121212;
+    /* "Inner color" likely refers to the background behind the card, i.e., the page background */
+}
+
+[data-theme="dark"] .event-item::after {
+    right: -6px;
+    background-color: #121212;
+}
+
+
+[data-theme="dark"] .event-item {
+    border-bottom: 1px dashed var(--border);
+}
+
+[data-theme="dark"] .event-header {
+    border-bottom: 1px dashed var(--border);
 }
 
 .event-item input:focus,
@@ -572,8 +784,8 @@
 
 .btn-pick-location:hover {
     background: #f9fafb;
-    border-color: #45B8AF;
-    color: #45B8AF;
+    border-color: var(--secondary-dark);
+    color: var(--secondary-dark);
 }
 
 .btn-pick-location svg {
@@ -596,10 +808,10 @@
 .btn-add-event {
     width: 100%;
     padding: 10px;
-    background: #f9fafb;
-    border: 1px dashed #d1d5db;
+    background: var(--bg-primary);
+    border: 1px dashed var(--border);
     border-radius: 0 0 6px 6px;
-    color: #6b7280;
+    color: var(--text-secondary);
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -804,7 +1016,7 @@
 }
 
 .tip-form-section.drag-over {
-    border-color: #45B8AF;
+    border-color: var(--secondary-dark);
     background-color: rgba(69, 184, 175, 0.05);
     box-shadow: 0 0 0 4px rgba(69, 184, 175, 0.1);
 }
@@ -849,7 +1061,7 @@
     padding: 12px 16px;
     background: #f0fdfa;
     /* Light mint bg */
-    border: 1px dashed #45B8AF;
+    border: 1px dashed var(--secondary-dark);
     border-radius: 6px;
     font-size: 0.85rem;
     color: #2c7a7b;
@@ -864,7 +1076,7 @@
 .guide-icon {
     display: flex;
     align-items: center;
-    color: #45B8AF;
+    color: var(--secondary-dark);
     flex-shrink: 0;
 }
 
@@ -933,4 +1145,197 @@
     margin-right: auto !important;
     flex: 0 1 auto !important;
     /* Allow shrinking but not forced growing */
+}
+
+/* --- Editor Steps 3, 4, 5 Dark ModeOverrides (Tips, Accommodation, Checklist) --- */
+
+[data-theme="dark"] .tip-form-section {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .tip-form-section h4 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .tip-form-section input,
+[data-theme="dark"] .tip-form-section textarea,
+[data-theme="dark"] .tip-form-section select {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .tip-form-section input:focus,
+[data-theme="dark"] .tip-form-section textarea:focus {
+    border-color: var(--secondary);
+}
+
+/* Step 4 Category Type Buttons */
+[data-theme="dark"] .category-type-selector {
+    background-color: #212121;
+    border: 1px solid #373737;
+    border-radius: 6px;
+    /* Ensure rounded corners */
+    padding: 4px;
+    /* Add some padding for the buttons inside */
+}
+
+[data-theme="dark"] .btn-type-select {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: none;
+}
+
+[data-theme="dark"] .btn-type-select.active {
+    background-color: var(--secondary-dark);
+    color: white;
+    border-color: var(--secondary-dark);
+}
+
+/* Guide Text Sections */
+[data-theme="dark"] .tip-guide-text {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+/* Ensure list items content is readable */
+[data-theme="dark"] .tip-list .day-card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .tip-list .day-card h4 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .tip-list .day-card p,
+[data-theme="dark"] .tip-list .day-card span {
+    color: var(--text-secondary);
+}
+
+/* Expanded Content Area */
+[data-theme="dark"] .tip-content-wrapper {
+    background-color: var(--bg-secondary);
+    /* Match card background */
+    border-top: 1px dashed #373737;
+}
+
+/* Step 4 Checklist Items */
+[data-theme="dark"] .checklist-item-row {
+    border-bottom: 1px solid #333;
+}
+
+[data-theme="dark"] .item-text {
+    color: var(--text-primary);
+}
+
+/* Step 4 Inner Input (Add Item) */
+[data-theme="dark"] .add-item-inner-form {
+    background-color: #373737;
+    /* Dark Gray Container */
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+[data-theme="dark"] .inner-item-input {
+    background-color: var(--bg-primary) !important;
+    /* Black default */
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .inner-item-input::placeholder {
+    color: #64748b;
+}
+
+[data-theme="dark"] .inner-item-input:focus {
+    background-color: black !important;
+    /* Force Black on focus */
+    color: white !important;
+    border-color: var(--secondary);
+}
+
+/* Priority Dropdown */
+[data-theme="dark"] .priority-dropdown {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+/* Tip Body Text */
+[data-theme="dark"] .tip-body p {
+    color: var(--text-secondary);
+}
+
+/* Accommodation Details */
+[data-theme="dark"] .acc-detail-item span,
+[data-theme="dark"] .acc-detail-item a {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .acc-detail-item svg {
+    color: var(--text-secondary);
+}
+
+/* User Requested Overrides: Accommodation Expanded Area */
+
+/* Assign Dates Button */
+[data-theme="dark"] .btn-assign-dates-compact {
+    background-color: #334155;
+    /* Dark Gray */
+    color: white;
+    border-color: #475569;
+}
+
+[data-theme="dark"] .btn-assign-dates-compact:hover {
+    background-color: #475569;
+}
+
+/* Notes Display Area */
+[data-theme="dark"] .acc-notes-display {
+    background-color: #282828;
+    /* Dark Gray */
+    color: white;
+    border-color: #3b3b3b;
+    border-left: 3px solid #64748b;
+}
+
+/* Date Selection Modal Checkbox Area */
+[data-theme="dark"] .date-modal-content {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .date-modal-header h3 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .date-checkboxes {
+    background-color: #334155;
+    /* Dark Gray */
+    border-color: #475569;
+}
+
+[data-theme="dark"] .date-checkbox-label {
+    background-color: #334155;
+    /* Match container */
+    border-color: #475569;
+    /* Separator lines */
+    color: white;
+}
+
+[data-theme="dark"] .date-checkbox-text {
+    color: white;
+}
+
+[data-theme="dark"] .date-checkbox-label.disabled .date-checkbox-text {
+    color: #94a3b8;
+    /* Dim text for disabled */
+}
+
+[data-theme="dark"] .date-checkbox-label:hover {
+    background-color: #475569;
 }

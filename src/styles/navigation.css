@@ -2,8 +2,8 @@
 .app-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    /* Center the logo */
+    justify-content: space-between;
+    /* Center the logo -> Changed to Space Between for Settings Button alignment */
     height: 60px;
     background-color: white;
     border-bottom: 1px solid var(--border);
@@ -11,6 +11,12 @@
     top: 0;
     z-index: 100;
     padding: 0 20px;
+}
+
+[data-theme="dark"] .app-header {
+    background-color: var(--bg-primary);
+    /* Black Background */
+    border-bottom-color: var(--border);
 }
 
 .app-logo {
@@ -21,6 +27,25 @@
     margin: 0;
     letter-spacing: -0.5px;
     cursor: pointer;
+}
+
+/* Settings Button Dark Mode */
+[data-theme="dark"] #btnSettings {
+    background-color: black !important;
+    /* Force Black BG */
+    /* Force Black BG */
+    border: none !important;
+    /* No Border */
+    border-radius: 50%;
+    /* Ensure it looks like a button */
+    padding: 6px !important;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--secondary) !important;
+    /* Mint Icon or user preference? User said "interior black", implied border white. Icon color wasn't specified but Mint is standard. Keep existing color or use white? Inline style has #FF6B6B. Let's keep #FF6B6B or match theme. */
 }
 
 /* Floating Action Button (FAB) */

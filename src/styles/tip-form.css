@@ -40,7 +40,7 @@
     font-size: 1.5rem;
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(69, 184, 175, 0.4);
-    background: #45B8AF;
+    background: var(--secondary-dark);
     color: white;
 
     /* Default (Enabled) State */

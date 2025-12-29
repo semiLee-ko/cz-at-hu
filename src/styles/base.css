@@ -33,9 +33,9 @@
     --primary: #FF8585;
     /* Sligthly lighter for dark mode */
     --primary-dark: #FF6B6B;
-    --secondary: #6EE7DE;
-    /* Brighter teal */
-    --secondary-dark: #4ECDC4;
+    --secondary: #3da89f;
+    /* Muted teal for dark mode */
+    --secondary-dark: #2A9D8F;
     --accent: #FFE66D;
     --dark: #ECF0F1;
     /* Inverted logic for 'dark' variable might be tricky, but let's override text colors mainly */
