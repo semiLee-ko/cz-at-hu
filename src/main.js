@@ -481,7 +481,10 @@ function renderDays(days = [], allAccommodations = [], startDate = null) {
                                                     <span class="event-time-end">${endTime}</span>
                                                 </div>
                                                 <div class="event-detail-content">
-                                                    <span class="event-place" style="height:20px !important; padding-left: 5px !important;">${place}</span>
+                                                    <span class="event-place" style="height:20px !important; padding-left: 5px !important;">
+                                                        ${place}
+
+                                                    </span>
                                                     <span class="event-desc">${desc}</span>
                                                 </div>
                                             </div>
@@ -778,19 +781,27 @@ function initSpotlightMode(schedule) {
             });
         });
 
-
-
-        // Settlement Logic
-        actionBar.querySelector('.action-settlement').addEventListener('click', () => {
-            const activeGroup = document.querySelector('.event-group.active-spotlight');
-            if (activeGroup) {
-                const scheduleId = activeGroup.dataset.scheduleId;
-                showSettlementPopup(activeGroup, updateActionStates, scheduleId);
-            }
-        });
     }
 
-    const deactivateSpotlight = () => {
+    // Settlement Logic (Robust Attachment)
+    // We clone the button to strip old listeners and ensure a fresh one is attached
+    const settlementBtn = actionBar.querySelector('.action-settlement');
+    const newSettlementBtn = settlementBtn.cloneNode(true);
+    settlementBtn.parentNode.replaceChild(newSettlementBtn, settlementBtn);
+
+    newSettlementBtn.addEventListener('click', () => {
+        const activeGroup = document.querySelector('.event-group.active-spotlight');
+        if (activeGroup) {
+            const scheduleId = activeGroup.dataset.scheduleId;
+            showSettlementPopup(activeGroup, updateActionStates, scheduleId);
+        }
+    });
+
+
+
+
+
+    function deactivateSpotlight() {
         document.body.classList.remove('spotlight-active');
         document.querySelectorAll('.event-group.active-spotlight').forEach(el => el.classList.remove('active-spotlight'));
         document.querySelectorAll('.day-card.spotlight-parent').forEach(el => el.classList.remove('spotlight-parent'));
@@ -799,7 +810,7 @@ function initSpotlightMode(schedule) {
         document.body.style.overflow = ''; // Enable scroll
     };
 
-    const updateActionStates = (group) => {
+    function updateActionStates(group) {
         const scheduleId = group.dataset.scheduleId;
         const schedule = getSchedule(scheduleId);
         if (!schedule) return;
@@ -1130,6 +1141,15 @@ function showSettlementPopup(group, updateActionStatesCallback, scheduleId) {
                 });
 
                 saveSchedule(schedule);
+
+                // VERIFICATION: Check if save actually worked
+                const check = getSchedule(schedule.id);
+                const checkEvent = check.days[dayIdx]?.events[eventIdx];
+                if (!checkEvent || !checkEvent.expenses || checkEvent.expenses.length !== event.expenses.length) {
+                    console.error('CRITICAL: Save failed', checkEvent);
+                    showCustomAlert('저장에 실패했습니다. 관리자에게 문의하세요.');
+                }
+
                 renderContent();
                 if (updateActionStatesCallback) updateActionStatesCallback(group);
             };

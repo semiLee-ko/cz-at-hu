@@ -1289,21 +1289,34 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 // Debug Log
                 if (lat || lng) {
                     console.log(`[Debug] Found coords in DOM: ${lat}, ${lng}`);
-                } else {
-                    // console.log('[Debug] No coords in DOM for this item');
                 }
-
                 const coords = (lat && lng) ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null;
 
-                // Only save events that have at least one of: location, place, description, start time, end time
-                if (location || place || description || startTime || endTime) {
+                // Restore Hidden Data (Expenses, Participants)
+                let expenses = [];
+                let participants = [];
+                const hiddenJson = eventItem.dataset.hiddenJson; // Use eventItem here
+                if (hiddenJson) {
+                    try {
+                        const hidden = JSON.parse(hiddenJson.replace(/&quot;/g, '"'));
+                        if (hidden.expenses) expenses = hidden.expenses;
+                        if (hidden.participants) participants = hidden.participants;
+                    } catch (e) {
+                        console.warn('Failed to parse hidden event data', e);
+                    }
+                }
+
+                // Only save events that have content (or hidden data)
+                if (location || place || description || startTime || endTime || expenses.length > 0) {
                     events.push({
                         location,
                         place,
                         startTime,
                         endTime,
                         description,
-                        coords // Save Coords
+                        coords, // Save Coords
+                        expenses, // Persist Expenses
+                        participants // Persist Participants
                     });
                 } else {
                     // Count empty events (absolutely nothing filled)
@@ -1576,8 +1589,15 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     }
 
     function renderEventItem(event, eventIndex, locationsList, timeOptions, dayNum) {
+        // Safe serialization of hidden props
+        const hiddenProps = {
+            expenses: event.expenses || [],
+            participants: event.participants || []
+        };
+        const hiddenJson = JSON.stringify(hiddenProps).replace(/"/g, '&quot;');
+
         return `
-            <div class="event-item">
+            <div class="event-item" data-hidden-json="${hiddenJson}">
                 <div class="event-header">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span>일정 ${eventIndex + 1}</span>
