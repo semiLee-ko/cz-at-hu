@@ -597,13 +597,15 @@
     transition: border-color 0.2s;
     background: var(--bg-secondary);
     color: var(--text-primary);
+    height: 35px;
 }
 
 [data-theme="dark"] .event-item input,
 [data-theme="dark"] .event-item textarea {
-    background: var(--bg-primary) !important;
+    background: var(--bg-secondary) !important;
     color: var(--text-primary) !important;
     border-color: var(--border);
+    height: 35px;
 }
 
 [data-theme="dark"] .event-item {
@@ -628,14 +630,13 @@
 }
 
 [data-theme="dark"] .btn-pick-location {
-    background: var(--bg-primary);
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     border-color: var(--border);
     color: var(--text-primary);
 }
 
 [data-theme="dark"] .btn-pick-location.active {
-    background: var(--bg-primary);
+    background: var(--bg-secondary);
     /* Keep background black */
     border-color: var(--border);
     color: #ef4444;
@@ -657,7 +658,7 @@
 
 /* Dark Mode: Inner circle is BLACK */
 [data-theme="dark"] .btn-pick-location.active svg circle {
-    fill: black;
+    fill: var(--bg-secondary);
     stroke: none;
 }
 
@@ -708,31 +709,10 @@
 }
 
 /* Add Punching Holes */
+/* Punching Holes Removed */
 [data-theme="dark"] .event-item::after,
 [data-theme="dark"] .event-item::before {
-    content: "";
-    position: absolute;
-    bottom: -6px;
-    width: 12px;
-    height: 12px;
-    background-color: var(--bg-secondary);
-    /* Match page background OR dark gray "inner" color */
-    border-radius: 50%;
-    z-index: 1;
-    /* If the hole needs to be "Dark Gray", it means the circle itself is dark gray sitting on top of the border line */
-    background-image: none;
-    /* Reset light mode SVG */
-}
-
-[data-theme="dark"] .event-item::before {
-    left: -6px;
-    background-color: #121212;
-    /* "Inner color" likely refers to the background behind the card, i.e., the page background */
-}
-
-[data-theme="dark"] .event-item::after {
-    right: -6px;
-    background-color: #121212;
+    display: none;
 }
 
 
@@ -1161,7 +1141,7 @@
 [data-theme="dark"] .tip-form-section input,
 [data-theme="dark"] .tip-form-section textarea,
 [data-theme="dark"] .tip-form-section select {
-    background-color: var(--bg-primary) !important;
+    background-color: var(--bg-secondary) !important;
     color: var(--text-primary) !important;
     border-color: var(--border);
 }

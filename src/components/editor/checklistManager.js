@@ -1,6 +1,56 @@
 // Checklist Management Module
 // Handles categories and items in an accordion style
 
+import {
+    getAllSchedules,
+    getChecklistTemplates,
+    saveChecklistTemplate,
+    deleteChecklistTemplate
+} from '../../storage.js';
+
+const CHECKLIST_THEMES = {
+    domestic: {
+        name: '국내 여행',
+        categories: [
+            { name: '필수 준비물', type: 'packing', items: ['신분증', '지갑/카드', '휴대폰 충전기'] },
+            { name: '의류', type: 'packing', items: ['속옷/양말', '잠옷', '여벌 옷', '외투'] },
+            { name: '세면도구', type: 'packing', items: ['칫솔/치약', '샴푸/컨디셔너', '바디워시', '클렌징폼'] },
+            { name: '상비약', type: 'packing', items: ['소화제', '진통제', '밴드/연고', '종합감기약', '모기기피제', '멀미약'] },
+            { name: '미용', type: 'packing', items: ['스킨/로션/팩', '선크림', '빗', '머리끈', '손톱깎이'] },
+            { name: '기타', type: 'packing', items: ['휴지/물티슈', '비닐봉지/지퍼백'] }
+        ]
+    },
+    overseas: {
+        name: '해외 여행',
+        categories: [
+            { name: '필수 서류', type: 'packing', items: ['여권', 'E-티켓', '바우처(숙소/투어)', '환전한 현금/카드', '여행자보험'] },
+            { name: '기내 용품', type: 'packing', items: ['목베개', '안대/귀마개', '보조배터리', '볼펜'] },
+            { name: '전자기기', type: 'packing', items: ['멀티어댑터', '충전기/케이블', '유심/포켓와이파이'] },
+            { name: '세면도구', type: 'packing', items: ['칫솔/치약', '샴푸/컨디셔너', '바디워시', '클렌징폼'] },
+            { name: '비상약', type: 'packing', items: ['소화제', '종합감기약', '지사제', '해열진통제', '밴드/연고', '영양제'] },
+            { name: '미용', type: 'packing', items: ['스킨/로션/팩', '선크림', '빗', '머리끈', '손톱깎이'] },
+            { name: '기타', type: 'packing', items: ['휴지/물티슈', '비닐봉지/지퍼백', '압축팩', '비상식량(고추장, 라면 등)', '우산/우비', '샤워필터'] }
+        ]
+    },
+    waterplay: {
+        name: '물놀이/여름',
+        categories: [
+            { name: '물놀이 용품', type: 'packing', items: ['수영복/래쉬가드', '아쿠아슈즈', '방수팩', '물안경/튜브', '비치타월'] },
+            { name: '피부 보호', type: 'packing', items: ['선크림(워터프루프)', '모자', '선글라스', '알로에 젤'] }
+        ]
+    },
+    camping: {
+        name: '캠핑/글램핑',
+        categories: [
+            { name: '숙박 용품', type: 'packing', items: ['텐트/타프', '그라운드시트', '펙/망치/장갑', '침낭/매트', '베개', '랜턴/조명', '난로'] },
+            { name: '주방 용품', type: 'packing', items: ['코펠/버너', '수저/컵', '아이스박스', '키친타월', '쓰레기봉투', '테이블', '의자', '부탄/이소가스', '그릇/접시', '칼/가위/집게'] },
+            { name: '음식', type: 'packing', items: ['바비큐 고기', '라면/햇반', '물/음료', '양념류'] },
+            { name: '화로', type: 'packing', items: ['화로대', '장작', '토치/가스', '숯집게', '장갑'] },
+            { name: '기타', type: 'packing', items: ['아이스박스', '쓰레기봉투', '휴지/물티슈', '일산화탄소감지기'] }
+        ]
+    }
+};
+
 export function createChecklistManager(container, schedule) {
     // Scope selectors to Step 4
     const stepRoot = container.querySelector('.form-step[data-step="4"]');
@@ -57,10 +107,34 @@ export function createChecklistManager(container, schedule) {
         const checklistsContainer = stepRoot.querySelector('#checklistsContainer');
         if (!checklistsContainer) return;
 
+        // Checklist Toolbar (Import / Save Template)
+        // Checklist Toolbar (Import / Save Template)
+        const toolbarHtml = `
+            <div class="checklist-toolbar">
+                <button type="button" id="btnSaveTemplate" class="btn-checklist-action secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span>템플릿 저장</span>
+                </button>
+                <button type="button" id="btnImportChecklist" class="btn-checklist-action primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="16 16 12 12 8 16"></polyline>
+                        <line x1="12" y1="12" x2="12" y2="21"></line>
+                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                        <polyline points="16 16 12 12 8 16"></polyline>
+                    </svg>
+                    <span>불러오기</span>
+                </button>
+            </div>
+        `;
+
         if (categories.length === 0) {
-            checklistsContainer.innerHTML = '<p class="no-events">등록된 내용이 없습니다.</p>';
+            checklistsContainer.innerHTML = toolbarHtml + '<p class="no-events">등록된 내용이 없습니다.</p>';
         } else {
-            checklistsContainer.innerHTML = categories.map(cat => {
+            checklistsContainer.innerHTML = toolbarHtml + categories.map(cat => {
                 const isExpanded = expandedCategories.has(cat.id);
                 return `
                 <div class="day-card tip-card ${isExpanded ? '' : 'collapsed'}" data-category-id="${cat.id}">
@@ -218,6 +292,17 @@ export function createChecklistManager(container, schedule) {
 
         // Drag & Drop for Categories
         attachDragEventListeners(checklistsContainer);
+
+        // Toolbar Buttons
+        const btnSaveTemplate = stepRoot.querySelector('#btnSaveTemplate');
+        if (btnSaveTemplate) {
+            btnSaveTemplate.addEventListener('click', handleSaveTemplate);
+        }
+
+        const btnImportChecklist = stepRoot.querySelector('#btnImportChecklist');
+        if (btnImportChecklist) {
+            btnImportChecklist.addEventListener('click', createImportModal);
+        }
     }
 
     function attachDragEventListeners(checklistsContainer) {
@@ -348,13 +433,13 @@ export function createChecklistManager(container, schedule) {
     }
 
     function deleteCategory(catId) {
-        if (confirm('이 카테고리를 삭제하시겠습니까?')) {
+        showCustomConfirm('이 카테고리를 삭제하시겠습니까?', () => {
             const index = categories.findIndex(c => c.id === catId);
             if (index !== -1) {
                 categories.splice(index, 1);
                 renderChecklists();
             }
-        }
+        });
     }
 
     function addItem(catId, text) {
@@ -413,6 +498,338 @@ export function createChecklistManager(container, schedule) {
                 stepRoot.querySelectorAll('.btn-type-select').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             });
+        });
+    }
+
+    // --- Template & Import Functions ---
+
+    function handleSaveTemplate() {
+        if (categories.length === 0) {
+            showCustomAlert('저장할 항목이 없습니다.');
+            return;
+        }
+        showCustomPrompt('템플릿 이름을 입력하세요:', '나만의 체크리스트', (name) => {
+            saveChecklistTemplate(name, JSON.parse(JSON.stringify(categories))); // Save deep copy
+            showCustomAlert('템플릿이 저장되었습니다.');
+        });
+    }
+
+    function importChecklist(sourceCategories) {
+        if (!sourceCategories || sourceCategories.length === 0) return;
+
+        const executeImport = () => {
+            // Clear existing categories
+            categories.length = 0;
+
+            let addedCount = 0;
+            sourceCategories.forEach(srcCat => {
+                // Deep copy to create new IDs
+                const newCat = {
+                    id: generateCategoryId(),
+                    name: srcCat.name,
+                    type: srcCat.type || 'packing',
+                    items: (srcCat.items || []).map(item => ({
+                        id: generateItemId(),
+                        text: typeof item === 'string' ? item : item.text,
+                        checked: false,
+                        priority: (typeof item === 'object' && item.priority) ? item.priority : 'medium'
+                    }))
+                };
+                categories.push(newCat);
+                addedCount++;
+            });
+
+            renderChecklists();
+            showCustomAlert(`${addedCount}개 카테고리를 불러왔습니다.`);
+        };
+
+        if (categories.length > 0) {
+            showCustomConfirm('템플릿을 불러오면 작성 중인 내용이 초기화됩니다.<br>그래도 불러오시겠습니까?', executeImport);
+        } else {
+            executeImport();
+        }
+    }
+
+    function createImportModal() {
+        // Create Modal Overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.display = 'flex';
+        overlay.style.zIndex = '1000'; // High z-index
+
+        // Modal Content
+        overlay.innerHTML = `
+            <div class="modal-content" style="width: 100%; max-width: 600px; height: 80vh; max-height: 700px; display: flex; flex-direction: column; padding: 0; border-radius: 12px; overflow: hidden;">
+                <div class="modal-header" style="padding: 16px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: white;">
+                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">체크리스트 불러오기</h3>
+                    <button type="button" class="btn-close-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8;">&times;</button>
+                </div>
+                
+                <div class="modal-body" style="flex: 1; display: flex; overflow: hidden; background: #f8fafc;">
+                    <!-- Sidebar Tabs -->
+                    <div class="import-tabs" style="width: 140px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                        <button class="tab-btn active" data-tab="themes" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">추천 테마</button>
+                        <button class="tab-btn" data-tab="templates" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">나만의 템플릿</button>
+                        <button class="tab-btn" data-tab="history" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">지난 여행</button>
+                    </div>
+
+                    <!-- Content Area -->
+                    <div class="import-content" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column;">
+                        <div id="tabContent" style="flex: 1; overflow-y: auto;">
+                            <!-- List will be rendered here -->
+                        </div>
+                        
+                        <!-- Preview Section -->
+                        <div id="previewSection" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: none;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 0.9rem; color: #475569;">미리보기</h4>
+                            <div id="previewList" style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; max-height: 150px; overflow-y: auto; font-size: 0.85rem; color: #64748b;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="padding: 16px; border-top: 1px solid #e2e8f0; background: white; display: flex; justify-content: flex-end; gap: 8px;">
+                    <button type="button" class="btn-cancel-modal" style="padding: 8px 16px; border: 1px solid #d1d5db; background: white; border-radius: 6px; cursor: pointer;">취소</button>
+                    <button type="button" class="btn-confirm-import" disabled style="padding: 8px 16px; border: none; background: #64748b; color: white; border-radius: 6px; cursor: not-allowed;">불러오기</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        let selectedData = null;
+
+        // Styles for active tab
+        const updateTabs = (activeTab) => {
+            overlay.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.dataset.tab === activeTab) {
+                    btn.classList.add('active');
+                    btn.style.color = '#3b82f6';
+                    btn.style.background = '#eff6ff';
+                    btn.style.borderLeftColor = '#3b82f6';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.color = '#64748b';
+                    btn.style.background = 'none';
+                    btn.style.borderLeftColor = 'transparent';
+                }
+            });
+            renderTabContent(activeTab);
+            // Reset selection
+            selectedData = null;
+            updatePreview();
+        };
+
+        const renderTabContent = (tab) => {
+            const container = overlay.querySelector('#tabContent');
+            container.innerHTML = '';
+
+            if (tab === 'themes') {
+                Object.entries(CHECKLIST_THEMES).forEach(([key, theme]) => {
+                    const card = createListCard(theme.name, `${theme.categories.length}개 카테고리`, () => selectItem(theme.categories));
+                    container.appendChild(card);
+                });
+            } else if (tab === 'templates') {
+                const templates = getChecklistTemplates();
+                if (templates.length === 0) {
+                    container.innerHTML = '<p style="color:#94a3b8; text-align:center; margin-top: 20px;">저장된 템플릿이 없습니다.</p>';
+                } else {
+                    templates.forEach(tpl => {
+                        const card = createListCard(tpl.name, `${new Date(tpl.createdAt).toLocaleDateString()} 저장`, () => selectItem(tpl.categories), true, tpl.id);
+                        container.appendChild(card);
+                    });
+                }
+            } else if (tab === 'history') {
+                const schedules = getAllSchedules();
+                const validSchedules = schedules.filter(s => s.checklists && s.checklists.length > 0);
+
+                if (validSchedules.length === 0) {
+                    container.innerHTML = '<p style="color:#94a3b8; text-align:center; margin-top: 20px;">불러올 지난 여행기록이 없습니다.</p>';
+                } else {
+                    validSchedules.forEach(sch => {
+                        const card = createListCard(sch.title, `${sch.startDate} 출발`, () => selectItem(sch.checklists));
+                        container.appendChild(card);
+                    });
+                }
+            }
+        };
+
+        const createListCard = (title, sub, onClick, isTemplate = false, id = null) => {
+            const div = document.createElement('div');
+            div.style.padding = '12px';
+            div.style.border = '1px solid #e2e8f0';
+            div.style.borderRadius = '6px';
+            div.style.marginBottom = '8px';
+            div.style.cursor = 'pointer';
+            div.style.background = 'white';
+            div.style.transition = 'all 0.2s';
+
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-weight:600; color:#334155;">${title}</div>
+                    ${isTemplate ? '<button class="btn-del-tmpl" style="padding:2px 6px; font-size:0.7rem; color:#ef4444; border:1px solid #ef4444; border-radius:4px; background:white; cursor:pointer;">삭제</button>' : ''}
+                </div>
+                <div style="font-size:0.8rem; color:#94a3b8;">${sub}</div>
+            `;
+
+            div.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-del-tmpl')) {
+                    e.stopPropagation();
+                    showCustomConfirm('이 템플릿을 삭제하시겠습니까?', () => {
+                        deleteChecklistTemplate(id);
+                        renderTabContent('templates');
+                    });
+                    return;
+                }
+
+                overlay.querySelectorAll('#tabContent > div').forEach(d => {
+                    d.style.borderColor = '#e2e8f0';
+                    d.style.background = 'white';
+                });
+                div.style.borderColor = '#3b82f6';
+                div.style.background = '#eff6ff';
+
+                onClick();
+            });
+            return div;
+        };
+
+        const selectItem = (categories) => {
+            selectedData = categories;
+            updatePreview();
+        };
+
+        const updatePreview = () => {
+            const previewSection = overlay.querySelector('#previewSection');
+            const previewList = overlay.querySelector('#previewList');
+            const btnImport = overlay.querySelector('.btn-confirm-import');
+
+            if (!selectedData) {
+                previewSection.style.display = 'none';
+                btnImport.disabled = true;
+                btnImport.style.background = '#cbd5e1';
+                btnImport.style.cursor = 'not-allowed';
+                return;
+            }
+
+            previewSection.style.display = 'block';
+            btnImport.disabled = false;
+            btnImport.style.background = '#3b82f6';
+            btnImport.style.cursor = 'pointer';
+
+            previewList.innerHTML = selectedData.map(cat => `
+                <div style="margin-bottom:8px;">
+                    <div style="font-weight:600;">• ${cat.name}</div>
+                    <div style="padding-left:12px; font-size:0.8rem;">
+                        ${(cat.items || []).map(i => (typeof i === 'string' ? i : i.text)).join(', ')}
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        overlay.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => updateTabs(btn.dataset.tab));
+        });
+
+        overlay.querySelector('.btn-close-modal').addEventListener('click', () => overlay.remove());
+        overlay.querySelector('.btn-cancel-modal').addEventListener('click', () => overlay.remove());
+
+        overlay.querySelector('.btn-confirm-import').addEventListener('click', () => {
+            if (selectedData) {
+                importChecklist(selectedData);
+                overlay.remove();
+            }
+        });
+
+        updateTabs('themes');
+    }
+
+    // Custom Modal Helpers
+    function showCustomAlert(message) {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.display = 'flex';
+        overlay.style.zIndex = '2000';
+        overlay.innerHTML = `
+            <div class="modal-content" style="max-width:350px; text-align:center; padding: 0; overflow:hidden;">
+                <div class="modal-body" style="padding:24px 20px;">
+                    <p style="margin:0; font-size:1rem; color:#334155; line-height:1.5;">${message}</p>
+                </div>
+                <div class="modal-footer" style="padding:12px; justify-content:center; border-top:1px solid #f1f5f9; background: #f8fafc;">
+                    <button class="btn-primary-modal" style="width:100%; padding: 10px; border-radius: 6px; cursor: pointer; border:none; background:#3b82f6; color:white; font-weight:600;">확인</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('button').addEventListener('click', () => overlay.remove());
+    }
+
+    function showCustomConfirm(message, onConfirm) {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.display = 'flex';
+        overlay.style.zIndex = '2000';
+        overlay.innerHTML = `
+            <div class="modal-content" style="max-width:350px; text-align:center; padding: 0; overflow:hidden;">
+                <div class="modal-body" style="padding:24px 20px;">
+                    <p style="margin:0; font-size:1rem; color:#334155; line-height:1.5;">${message}</p>
+                </div>
+                <div class="modal-footer" style="padding:12px; display:flex; gap:10px; justify-content:center; border-top:1px solid #f1f5f9; background: #f8fafc;">
+                    <button class="btn-cancel" style="flex:1; padding: 10px; border:1px solid #cbd5e1; background:white; border-radius:6px; cursor:pointer; color:#64748b;">취소</button>
+                    <button class="btn-confirm" style="flex:1; padding: 10px; border:none; background:#ef4444; border-radius:6px; cursor:pointer; color:white; font-weight:600;">삭제</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('.btn-cancel').addEventListener('click', () => overlay.remove());
+        overlay.querySelector('.btn-confirm').addEventListener('click', () => {
+            overlay.remove();
+            onConfirm();
+        });
+    }
+
+    function showCustomPrompt(message, defaultValue, onConfirm) {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.style.display = 'flex';
+        overlay.style.zIndex = '2000';
+        overlay.innerHTML = `
+            <div class="modal-content" style="max-width:350px; padding: 0; overflow:hidden;">
+                <div class="modal-header" style="padding:16px; border-bottom:1px solid #f1f5f9; background:white;">
+                    <h3 style="margin:0; font-size:1.1rem; color:#1e293b;">${message}</h3>
+                </div>
+                <div class="modal-body" style="padding:20px 16px;">
+                    <input type="text" value="${defaultValue}" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:1rem; outline:none;">
+                </div>
+                <div class="modal-footer" style="padding:12px; display:flex; gap:10px; justify-content:flex-end; border-top:1px solid #f1f5f9; background:#f8fafc;">
+                    <button class="btn-cancel" style="padding: 8px 16px; border:1px solid #cbd5e1; background:white; border-radius:6px; cursor:pointer; color:#64748b;">취소</button>
+                    <button class="btn-confirm" style="padding: 8px 16px; border:none; background:#3b82f6; border-radius:6px; cursor:pointer; color:white; font-weight:600;">저장</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        const input = overlay.querySelector('input');
+        input.focus();
+        input.setSelectionRange(0, input.value.length);
+
+        // Handle Enter key
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const val = input.value.trim();
+                if (val) {
+                    overlay.remove();
+                    onConfirm(val);
+                }
+            }
+        });
+
+        overlay.querySelector('.btn-cancel').addEventListener('click', () => overlay.remove());
+        overlay.querySelector('.btn-confirm').addEventListener('click', () => {
+            const val = input.value.trim();
+            if (val) {
+                overlay.remove();
+                onConfirm(val);
+            }
         });
     }
 

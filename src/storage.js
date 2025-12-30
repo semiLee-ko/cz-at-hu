@@ -67,6 +67,34 @@ export function setCurrentSchedule(id) {
     localStorage.setItem(CURRENT_SCHEDULE_KEY, id);
 }
 
+// 템플릿 관련 기능
+const TEMPLATE_KEY = 'checklist_templates';
+
+export function getChecklistTemplates() {
+    const data = localStorage.getItem(TEMPLATE_KEY);
+    return data ? JSON.parse(data) : [];
+}
+
+export function saveChecklistTemplate(name, categories) {
+    const templates = getChecklistTemplates();
+    const newTemplate = {
+        id: 'tpl_' + Date.now(),
+        name,
+        categories, // Should be a deep copy of the categories array
+        createdAt: new Date().toISOString()
+    };
+
+    templates.push(newTemplate);
+    localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+    return newTemplate;
+}
+
+export function deleteChecklistTemplate(id) {
+    const templates = getChecklistTemplates();
+    const filtered = templates.filter(t => t.id !== id);
+    localStorage.setItem(TEMPLATE_KEY, JSON.stringify(filtered));
+}
+
 // 기본 템플릿 일정 생성
 export function createDefaultSchedule() {
     return {

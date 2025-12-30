@@ -222,3 +222,43 @@
         opacity: 0;
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .chatbot-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .chatbot-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+[data-theme="dark"] .chat-messages {
+    background: var(--bg-primary);
+}
+
+[data-theme="dark"] .message.ai {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .chat-input-area {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+}
+
+[data-theme="dark"] .chat-input {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .chat-input:focus {
+    border-color: #3b82f6;
+}
+
+[data-theme="dark"] .typing-dot {
+    background: #64748b;
+}

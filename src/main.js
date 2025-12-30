@@ -1405,8 +1405,8 @@ function showTotalSettlementPopup(scheduleId) {
                                                         <div class="exp-left">
                                                             <div class="exp-usage-main">${exp.usage || '지출 내역'}</div>
                                                             <div class="exp-who-meta">
-                                                                <span class="exp-payer-name"><b>${exp.payer}</b> 결제</span>
-                                                                <span class="exp-participants">(${exp.participants?.join(', ') || item.event.participants?.join(', ') || '전체'})</span>
+                                                                    <span class="exp-payer-name"><b>${exp.payer}</b> 결제</span>
+                                                                <span class="exp-participants">${exp.participants?.join(', ') || item.event.participants?.join(', ') || '전체'}</span>
                                                             </div>
                                                         </div>
                                                         <span class="exp-cost">${Number(exp.amount).toLocaleString()}원</span>

@@ -1347,6 +1347,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     </svg>
                 </div>
                 
+                <div class="day-actions-bar btn-toggle-all-details" data-day="${day.day}">
+                     <svg class="toggle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 15l6-6 6 6"/>
+                     </svg>
+                </div>
+
                 <div class="events-list" id="events-day-${day.day}">
                     ${eventsToRender.map((event, eventIndex) =>
                 renderEventItem(event, eventIndex, locationsList, timeOptions, day.day)
@@ -1372,12 +1378,56 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 dayCard.classList.toggle('collapsed');
                 if (dayCard.classList.contains('collapsed')) {
                     eventsList.style.display = 'none';
-                    addBtn.style.display = 'none';
+                    if (addBtn) addBtn.style.display = 'none';
                     icon.innerHTML = '<path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
                 } else {
                     eventsList.style.display = 'block';
-                    addBtn.style.display = 'block';
+                    if (addBtn) addBtn.style.display = 'block';
                     icon.innerHTML = '<path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                }
+            });
+        });
+
+        // Add collapse/expand all details toggle functionality
+        daysContainer.querySelectorAll('.btn-toggle-all-details').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dayNum = btn.dataset.day;
+                const eventsList = daysContainer.querySelector(`#events-day-${dayNum}`);
+                const eventItems = eventsList.querySelectorAll('.event-item');
+                const icon = btn.querySelector('svg');
+
+                // Toggle state
+                const isCollapsed = btn.classList.contains('all-collapsed');
+
+                if (isCollapsed) {
+                    // Expand All
+                    eventItems.forEach(item => {
+                        item.classList.remove('collapsed');
+                        const content = item.querySelector('.event-content');
+                        if (content) content.style.display = 'block';
+
+                        // Sync Icon: UP (Expanded)
+                        const itemIcon = item.querySelector('.collapse-icon');
+                        if (itemIcon) itemIcon.innerHTML = '<path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                    });
+                    btn.classList.remove('all-collapsed');
+                    // Change icon to "Collapse" (Up Arrow/Chevron)
+                    icon.innerHTML = '<path d="M6 15l6-6 6 6"/>';
+                } else {
+                    // Collapse All
+                    eventItems.forEach(item => {
+                        item.classList.add('collapsed');
+                        const content = item.querySelector('.event-content');
+                        if (content) content.style.display = 'none';
+
+                        // Sync Icon: DOWN (Collapsed)
+                        const itemIcon = item.querySelector('.collapse-icon');
+                        if (itemIcon) itemIcon.innerHTML = '<path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                    });
+                    btn.classList.add('all-collapsed');
+                    // Change icon to "Expand" (Down Arrow/Chevron)
+                    icon.innerHTML = '<path d="M6 9l6 6 6-6"/>';
                 }
             });
         });
@@ -1423,45 +1473,95 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         });
 
         // NEW: Location Picker Delegation
-        daysContainer.addEventListener('click', (e) => {
-            const pickBtn = e.target.closest('.btn-pick-location');
-            if (pickBtn) {
-                const eventItem = pickBtn.closest('.event-item');
-                const latInput = eventItem.querySelector('.event-lat');
-                const lngInput = eventItem.querySelector('.event-lng');
-                const placeInput = eventItem.querySelector('.event-place');
+        // NEW: Location Picker Delegation - Prevent Duplicate Listeners
+        if (!daysContainer.dataset.hasLocationListener) {
+            daysContainer.dataset.hasLocationListener = 'true';
+            daysContainer.addEventListener('click', (e) => {
+                const pickBtn = e.target.closest('.btn-pick-location');
+                if (pickBtn) {
+                    const eventItem = pickBtn.closest('.event-item');
+                    const latInput = eventItem.querySelector('.event-lat');
+                    const lngInput = eventItem.querySelector('.event-lng');
+                    const placeInput = eventItem.querySelector('.event-place');
 
-                const currentLat = latInput.value ? parseFloat(latInput.value) : null;
-                const currentLng = lngInput.value ? parseFloat(lngInput.value) : null;
+                    const currentLat = latInput.value ? parseFloat(latInput.value) : null;
+                    const currentLng = lngInput.value ? parseFloat(lngInput.value) : null;
 
-                if (window.showLocationPicker) {
-                    window.showLocationPicker(currentLat, currentLng, (coords) => {
-                        latInput.value = coords.lat;
-                        lngInput.value = coords.lng;
+                    if (window.showLocationPicker) {
+                        window.showLocationPicker(currentLat, currentLng, (coords) => {
+                            latInput.value = coords.lat;
+                            lngInput.value = coords.lng;
 
-                        // Update visual state (Add red active class)
-                        pickBtn.classList.add('active');
+                            // Update visual state (Add red active class)
+                            pickBtn.classList.add('active');
 
-                        // Optional: if place is empty, maybe fill with something? 
-                        // But we don't return address yet.
-                    });
-                } else {
-                    alert('지도 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                            // Optional: if place is empty, maybe fill with something? 
+                            // But we don't return address yet.
+                        });
+                    } else {
+                        alert('지도 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                    }
                 }
-            }
-        });
+            });
+        }
+
+        // NEW: Event Reorder Delegation
+        if (!daysContainer.dataset.hasReorderListener) {
+            daysContainer.dataset.hasReorderListener = 'true';
+            daysContainer.addEventListener('click', (e) => {
+                const upBtn = e.target.closest('.btn-move-event-up');
+                const downBtn = e.target.closest('.btn-move-event-down');
+
+                if (!upBtn && !downBtn) return;
+
+                e.stopPropagation(); // Stop collapse toggle
+                e.preventDefault();
+
+                const btn = upBtn || downBtn;
+                const currentItem = btn.closest('.event-item');
+                const eventsList = currentItem.parentElement;
+
+                if (upBtn) {
+                    const prevItem = currentItem.previousElementSibling;
+                    if (prevItem && prevItem.classList.contains('event-item')) {
+                        eventsList.insertBefore(currentItem, prevItem);
+                        renumberEvents(eventsList);
+                    }
+                } else if (downBtn) {
+                    const nextItem = currentItem.nextElementSibling;
+                    if (nextItem && nextItem.classList.contains('event-item')) {
+                        // To move down, insert next item before current item
+                        eventsList.insertBefore(nextItem, currentItem);
+                        renumberEvents(eventsList);
+                    }
+                }
+            });
+        }
+
+        function renumberEvents(listElement) {
+            const items = listElement.querySelectorAll(':scope > .event-item');
+            items.forEach((item, index) => {
+                const headerSpan = item.querySelector('.event-header span');
+                if (headerSpan) {
+                    headerSpan.textContent = `일정 ${index + 1}`;
+                }
+            });
+        }
 
         // Add collapse/expand functionality for event items
         daysContainer.querySelectorAll('[data-toggle="event"]').forEach(header => {
             header.addEventListener('click', () => {
                 const eventItem = header.closest('.event-item');
                 const eventContent = eventItem.querySelector('.event-content');
+                const icon = header.querySelector('svg');
 
                 eventItem.classList.toggle('collapsed');
                 if (eventItem.classList.contains('collapsed')) {
                     eventContent.style.display = 'none';
+                    if (icon) icon.innerHTML = '<path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'; // Down
                 } else {
                     eventContent.style.display = 'block';
+                    if (icon) icon.innerHTML = '<path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'; // Up
                 }
             });
         });
@@ -1470,12 +1570,28 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     function renderEventItem(event, eventIndex, locationsList, timeOptions, dayNum) {
         return `
             <div class="event-item">
-                <div class="event-header" data-toggle="event">
-                    <span>일정 ${eventIndex + 1}</span>
+                <div class="event-header">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span>일정 ${eventIndex + 1}</span>
+                        <button type="button" class="btn-toggle-collapse-icon" data-toggle="event" title="접기/펴기">
+                            <svg class="collapse-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="event-actions">
-                        <svg class="collapse-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M4 10L8 6L12 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        <div class="event-reorder-actions" style="display:flex; gap:4px; margin-right:6px;">
+                             <button type="button" class="btn-move-event btn-move-event-up" title="위로 이동">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 15l-6-6-6 6"/>
+                                </svg>
+                             </button>
+                             <button type="button" class="btn-move-event btn-move-event-down" title="아래로 이동">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 9l6 6 6-6"/>
+                                </svg>
+                             </button>
+                        </div>
                         <button type="button" class="btn-remove-event" data-day="${dayNum}">
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor">
                                 <path d="M1 1L13 13M13 1L1 13" stroke-width="2" stroke-linecap="round"/>
