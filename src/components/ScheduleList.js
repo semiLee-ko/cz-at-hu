@@ -3,9 +3,11 @@
 import { getAllSchedules, deleteSchedule, setCurrentSchedule, getSchedule } from '../storage.js';
 import { showShareModal } from './ShareModal.js';
 import { showChatBot } from './ChatBot.js';
+import { showCustomConfirm } from '../utils/modalUtils.js';
 
 export function renderScheduleList(container, onSelect) {
     const schedules = getAllSchedules();
+
 
     container.innerHTML = `
         <div class="page-transition">
@@ -114,10 +116,10 @@ export function renderScheduleList(container, onSelect) {
     container.querySelectorAll('.btn-delete-icon').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (confirm('정말 삭제하시겠습니까?')) {
+            showCustomConfirm('정말 삭제하시겠습니까?', () => {
                 deleteSchedule(btn.dataset.id);
                 renderScheduleList(container, onSelect);
-            }
+            });
         });
     });
 

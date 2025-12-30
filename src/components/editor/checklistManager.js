@@ -7,6 +7,7 @@ import {
     saveChecklistTemplate,
     deleteChecklistTemplate
 } from '../../storage.js';
+import { showCustomAlert, showCustomConfirm, showCustomPrompt } from '../../utils/modalUtils.js';
 
 const CHECKLIST_THEMES = {
     domestic: {
@@ -744,49 +745,9 @@ export function createChecklistManager(container, schedule) {
         updateTabs('themes');
     }
 
-    // Custom Modal Helpers
-    function showCustomAlert(message) {
-        const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay';
-        overlay.style.display = 'flex';
-        overlay.style.zIndex = '2000';
-        overlay.innerHTML = `
-            <div class="modal-content" style="max-width:350px; text-align:center; padding: 0; overflow:hidden;">
-                <div class="modal-body" style="padding:24px 20px;">
-                    <p style="margin:0; font-size:1rem; color:#334155; line-height:1.5;">${message}</p>
-                </div>
-                <div class="modal-footer" style="padding:12px; justify-content:center; border-top:1px solid #f1f5f9; background: #f8fafc;">
-                    <button class="btn-primary-modal" style="width:100%; padding: 10px; border-radius: 6px; cursor: pointer; border:none; background:#3b82f6; color:white; font-weight:600;">확인</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        overlay.querySelector('button').addEventListener('click', () => overlay.remove());
-    }
 
-    function showCustomConfirm(message, onConfirm) {
-        const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay';
-        overlay.style.display = 'flex';
-        overlay.style.zIndex = '2000';
-        overlay.innerHTML = `
-            <div class="modal-content" style="max-width:350px; text-align:center; padding: 0; overflow:hidden;">
-                <div class="modal-body" style="padding:24px 20px;">
-                    <p style="margin:0; font-size:1rem; color:#334155; line-height:1.5;">${message}</p>
-                </div>
-                <div class="modal-footer" style="padding:12px; display:flex; gap:10px; justify-content:center; border-top:1px solid #f1f5f9; background: #f8fafc;">
-                    <button class="btn-cancel" style="flex:1; padding: 10px; border:1px solid #cbd5e1; background:white; border-radius:6px; cursor:pointer; color:#64748b;">취소</button>
-                    <button class="btn-confirm" style="flex:1; padding: 10px; border:none; background:#ef4444; border-radius:6px; cursor:pointer; color:white; font-weight:600;">삭제</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        overlay.querySelector('.btn-cancel').addEventListener('click', () => overlay.remove());
-        overlay.querySelector('.btn-confirm').addEventListener('click', () => {
-            overlay.remove();
-            onConfirm();
-        });
-    }
+
+
 
     function showCustomPrompt(message, defaultValue, onConfirm) {
         const overlay = document.createElement('div');

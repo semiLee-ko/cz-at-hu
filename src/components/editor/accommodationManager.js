@@ -1,5 +1,5 @@
-// Accommodation Management Module
-// Handles adding, editing, and deleting accommodations in an accordion style
+
+import { showCustomAlert, showCustomConfirm } from '../../utils/modalUtils.js';
 
 export function createAccommodationManager(container, schedule, generateDaysFromDateRange) {
     // Scope selectors to this specific step to avoid conflicts with other steps sharing same classes
@@ -9,6 +9,7 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
     let editingAccommodationId = null;
     let draggedItem = null;
     let placeholder = null;
+    let globalDragListenersAttached = false;
     let expandedAccommodations = new Set(); // Track expanded accommodation IDs
     let clickListenerAttached = false; // Track if click listener is attached
 
@@ -16,6 +17,149 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
         return 'acc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
+    function attachAccommodationEventListeners() {
+        if (!stepRoot) return;
+        console.log('Attaching Accommodation Listeners');
+        const accommodationList = stepRoot.querySelector('#accommodationList');
+        const formSection = stepRoot.querySelector('.accommodation-form');
+
+        if (!accommodationList) {
+            console.warn('accommodationList not found');
+            return;
+        }
+
+        // Use event delegation for list clicks
+        if (!clickListenerAttached) {
+            accommodationList.addEventListener('click', (e) => {
+                const header = e.target.closest('.day-header');
+                if (!header) return;
+
+                // Prevent toggle if clicking on drag handle or buttons
+                if (e.target.closest('.drag-handle') || e.target.closest('button')) return;
+
+                const card = header.closest('.day-card');
+                if (card) {
+                    e.stopPropagation();
+                    const accId = card.dataset.accId;
+
+                    const isClosing = !card.classList.contains('collapsed');
+                    if (isClosing) {
+                        expandedAccommodations.delete(accId);
+                        card.classList.add('collapsed');
+                    } else {
+                        expandedAccommodations.add(accId);
+                        card.classList.remove('collapsed');
+                    }
+                }
+            });
+            clickListenerAttached = true;
+        }
+
+        // Re-attach item-specific listeners (Delete, Date, Drag Handles)
+        accommodationList.querySelectorAll('.btn-delete-acc-ghost').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const accId = btn.dataset.accId || btn.closest('.btn-delete-acc-ghost').dataset.accId;
+                deleteAccommodation(accId);
+            });
+        });
+
+        accommodationList.querySelectorAll('.btn-assign-dates-compact').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const accId = btn.dataset.accId || btn.closest('.btn-assign-dates-compact').dataset.accId;
+                openDateModal(accId);
+            });
+        });
+
+        // 1. Attach Item Drag Listeners (Handles)
+        attachItemDragListeners(accommodationList, formSection);
+
+        // 2. Attach Global Drag Listeners (Container & Form) - Once
+        if (!globalDragListenersAttached) {
+            attachGlobalDragListeners(accommodationList, formSection);
+            globalDragListenersAttached = true;
+        }
+    }
+
+    function attachItemDragListeners(accommodationList, formSection) {
+        accommodationList.querySelectorAll('.drag-handle').forEach(handle => {
+            handle.addEventListener('dragstart', (e) => {
+                const item = handle.closest('.day-card');
+                console.log('Drag Start:', item.dataset.accId);
+                draggedItem = item;
+                e.dataTransfer.setData('text/plain', item.dataset.accId);
+                e.dataTransfer.effectAllowed = 'copyMove';
+                setTimeout(() => item.classList.add('dragging'), 0);
+                item.classList.add('collapsed');
+            });
+            handle.addEventListener('dragend', () => resetDragState(formSection));
+
+            // Touch events for handles
+            handle.addEventListener('touchstart', (e) => {
+                if (e.cancelable) e.preventDefault();
+                const item = handle.closest('.day-card');
+                draggedItem = item;
+                item.classList.add('dragging');
+                item.classList.add('collapsed');
+            }, { passive: false });
+        });
+    }
+
+    function attachGlobalDragListeners(accommodationList, formSection) {
+        // List Container Events
+        accommodationList.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (draggedItem) handleDragOverList(accommodationList, e.clientY);
+        });
+
+        accommodationList.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedItem) handleDropList(accommodationList);
+        });
+
+        accommodationList.addEventListener('touchmove', (e) => {
+            if (!draggedItem) return;
+            if (e.cancelable) e.preventDefault();
+            const touch = e.touches[0];
+            const fingerEl = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            if (formSection && (formSection === fingerEl || formSection.contains(fingerEl))) {
+                formSection.classList.add('drag-over');
+                if (placeholder?.parentNode) placeholder.parentNode.removeChild(placeholder);
+            } else {
+                if (formSection) formSection.classList.remove('drag-over');
+                handleDragOverList(accommodationList, touch.clientY);
+            }
+        }, { passive: false });
+
+        accommodationList.addEventListener('touchend', (e) => {
+            if (!draggedItem) return;
+            if (formSection?.classList.contains('drag-over')) {
+                handleDropForm(formSection, draggedItem.dataset.accId);
+            } else {
+                handleDropList(accommodationList);
+            }
+            resetDragState(formSection);
+        });
+
+        // Form Section Events
+        if (formSection) {
+            formSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                console.log('Form Drag Over');
+                formSection.classList.add('drag-over');
+                e.dataTransfer.dropEffect = 'copy';
+            });
+            formSection.addEventListener('dragleave', () => formSection.classList.remove('drag-over'));
+            formSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const data = e.dataTransfer.getData('text/plain');
+                console.log('Form Drop Data:', data);
+                handleDropForm(formSection, data);
+            });
+        }
+    }
     function getDayNumber(dateString) {
         const form = container.querySelector('#scheduleForm');
         const formData = new FormData(form);
@@ -169,140 +313,7 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
         validateAccommodationForm();
     }
 
-    function attachAccommodationEventListeners() {
-        if (!stepRoot) return;
-        const accommodationList = stepRoot.querySelector('#accommodationList');
-        const formSection = stepRoot.querySelector('.accommodation-form');
 
-        if (!accommodationList) {
-            console.warn('accommodationList not found');
-            return;
-        }
-
-
-        const headers = accommodationList.querySelectorAll('.day-header');
-        console.log('Found headers:', headers.length);
-
-        // Use event delegation instead of forEach
-        // Only add listener once using a flag
-        if (!clickListenerAttached) {
-            accommodationList.addEventListener('click', (e) => {
-                const header = e.target.closest('.day-header');
-                if (!header) return;
-
-                // Prevent toggle if clicking on drag handle or buttons
-                if (e.target.closest('.drag-handle') || e.target.closest('button')) return;
-
-                const card = header.closest('.day-card');
-                if (card) {
-                    e.stopPropagation();
-                    const accId = card.dataset.accId;
-
-                    const isClosing = !card.classList.contains('collapsed');
-                    if (isClosing) {
-                        expandedAccommodations.delete(accId);
-                        card.classList.add('collapsed');
-                    } else {
-                        expandedAccommodations.add(accId);
-                        card.classList.remove('collapsed');
-                    }
-                    console.log('Toggled:', accId, 'Collapsed:', card.classList.contains('collapsed'));
-                }
-            });
-            clickListenerAttached = true;
-        }
-
-        accommodationList.querySelectorAll('.btn-delete-acc-ghost').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const accId = btn.dataset.accId || btn.closest('.btn-delete-acc-ghost').dataset.accId;
-                deleteAccommodation(accId);
-            });
-        });
-
-        accommodationList.querySelectorAll('.btn-assign-dates-compact').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const accId = btn.dataset.accId || btn.closest('.btn-assign-dates-compact').dataset.accId;
-                openDateModal(accId);
-            });
-        });
-
-        attachDragEventListeners(accommodationList, formSection);
-    }
-
-    function attachDragEventListeners(accommodationList, formSection) {
-        accommodationList.querySelectorAll('.drag-handle').forEach(handle => {
-            handle.addEventListener('dragstart', (e) => {
-                const item = handle.closest('.day-card');
-                draggedItem = item;
-                e.dataTransfer.setData('text/plain', item.dataset.accId);
-                e.dataTransfer.effectAllowed = 'move';
-                setTimeout(() => item.classList.add('dragging'), 0);
-                item.classList.add('collapsed');
-            });
-            handle.addEventListener('dragend', () => resetDragState(formSection));
-        });
-
-        accommodationList.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if (draggedItem) handleDragOverList(accommodationList, e.clientY);
-        });
-
-        accommodationList.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (draggedItem) handleDropList(accommodationList);
-        });
-
-        if (formSection) {
-            formSection.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                formSection.classList.add('drag-over');
-                e.dataTransfer.dropEffect = 'copy';
-            });
-            formSection.addEventListener('dragleave', () => formSection.classList.remove('drag-over'));
-            formSection.addEventListener('drop', (e) => {
-                e.preventDefault();
-                handleDropForm(formSection, e.dataTransfer.getData('text/plain'));
-            });
-        }
-
-        // Touch events
-        accommodationList.querySelectorAll('.drag-handle').forEach(handle => {
-            handle.addEventListener('touchstart', (e) => {
-                if (e.cancelable) e.preventDefault();
-                const item = handle.closest('.day-card');
-                draggedItem = item;
-                item.classList.add('dragging');
-                item.classList.add('collapsed');
-            }, { passive: false });
-        });
-
-        accommodationList.addEventListener('touchmove', (e) => {
-            if (!draggedItem) return;
-            if (e.cancelable) e.preventDefault();
-            const touch = e.touches[0];
-            const fingerEl = document.elementFromPoint(touch.clientX, touch.clientY);
-
-            if (formSection && (formSection === fingerEl || formSection.contains(fingerEl))) {
-                formSection.classList.add('drag-over');
-                if (placeholder?.parentNode) placeholder.parentNode.removeChild(placeholder);
-            } else {
-                if (formSection) formSection.classList.remove('drag-over');
-                handleDragOverList(accommodationList, touch.clientY);
-            }
-        }, { passive: false });
-
-        accommodationList.addEventListener('touchend', (e) => {
-            if (!draggedItem) return;
-            if (formSection?.classList.contains('drag-over')) {
-                handleDropForm(formSection, draggedItem.dataset.accId);
-            } else {
-                handleDropList(accommodationList);
-            }
-            resetDragState(formSection);
-        });
-    }
 
     function resetDragState(formSection) {
         draggedItem?.classList.remove('dragging');
@@ -385,7 +396,7 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
         const checkOut = stepRoot.querySelector('#accCheckOut').value.trim();
         const notes = stepRoot.querySelector('#accNotes').value.trim();
 
-        if (!name) return alert('숙소명을 입력해주세요.');
+        if (!name) return showCustomAlert('숙소명을 입력해주세요.');
 
         const accData = { name, type, location, contact, price, url, checkIn, checkOut, notes };
 
@@ -430,10 +441,10 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
     }
 
     function deleteAccommodation(accId) {
-        if (confirm('이 숙소 정보를 삭제하시겠습니까?')) {
+        showCustomConfirm('이 숙소 정보를 삭제하시겠습니까?', () => {
             accommodations = accommodations.filter(a => a.id !== accId);
             renderAccommodations();
-        }
+        });
     }
 
     function openDateModal(accId) {
@@ -441,7 +452,7 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
         const formData = new FormData(form);
         const startDate = formData.get('startDate');
         const endDate = formData.get('endDate');
-        if (!startDate || !endDate) return alert('1단계에서 여행 날짜를 먼저 입력해주세요.');
+        if (!startDate || !endDate) return showCustomAlert('1단계에서 여행 날짜를 먼저 입력해주세요.');
 
         const days = generateDaysFromDateRange(startDate, endDate);
         const acc = accommodations.find(a => a.id === accId);

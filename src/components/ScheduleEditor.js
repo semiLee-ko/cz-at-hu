@@ -5,6 +5,7 @@ import { createStepManager } from './editor/stepManager.js';
 import { createAccommodationManager } from './editor/accommodationManager.js';
 import { createChecklistManager } from './editor/checklistManager.js';
 import { createTipManager } from './editor/tipManager.js';
+import { showCustomConfirm, showCustomAlert } from '../utils/modalUtils.js';
 
 export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     // 오늘 날짜 가져오기
@@ -1173,6 +1174,13 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         };
 
         const saved = saveSchedule(newSchedule);
+
+        // FIX: Update current schedule ID so subsequent saves are updates, not new creates
+        if (!schedule.id && saved.id) {
+            schedule.id = saved.id;
+            const titleEl = container.querySelector('.editor-title');
+            if (titleEl) titleEl.textContent = '일정 수정';
+        }
 
         // Prevent navigation (stay on page)
         // onSave(saved); 

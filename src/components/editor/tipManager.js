@@ -1,5 +1,5 @@
-// Tip Management Module
-// Handles adding, editing, and deleting tips in an accordion style
+
+import { showCustomAlert, showCustomConfirm } from '../../utils/modalUtils.js';
 
 export function createTipManager(container, schedule) {
     // Scope selectors to this specific step to avoid conflicts with other steps sharing same classes
@@ -8,12 +8,113 @@ export function createTipManager(container, schedule) {
     let tips = schedule.tips || [];
     let editingTipId = null;
     let draggedItem = null;
-    let placeholder = null;
+    let globalDragListenersAttached = false;
 
-    function generateTipId() {
-        return 'tip_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    function attachTipEventListeners() {
+        if (!stepRoot) return;
+        const tipsContainer = stepRoot.querySelector('#tipsContainer');
+        const formSection = stepRoot.querySelector('.tip-form-section');
+
+        tipsContainer.querySelectorAll('.day-header').forEach(header => {
+            if (!header.dataset.listenerAttached) {
+                header.addEventListener('click', (e) => {
+                    if (e.target.closest('.drag-handle')) return;
+                    header.closest('.day-card').classList.toggle('collapsed');
+                });
+                header.dataset.listenerAttached = 'true';
+            }
+        });
+
+        tipsContainer.querySelectorAll('.btn-delete-tip-icon').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const tipId = btn.dataset.tipId || btn.closest('.btn-delete-tip-icon').dataset.tipId;
+                deleteTip(tipId);
+            });
+        });
+
+        // 1. Attach Item Drag Listeners (Handles)
+        attachItemDragListeners(tipsContainer, formSection);
+
+        // 2. Attach Global Drag Listeners (Container & Form) - Once
+        if (!globalDragListenersAttached) {
+            attachGlobalDragListeners(tipsContainer, formSection);
+            globalDragListenersAttached = true;
+        }
     }
 
+    function attachItemDragListeners(tipsContainer, formSection) {
+        tipsContainer.querySelectorAll('.drag-handle').forEach(handle => {
+            handle.addEventListener('dragstart', (e) => {
+                const item = handle.closest('.day-card');
+                draggedItem = item;
+                e.dataTransfer.setData('text/plain', item.dataset.tipId);
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => item.classList.add('dragging'), 0);
+                item.classList.add('collapsed');
+            });
+            handle.addEventListener('dragend', () => resetDragState(formSection));
+
+            // Touch events
+            handle.addEventListener('touchstart', (e) => {
+                if (e.cancelable) e.preventDefault();
+                const item = handle.closest('.day-card');
+                draggedItem = item;
+                item.classList.add('dragging');
+                item.classList.add('collapsed');
+            }, { passive: false });
+        });
+    }
+
+    function attachGlobalDragListeners(tipsContainer, formSection) {
+        tipsContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (draggedItem) handleDragOverList(tipsContainer, e.clientY);
+        });
+
+        tipsContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedItem) handleDropList(tipsContainer);
+        });
+
+        if (formSection) {
+            formSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                formSection.classList.add('drag-over');
+                e.dataTransfer.dropEffect = 'copy';
+            });
+            formSection.addEventListener('dragleave', () => formSection.classList.remove('drag-over'));
+            formSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                handleDropForm(formSection, e.dataTransfer.getData('text/plain'));
+            });
+        }
+
+        tipsContainer.addEventListener('touchmove', (e) => {
+            if (!draggedItem) return;
+            if (e.cancelable) e.preventDefault();
+            const touch = e.touches[0];
+            const fingerEl = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            if (formSection && (formSection === fingerEl || formSection.contains(fingerEl))) {
+                formSection.classList.add('drag-over');
+                if (placeholder?.parentNode) placeholder.parentNode.removeChild(placeholder);
+            } else {
+                if (formSection) formSection.classList.remove('drag-over');
+                handleDragOverList(tipsContainer, touch.clientY);
+            }
+        }, { passive: false });
+
+        tipsContainer.addEventListener('touchend', (e) => {
+            if (!draggedItem) return;
+            if (formSection?.classList.contains('drag-over')) {
+                handleDropForm(formSection, draggedItem.dataset.tipId);
+            } else {
+                handleDropList(tipsContainer);
+            }
+            resetDragState(formSection);
+        });
+    }
     // Real-time validation for tip form
     function validateTipForm() {
         if (!stepRoot) return;
@@ -149,22 +250,40 @@ export function createTipManager(container, schedule) {
             });
         });
 
-        attachDragEventListeners(tipsContainer, formSection);
+        // 1. Attach Item Drag Listeners (Handles)
+        attachItemDragListeners(tipsContainer, formSection);
+
+        // 2. Attach Global Drag Listeners (Container & Form) - Once
+        if (!globalDragListenersAttached) {
+            attachGlobalDragListeners(tipsContainer, formSection);
+            globalDragListenersAttached = true;
+        }
     }
 
-    function attachDragEventListeners(tipsContainer, formSection) {
+    function attachItemDragListeners(tipsContainer, formSection) {
         tipsContainer.querySelectorAll('.drag-handle').forEach(handle => {
             handle.addEventListener('dragstart', (e) => {
                 const item = handle.closest('.day-card');
                 draggedItem = item;
                 e.dataTransfer.setData('text/plain', item.dataset.tipId);
-                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.effectAllowed = 'copyMove';
                 setTimeout(() => item.classList.add('dragging'), 0);
                 item.classList.add('collapsed');
             });
             handle.addEventListener('dragend', () => resetDragState(formSection));
-        });
 
+            // Touch events
+            handle.addEventListener('touchstart', (e) => {
+                if (e.cancelable) e.preventDefault();
+                const item = handle.closest('.day-card');
+                draggedItem = item;
+                item.classList.add('dragging');
+                item.classList.add('collapsed');
+            }, { passive: false });
+        });
+    }
+
+    function attachGlobalDragListeners(tipsContainer, formSection) {
         tipsContainer.addEventListener('dragover', (e) => {
             e.preventDefault();
             if (draggedItem) handleDragOverList(tipsContainer, e.clientY);
@@ -187,17 +306,6 @@ export function createTipManager(container, schedule) {
                 handleDropForm(formSection, e.dataTransfer.getData('text/plain'));
             });
         }
-
-        // Touch events
-        tipsContainer.querySelectorAll('.drag-handle').forEach(handle => {
-            handle.addEventListener('touchstart', (e) => {
-                if (e.cancelable) e.preventDefault();
-                const item = handle.closest('.day-card');
-                draggedItem = item;
-                item.classList.add('dragging');
-                item.classList.add('collapsed');
-            }, { passive: false });
-        });
 
         tipsContainer.addEventListener('touchmove', (e) => {
             if (!draggedItem) return;
@@ -301,8 +409,8 @@ export function createTipManager(container, schedule) {
         const title = titleInput.value.trim();
         const content = contentInput.value.trim();
 
-        if (!title) return alert('제목을 입력해주세요.');
-        if (!content) return alert('내용을 입력해주세요.');
+        if (!title) return showCustomAlert('제목을 입력해주세요.');
+        if (!content) return showCustomAlert('내용을 입력해주세요.');
 
         if (editingTipId) {
             const index = tips.findIndex(t => t.id === editingTipId);
@@ -337,10 +445,10 @@ export function createTipManager(container, schedule) {
     }
 
     function deleteTip(tipId) {
-        if (confirm('이 팁을 삭제하시겠습니까?')) {
+        showCustomConfirm('이 팁을 삭제하시겠습니까?', () => {
             tips = tips.filter(t => t.id !== tipId);
             renderTips();
-        }
+        });
     }
 
     function clearTipForm() {
