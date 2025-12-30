@@ -58,9 +58,17 @@
 }
 
 /* Collapsed: Point DOWN */
-.day-card.collapsed .collapse-icon,
-.day-card-under.collapsed .collapse-icon {
+.day-card.collapsed .collapse-icon {
+    transform: rotate(0deg);
+}
+
+/* Day Card Under (Accommodations) - Align with Editor Logic */
+.day-card-under .collapse-icon {
     transform: rotate(180deg);
+}
+
+.day-card-under.collapsed .collapse-icon {
+    transform: rotate(0deg);
 }
 
 .day-badge {
