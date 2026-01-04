@@ -47,29 +47,45 @@ export function createStepManager(container, schedule, locations) {
         });
     }
 
-    function goToStep(targetStep, callbacks = {}) {
-        if (targetStep < 1 || targetStep > totalSteps || targetStep === currentStep) return;
+    async function goToStep(targetStep, callbacks = {}) {
+        if (targetStep < 1 || targetStep > totalSteps || targetStep === currentStep) return false;
 
         // Execute logic when leaving explicit steps (e.g. generating days when leaving step 1)
         // We do this regardless of direction now, because we want data ready if we jump from 1 to 3
-        if (currentStep === 1 || targetStep >= 2) {
-            if (callbacks.onLeaveStep1) callbacks.onLeaveStep1();
+        if (currentStep === 1) {
+            if (callbacks.onLeaveStep1) {
+                const result = await callbacks.onLeaveStep1();
+                if (result === false) return false;
+            }
         }
 
-        // Trigger render callbacks based on destination
-        if (targetStep === 2 && callbacks.renderStep2) callbacks.renderStep2();
-        if (targetStep === 3 && callbacks.renderAccommodations) callbacks.renderAccommodations();
-        if (targetStep === 4 && callbacks.renderChecklists) {
-            callbacks.renderChecklists('packing');
-            callbacks.renderChecklists('todo');
+        // Support onLeaveStep2 cancellation (added for custom confirm)
+        if (currentStep === 2) {
+            if (callbacks.onLeaveStep2) {
+                const result = await callbacks.onLeaveStep2();
+                if (result === false) return false;
+            }
         }
-        if (targetStep === 5 && callbacks.renderTips) callbacks.renderTips();
+
+        // Generalize for other steps if needed
+        if (currentStep === 3 && callbacks.onLeaveStep3) await callbacks.onLeaveStep3();
+        if (currentStep === 4 && callbacks.onLeaveStep4) await callbacks.onLeaveStep4();
+
+        // Trigger render callbacks based on destination
+        if (targetStep === 2 && callbacks.renderStep2) await callbacks.renderStep2();
+        if (targetStep === 3 && callbacks.renderAccommodations) await callbacks.renderAccommodations();
+        if (targetStep === 4 && callbacks.renderChecklists) {
+            await callbacks.renderChecklists('packing');
+            await callbacks.renderChecklists('todo');
+        }
+        if (targetStep === 5 && callbacks.renderTips) await callbacks.renderTips();
 
         currentStep = targetStep;
         // UI update is handled by the caller (ScheduleEditor) usually, or we can call it here if we had statuses
         // But statuses are dynamic. We will let ScheduleEditor call updateStepUI with latest statuses.
         // For now, we scroll.
         scrollToTop();
+        return true;
     }
 
     function nextStep(renderStep2Callback, renderAccommodationsCallback, renderChecklistsCallback, renderTipsCallback) {

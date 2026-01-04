@@ -22,6 +22,7 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
     // defaults
     const confirmText = options.confirmText || '삭제';
     const confirmColor = options.confirmColor || '#ef4444'; // default red for consistency with current usage
+    const onCancel = options.onCancel;
 
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
@@ -39,7 +40,13 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
         </div>
     `;
     document.body.appendChild(overlay);
-    overlay.querySelector('.btn-cancel').addEventListener('click', () => overlay.remove());
+
+    const closeWithCancel = () => {
+        overlay.remove();
+        if (onCancel) onCancel();
+    };
+
+    overlay.querySelector('.btn-cancel').addEventListener('click', closeWithCancel);
     overlay.querySelector('.btn-confirm').addEventListener('click', () => {
         overlay.remove();
         onConfirm();

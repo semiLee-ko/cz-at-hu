@@ -690,7 +690,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     // Attach Click Handlers to Step Indicators (Tab Navigation)
     container.querySelectorAll('.step-item').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', async () => {
             const targetStep = parseInt(item.dataset.step);
 
             // Define callbacks for rendering
@@ -700,23 +700,20 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     // generateDays logic is called in goToStep target check if we want, 
                     // but stepManager.js calls renderStep2Callback.
                 },
-                renderStep2: () => renderStep2(stepManager.generateDaysFromDateRange(
-                    container.querySelector('input[name="startDate"]').value,
-                    container.querySelector('input[name="endDate"]').value,
-                    container.querySelectorAll('.day-card').length > 0 ? collectDaysData(container) : schedule.days // Preserve current edits if re-rendering? 
-                    // Actually generateDays... merges existing. 
-                    // We should pass potentially modified 'days'.
-                    // But collectDaysData reads DOM. If Step 2 is not visible, it returns nothing?
-                    // Wait, if we jump 1->3, Step 2 is skipped. 
-                    // If we jump 2->3, we should probably save Step 2 state? 
-                    // `schedule` object is local to this editor. We should update `schedule.days`?
-                    // For simplicity in this refactor, we pass `schedule.days` (original) merged with dates.
-                    // Events added in Step 2 are in DOM only until save! 
-                    // This is a risk. If user goes 2 -> 1 -> 2, they might lose events if we re-render from schedule.days?
-                    // stepManager.generateDaysFromDateRange merges `existingDays`.
-                    // We must insure `schedule.days` is up to date OR pass current DOM state.
-                    // FIX: If we leave Step 2, we must capture its state!
-                ), Array.from(locations), container),
+                renderStep2: async () => {
+                    // CRITICAL: We need current days data. If Step 2 is active, we might need to await collectDaysData.
+                    // But here, renderStep2 is called when entering Step 2.
+                    // If we are entering Step 2, we use schedule.days (which should be up-to-date from onLeave logic).
+                    // However, generateDaysFromDateRange expects an array, not a promise.
+                    // Since we've already handled saving Step 2 data in the nav click handler above,
+                    // we can safely pass schedule.days here. `collectDaysData` call inside renderStep2 params was risky/redundant.
+
+                    renderStep2(stepManager.generateDaysFromDateRange(
+                        container.querySelector('input[name="startDate"]').value,
+                        container.querySelector('input[name="endDate"]').value,
+                        schedule.days || []
+                    ), Array.from(locations), container);
+                },
 
                 renderAccommodations: () => accommodationManager.renderAccommodations(),
                 renderChecklists: () => checklistManager.renderChecklists(),
@@ -725,19 +722,87 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
             // Before moving, if we are on Step 2, capture days data to `schedule.days` so it's preserved
             if (stepManager.currentStep === 2) {
-                const daysData = collectDaysData(container, true); // Show warning
+                const daysData = await collectDaysData(container, true); // Show warning
                 if (daysData === null) {
                     return; // User cancelled due to empty events
                 }
                 schedule.days = daysData;
             }
 
-            stepManager.goToStep(targetStep, callbacks);
+            const canProceed = await stepManager.goToStep(targetStep, callbacks);
+            if (canProceed === false) return;
+
             updateHeaderTitle(targetStep);
             updateStatus();
 
             // Setup time formatting delegation
             setupTimeFormatting(container);
+        });
+    });
+
+    // 네비게이션 버튼 (Footer Buttons) - Restored & Fixed Async
+    container.querySelectorAll('.btn-step-nav').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const direction = btn.dataset.direction;
+            let targetStep = direction === 'next' ? stepManager.currentStep + 1 : stepManager.currentStep - 1;
+
+            // Validation logic...
+            if (direction === 'next') {
+                if (stepManager.currentStep === 1) {
+                    const title = container.querySelector('input[name="title"]').value.trim();
+                    const startDate = container.querySelector('input[name="startDate"]').value;
+                    const endDate = container.querySelector('input[name="endDate"]').value;
+
+                    if (!title || !startDate || !endDate) {
+                        alert('필수 정보를 입력해주세요.');
+                        return;
+                    }
+                }
+            }
+
+            const callbacks = {
+                onLeaveStep1: () => {
+                    // Step 1 data is auto-bound to inputs, we rely on DOM reading in generateDays
+                },
+                onLeaveStep2: async () => {
+                    // CRITICAL: Await the promise from collectDaysData
+                    const daysData = await collectDaysData(container, true);
+                    if (daysData === null) { // User cancelled warning
+                        return false;
+                    }
+                    schedule.days = daysData;
+                    return true;
+                },
+                onLeaveStep3: () => {
+                    schedule.accommodations = collectAccommodationsData(container);
+                },
+                onLeaveStep4: () => {
+                    schedule.tips = collectTipsData(container);
+                },
+                onEnterStep2: () => {
+                    renderStep2(schedule.days, schedule.locations, container);
+                },
+                onEnterStep3: () => {
+                    renderStep3(schedule.accommodations, container);
+                },
+                onEnterStep4: () => {
+                    renderStep4(schedule.tips, container);
+                },
+                onEnterStep5: () => {
+                    renderStep5(schedule, container);
+                }
+            };
+
+            const canProceed = await stepManager.goToStep(targetStep, callbacks);
+            if (canProceed === false) return; // Explicit check if it returns false (it might return undefined if void)
+            // Note: stepManager.goToStep doesn't historically return boolean unless we updated it. 
+            // BUT, looking at callbacks.onLeaveStep2, it returns boolean. 
+            // If goToStep doesn't handle async boolean returns from callbacks, this might be moot.
+            // Let's check stepManager.js `goToStep` implementation.
+            // It calls `if (callbacks.onLeaveStep1) callbacks.onLeaveStep1();`
+            // It doesn't seem to await or check return values in the version I saw in Step 522.
+            // Wait, if `stepManager.goToStep` is SYNC and ignores return values, then `onLeaveStep2` returning false WON'T STOP navigation.
+            // I need to check `stepManager.js` again.
         });
     });
 
@@ -1141,11 +1206,11 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     // 폼 제출
     const form = container.querySelector('#scheduleForm');
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const formData = new FormData(form);
-        const daysData = collectDaysData(container, true); // Show warning when saving
+        const daysData = await collectDaysData(container, true); // Show warning when saving
 
         // If user cancelled due to empty events, don't save
         if (daysData === null) {
@@ -1234,7 +1299,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     // Render Step 2 Helper Functions
 
-    function collectDaysData(container, showWarning = false) {
+    async function collectDaysData(container, showWarning = false) {
         const daysContainer = container.querySelector('#daysContainer');
         const dayCards = daysContainer ? daysContainer.querySelectorAll(':scope > .day-card') : [];
 
@@ -1333,10 +1398,20 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
         // Show warning if requested and there are empty events
         if (showWarning && emptyEventCount > 0) {
-            const confirmed = confirm(`${emptyEventCount}개의 빈 일정이 있습니다.\n(위치, 내용이 모두 비어있음)\n\n이 일정들을 삭제하고 계속하시겠습니까?`);
-            if (!confirmed) {
-                return null; // User cancelled
-            }
+            return new Promise((resolve) => {
+                showCustomConfirm(
+                    `${emptyEventCount}개의 빈 일정이 있습니다.\n(위치, 내용이 모두 비어있음)\n\n이 일정들을 삭제하고 계속하시겠습니까?`,
+                    () => {
+                        resolve(days); // User confirmed
+                    },
+                    {
+                        confirmText: '계속 (삭제)',
+                        onCancel: () => {
+                            resolve(null); // User cancelled
+                        }
+                    }
+                );
+            });
         }
 
         return days;
@@ -1410,6 +1485,8 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         });
 
         // Add collapse/expand all details toggle functionality
+        // Add collapse/expand all details toggle functionality
+
         daysContainer.querySelectorAll('.btn-toggle-all-details').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
