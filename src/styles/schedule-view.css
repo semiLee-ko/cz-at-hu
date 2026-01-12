@@ -762,6 +762,12 @@ body.spotlight-active {
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     transform: scale(0.9);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid var(--border);
+}
+
+[data-theme="dark"] .custom-confirm-modal {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 }
 
 .custom-confirm-overlay.active .custom-confirm-modal {
@@ -799,8 +805,13 @@ body.spotlight-active {
 }
 
 .btn-confirm-ok {
-    background: #000;
-    color: #fff;
+    background: var(--dark);
+    color: white;
+}
+
+[data-theme="dark"] .btn-confirm-ok {
+    background: var(--secondary);
+    color: white;
 }
 
 .btn-confirm-ok:active {
@@ -1068,7 +1079,7 @@ body.spotlight-active {
 .btn-save-members {
     width: 100%;
     padding: 16px;
-    background: #000;
+    background: var(--dark);
     color: white;
     border: none;
     border-radius: 16px;
@@ -1121,7 +1132,7 @@ body.spotlight-active {
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
     transform: translateY(40px) scale(0.95);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1481,15 +1492,15 @@ body.spotlight-active {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
 }
 
 .camera-popup-header h3 {
     margin: 0;
     font-size: 1.15rem;
     font-weight: 800;
-    color: #1e293b;
+    color: var(--text-primary);
 }
 
 .btn-close-camera {
@@ -1742,14 +1753,14 @@ body.spotlight-active {
 
 .camera-popup-footer {
     padding: 20px 24px;
-    background: white;
-    border-top: 1px solid #e2e8f0;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
 }
 
 .btn-generate-polaroid {
     width: 100%;
     padding: 16px;
-    background: #3b82f6;
+    background: var(--dark);
     color: white;
     border: none;
     border-radius: 16px;
@@ -1762,7 +1773,7 @@ body.spotlight-active {
 
 .btn-generate-polaroid:active {
     transform: scale(0.98);
-    background: #2563eb;
+    opacity: 0.9;
 }
 
 /* Floating Action Group (Map & Receipt) */
@@ -2170,7 +2181,7 @@ body.spotlight-active {
     padding: 20px;
     color: #94a3b8;
     font-size: 0.85rem;
-    background: #f8fafc;
+    background: #3f3f3f;
     border-radius: 12px;
     border: 1px dashed #cbd5e1;
 }
@@ -2301,4 +2312,22 @@ body.spotlight-active {
 
 [data-theme="dark"] .star-rating-input .star.active {
     color: #fbbf24;
+}
+
+[data-theme="dark"] .btn-save-members,
+[data-theme="dark"] .btn-generate-polaroid {
+    background: var(--secondary);
+    color: white;
+}
+
+[data-theme="dark"] .btn-close-map,
+[data-theme="dark"] .btn-close-members,
+[data-theme="dark"] .btn-close-settlement,
+[data-theme="dark"] .btn-close-total-settlement {
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .settlement-popup-container {
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }

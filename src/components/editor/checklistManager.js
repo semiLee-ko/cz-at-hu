@@ -92,15 +92,22 @@ export function createChecklistManager(container, schedule) {
 
         if (!nameInput || !btnAdd) return;
 
-        const name = nameInput.value.trim();
+        setTimeout(() => {
+            const name = nameInput.value.trim();
+            const hasValidLength = name.length >= 2 && name.length <= 30; // Updated to match 30 in ScheduleEditor
 
-        // Simple validation: 2-20 characters
-        const isValid = name.length >= 2 && name.length <= 20;
+            // Check for any visible error messages
+            const errorMessages = stepRoot.querySelectorAll('.error-message');
+            const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
 
-        btnAdd.disabled = !isValid;
-        if (btnContainer) {
-            btnContainer.classList.toggle('hidden', !isValid);
-        }
+            const isValid = hasValidLength && !hasErrors;
+
+            btnAdd.disabled = !isValid;
+
+            if (btnContainer) {
+                btnContainer.classList.toggle('hidden', !isValid);
+            }
+        }, 0);
     }
 
     function renderChecklists() {
@@ -422,6 +429,11 @@ export function createChecklistManager(container, schedule) {
         const name = nameInput.value.trim();
         if (!name) return;
 
+        // Final validation check
+        const errorMessages = stepRoot.querySelectorAll('.error-message');
+        const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
+        if (hasErrors) return showCustomAlert('유효하지 않은 입력이 있습니다.');
+
         const newCat = {
             id: generateCategoryId(),
             name,
@@ -487,9 +499,10 @@ export function createChecklistManager(container, schedule) {
         });
     }
 
-    // Direct event assignment scoped to stepRoot
+    // Scoped event assignment
     if (stepRoot) {
-        stepRoot.querySelector('#categoryName')?.addEventListener('input', validateCategoryForm);
+        // Listen to all inputs within stepRoot to update button state
+        stepRoot.addEventListener('input', validateCategoryForm);
         stepRoot.querySelector('#btnAddCategory')?.addEventListener('click', addCategory);
 
         // Type selection events
@@ -568,14 +581,14 @@ export function createChecklistManager(container, schedule) {
                 
                 <div class="modal-body" style="flex: 1; display: flex; overflow: hidden; background: #f8fafc;">
                     <!-- Sidebar Tabs -->
-                    <div class="import-tabs" style="width: 140px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column;">
-                        <button class="tab-btn active" data-tab="themes" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">추천 테마</button>
-                        <button class="tab-btn" data-tab="templates" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">나만의 템플릿</button>
-                        <button class="tab-btn" data-tab="history" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">지난 여행</button>
+                    <div class="import-tabs" style="width: 90px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                        <button class="tab-btn active" data-tab="themes" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">추천<br/>테마</button>
+                        <button class="tab-btn" data-tab="templates" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">나만의<br/>템플릿</button>
+                        <button class="tab-btn" data-tab="history" style="padding: 12px; text-align: left; border: none; background: none; cursor: pointer; border-left: 3px solid transparent; color: #64748b; font-weight: 600;">지난<br/>여행</button>
                     </div>
 
                     <!-- Content Area -->
-                    <div class="import-content" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column;">
+                    <div class="import-content" style="flex: 1; padding: 5px 0 5px 5px; overflow-y: auto; display: flex; flex-direction: column;">
                         <div id="tabContent" style="flex: 1; overflow-y: auto;">
                             <!-- List will be rendered here -->
                         </div>

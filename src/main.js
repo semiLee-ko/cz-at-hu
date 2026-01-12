@@ -188,15 +188,15 @@ function renderScheduleView(container, scheduleId) {
 
             <div class="stats entry-stagger-1">
                 <div class="stat-item">
-                    <div class="stat-label">DURATION</div>
+                    <div class="stat-label">일정</div>
                     <div class="stat-value">${calculateDuration(schedule.startDate, schedule.endDate)}</div>
                 </div>
                 <div class="stat-item stat-item-countries" style="border-left: 1px solid #eee; border-right: 1px solid #eee;">
-                    <div class="stat-label">COUNTRIES</div>
+                    <div class="stat-label">국가/시도</div>
                     <div class="stat-value stat-value-collapsible collapsed" id="countriesValue">${schedule.countries ? schedule.countries.join(' ') : '-'}</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">MEMBERS</div>
+                    <div class="stat-label">인원</div>
                     <div class="stat-value">성인${schedule.members?.adults || 0} 아동${schedule.members?.children || 0}</div>
                 </div>
                 
@@ -1477,9 +1477,16 @@ function showTotalSettlementPopup(scheduleId) {
 
 // Camera Popup for Polaroid Reviews
 function showCameraPopup(group, imageFile) {
+    const scheduleId = group.dataset.scheduleId;
+    const dayIdx = parseInt(group.dataset.dayIndex);
+    const eventIdx = parseInt(group.dataset.eventIndex);
+    const schedule = getSchedule(scheduleId);
+    const event = schedule?.days[dayIdx]?.events[eventIdx];
+    const initialPlace = event?.place || event?.location || '';
+
     const reader = new FileReader();
     reader.onload = (e) => {
-        const imageUrl = e.target.result;
+        let imageUrl = e.target.result;
 
         const modal = document.createElement('div');
         modal.className = 'camera-popup-overlay';
@@ -1493,6 +1500,9 @@ function showCameraPopup(group, imageFile) {
         const timeStr = `${year}-${month}-${day} ${hours}:${minutes}`;
 
         let starRating = 5;
+        let showDate = true;
+        let showPrice = true;
+        let showRating = true;
 
         const renderContent = () => {
             modal.innerHTML = `
@@ -1512,7 +1522,7 @@ function showCameraPopup(group, imageFile) {
                             <div class="polaroid-frame">
                                 <div class="polaroid-image-container">
                                     <img src="${imageUrl}" class="polaroid-image">
-                                    <div class="polaroid-time-stamp">${timeStr}</div>
+                                    <div class="polaroid-time-stamp" style="display: ${showDate ? 'block' : 'none'};">${timeStr}</div>
                                     <div class="polaroid-branding">LITTLE TRIP</div>
                                     <button class="btn-reselect-image" title="이미지 다시 선택">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1522,12 +1532,12 @@ function showCameraPopup(group, imageFile) {
                                     </button>
                                 </div>
                                 <div class="polaroid-info">
-                                    <div class="info-line place-preview">장소를 입력하세요</div>
-                                    <div class="info-line item-preview">메뉴를 입력하세요</div>
-                                    <div class="info-memo memo-preview">메모를 입력하세요</div>
+                                    <div class="info-line place-preview">${initialPlace}</div>
+                                    <div class="info-line item-preview"></div>
+                                    <div class="info-memo memo-preview"></div>
                                     <div class="info-footer">
-                                        <span class="price-preview">0원</span>
-                                        <span class="rating-preview">★★★★★</span>
+                                        <span class="price-preview" style="display: ${showPrice ? 'inline' : 'none'};">0원</span>
+                                        <span class="rating-preview" style="display: ${showRating ? 'inline' : 'none'};">★★★★★</span>
                                     </div>
                                 </div>
                             </div>
@@ -1537,7 +1547,7 @@ function showCameraPopup(group, imageFile) {
                         <div class="polaroid-inputs">
                             <div class="input-group">
                                 <label>장소명</label>
-                                <input type="text" class="input-place" placeholder="예: 구글 맛집">
+                                <input type="text" class="input-place" placeholder="예: 구글 맛집" value="${initialPlace}">
                             </div>
                             <div class="input-group">
                                 <label>메뉴/항목</label>
@@ -1557,6 +1567,30 @@ function showCameraPopup(group, imageFile) {
                                     <div class="star-rating-input">
                                         ${[1, 2, 3, 4, 5].map(n => `<span class="star ${n <= starRating ? 'active' : ''}" data-value="${n}">★</span>`).join('')}
                                     </div>
+                                </div>
+                            </div>
+                            <!-- Display Toggles -->
+                            <div class="toggle-group" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px; padding: 16px; background: var(--bg-primary); border-radius: 12px; border: 1px solid var(--border);">
+                                <div class="toggle-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">날짜 표시</span>
+                                    <label class="ios-switch">
+                                        <input type="checkbox" class="toggle-date" ${showDate ? 'checked' : ''}>
+                                        <span class="ios-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">금액 표시</span>
+                                    <label class="ios-switch">
+                                        <input type="checkbox" class="toggle-price" ${showPrice ? 'checked' : ''}>
+                                        <span class="ios-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="toggle-item" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">별점 표시</span>
+                                    <label class="ios-switch">
+                                        <input type="checkbox" class="toggle-rating" ${showRating ? 'checked' : ''}>
+                                        <span class="ios-slider"></span>
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -1586,10 +1620,29 @@ function showCameraPopup(group, imageFile) {
             const previewRating = modal.querySelector('.rating-preview');
             const previewMemo = modal.querySelector('.memo-preview');
 
-            inputPlace.oninput = () => previewPlace.textContent = inputPlace.value || '장소를 입력하세요';
-            inputItem.oninput = () => previewItem.textContent = inputItem.value || '메뉴를 입력하세요';
-            inputPrice.oninput = () => previewPrice.textContent = (Number(inputPrice.value).toLocaleString() || '0') + '원';
-            inputMemo.oninput = () => previewMemo.textContent = inputMemo.value || '메모를 입력하세요';
+            inputPlace.oninput = () => previewPlace.textContent = inputPlace.value;
+            inputItem.oninput = () => previewItem.textContent = inputItem.value;
+            inputPrice.oninput = () => previewPrice.textContent = inputPrice.value ? (Number(inputPrice.value).toLocaleString() + '원') : '0원';
+            inputMemo.oninput = () => previewMemo.textContent = inputMemo.value;
+
+            // Visibility Toggle Listeners
+            const toggleDate = modal.querySelector('.toggle-date');
+            const togglePrice = modal.querySelector('.toggle-price');
+            const toggleRating = modal.querySelector('.toggle-rating');
+            const previewDate = modal.querySelector('.polaroid-time-stamp');
+
+            toggleDate.onchange = (e) => {
+                showDate = e.target.checked;
+                previewDate.style.display = showDate ? 'block' : 'none';
+            };
+            togglePrice.onchange = (e) => {
+                showPrice = e.target.checked;
+                previewPrice.style.display = showPrice ? 'inline' : 'none';
+            };
+            toggleRating.onchange = (e) => {
+                showRating = e.target.checked;
+                previewRating.style.display = showRating ? 'inline' : 'none';
+            };
 
             // Image Re-selection
             modal.querySelector('.btn-reselect-image').onclick = () => {
@@ -1661,8 +1714,10 @@ function showCameraPopup(group, imageFile) {
                     ctx.font = 'bold 22px sans-serif';
 
                     // Time Stamp (Top Right)
-                    ctx.textAlign = 'right';
-                    ctx.fillText(timeStr, padding + imageSize - 20, padding + 40);
+                    if (showDate) {
+                        ctx.textAlign = 'right';
+                        ctx.fillText(timeStr, padding + imageSize - 20, padding + 40);
+                    }
 
                     // Service Branding (Bottom Center)
                     ctx.textAlign = 'center';
@@ -1678,28 +1733,36 @@ function showCameraPopup(group, imageFile) {
                     ctx.fillStyle = '#1e293b';
 
                     // Place Name (Bold)
-                    ctx.font = 'bold 48px sans-serif';
-                    ctx.fillText(inputPlace.value || '장소명 미입력', padding, imageSize + padding + 80);
+                    if (inputPlace.value) {
+                        ctx.font = 'bold 48px sans-serif';
+                        ctx.fillText(inputPlace.value, padding, imageSize + padding + 80);
+                    }
 
                     // Item Name
-                    ctx.font = '40px sans-serif';
-                    ctx.fillStyle = '#64748b';
-                    ctx.fillText(inputItem.value || '항목 미입력', padding, imageSize + padding + 140);
+                    if (inputItem.value) {
+                        ctx.font = '40px sans-serif';
+                        ctx.fillStyle = '#64748b';
+                        ctx.fillText(inputItem.value, padding, imageSize + padding + 140);
+                    }
 
                     // Footer Side by Side
                     const footerY = imageSize + padding + 220;
 
                     // Price
-                    ctx.font = 'bold 44px sans-serif';
-                    ctx.fillStyle = '#10b981';
-                    ctx.fillText((Number(inputPrice.value).toLocaleString() || '0') + '원', padding, footerY);
+                    if (showPrice) {
+                        ctx.font = 'bold 44px sans-serif';
+                        ctx.fillStyle = '#10b981';
+                        ctx.fillText((Number(inputPrice.value).toLocaleString() || '0') + '원', padding, footerY);
+                    }
 
                     // Rating
-                    ctx.font = '44px sans-serif';
-                    ctx.fillStyle = '#fbbf24';
-                    const ratingStr = '★'.repeat(starRating) + '☆'.repeat(5 - starRating);
-                    const ratingWidth = ctx.measureText(ratingStr).width;
-                    ctx.fillText(ratingStr, frameWidth - padding - ratingWidth, footerY);
+                    if (showRating) {
+                        ctx.font = '44px sans-serif';
+                        ctx.fillStyle = '#fbbf24';
+                        const ratingStr = '★'.repeat(starRating) + '☆'.repeat(5 - starRating);
+                        const ratingWidth = ctx.measureText(ratingStr).width;
+                        ctx.fillText(ratingStr, frameWidth - padding - ratingWidth, footerY);
+                    }
 
                     // 4.5 Draw Memo (Wrapped Text)
                     if (inputMemo.value) {

@@ -175,12 +175,14 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                             <h4 id="accFormTitle">새 숙소 추가</h4>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>숙소명 *</label>
-                                    <input type="text" id="accName" placeholder="예: 힐튼 호텔">
+                                    <label>숙소명 <span class="required">*</span></label>
+                                    <input type="text" id="accName" placeholder="예: 서울 게스트하우스">
+                                    <div class="error-message" id="accNameError"></div>
                                 </div>
                                 <div class="form-group">
                                     <label>형태</label>
-                                    <input type="text" id="accType" placeholder="예: 호텔, 캠핑">
+                                    <input type="text" id="accType" placeholder="예: 호텔, 게스트하우스, 리조트">
+                                    <div class="error-message" id="accTypeError"></div>
                                 </div>
                             </div>
                             
@@ -188,10 +190,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 <div class="form-group">
                                     <label>위치</label>
                                     <input type="text" id="accLocation" placeholder="예: 서울 강남구">
+                                    <div class="error-message" id="accLocationError"></div>
                                 </div>
                                 <div class="form-group">
                                     <label>연락처</label>
                                     <input type="text" id="accContact" placeholder="예: 02-1234-5678">
+                                    <div class="error-message" id="accContactError"></div>
                                 </div>
                             </div>
                             
@@ -199,10 +203,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 <div class="form-group">
                                     <label>가격</label>
                                     <input type="text" id="accPrice" placeholder="예: 150,000">
+                                    <div class="error-message" id="accPriceError"></div>
                                 </div>
                                 <div class="form-group">
                                     <label>URL</label>
                                     <input type="url" id="accUrl" placeholder="예: https://...">
+                                    <div class="error-message" id="accUrlError"></div>
                                 </div>
                             </div>
                             
@@ -210,16 +216,19 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 <div class="form-group">
                                     <label>입실시간</label>
                                     <input type="text" id="accCheckIn" list="time-options" placeholder="15:00">
+                                    <div class="error-message" id="accCheckInError"></div>
                                 </div>
                                 <div class="form-group">
                                     <label>퇴실시간</label>
                                     <input type="text" id="accCheckOut" list="time-options" placeholder="11:00">
+                                    <div class="error-message" id="accCheckOutError"></div>
                                 </div>
                             </div>
                             
                             <div class="form-group">
                                 <label>메모</label>
-                                <textarea id="accNotes" placeholder="추가 정보나 메모를 입력하세요" rows="3"></textarea>
+                                <textarea id="accNotes" rows="3" placeholder="기타 메모사항"></textarea>
+                                <div class="error-message" id="accNotesError"></div>
                             </div>
                             
                             <!-- Circular Add Button -->
@@ -249,6 +258,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                             <div class="form-group">
                                 <label>카테고리명</label>
                                 <input type="text" id="categoryName" placeholder="예: 의류, 세면도구, 예약확인" maxlength="20">
+                                <div class="error-message" id="categoryNameError"></div>
                             </div>
 
                             <div class="form-group">
@@ -287,10 +297,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                             <div class="form-group">
                                 <label>제목</label>
                                 <input type="text" id="tipTitle" placeholder="예: 환전 팁, 대중교통 이용법" maxlength="50">
+                                <div class="error-message" id="tipTitleError"></div>
                             </div>
                             <div class="form-group">
                                 <label>내용</label>
                                 <textarea id="tipContent" placeholder="상세 내용을 입력하세요" rows="4" maxlength="200"></textarea>
+                                <div class="error-message" id="tipContentError"></div>
                             </div>
                             <!-- Validation Error Message -->
                             <p id="tipValidationMsg" class="validation-error-msg"></p>
@@ -441,11 +453,85 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             maxLength: 10,
             noSpace: true,
             msg: '한글, 영문만 입력 가능합니다. (띄어쓰기 금지, 최대 10자)'
+        },
+        // Step 2: Schedule Validation
+        place: {
+            regex: /^[가-힣a-zA-Z0-9\s.,&\-()]+$/,  // No <>"'
+            maxLength: 50,
+            msg: '장소명은 한글, 영문, 숫자, 공백, .,&-() 만 허용됩니다. (최대 50자)'
+        },
+        description: {
+            regex: /^[^<>"']*$/,  // Block XSS characters: <>"'
+            maxLength: 200,
+            msg: '설명에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 200자)'
+        },
+        time: {
+            regex: /^([01]\d|2[0-3]):([0-5]\d)$/,
+            maxLength: 5,
+            msg: 'HH:MM 형식으로 입력해주세요. (예: 09:30)'
+        },
+        // Step 3: Accommodation Validation
+        accName: {
+            regex: /^[^<>"']+$/,  // Block XSS characters
+            maxLength: 100,
+            msg: '숙소명에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 100자)'
+        },
+        accType: {
+            regex: /^[^<>"']*$/,  // Block XSS characters, optional field
+            maxLength: 30,
+            msg: '형태에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 30자)'
+        },
+        accLocation: {
+            regex: /^[^<>"']+$/,  // Block XSS characters
+            maxLength: 200,
+            msg: '주소에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 200자)'
+        },
+        accContact: {
+            regex: /^[0-9\-]*$/,  // Only numbers and hyphens
+            maxLength: 20,
+            msg: '연락처는 숫자와 하이픈(-)만 입력 가능합니다.'
+        },
+        accPrice: {
+            regex: /^[0-9]*$/,  // Only numbers (commas will be added automatically)
+            maxLength: 20,
+            msg: '가격은 숫자만 입력 가능합니다.'
+        },
+        accUrl: {
+            regex: /^[^<>"'\s]*$/,  // Block XSS and spaces
+            maxLength: 200,
+            msg: 'URL에는 <, >, ", \', 공백을 사용할 수 없습니다. (최대 200자)'
+        },
+        accNotes: {
+            regex: /^[^<>"']*$/,  // Block XSS characters
+            maxLength: 500,
+            msg: '메모에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 500자)'
+        },
+        // Step 4: Checklist Validation  
+        checklistCategory: {
+            regex: /^[^<>"']+$/,  // Block XSS characters
+            maxLength: 30,
+            msg: '카테고리명에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 30자)'
+        },
+        checklistItem: {
+            regex: /^[^<>"']+$/,  // Block XSS characters
+            maxLength: 100,
+            msg: '항목명에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 100자)'
+        },
+        // Step 5: Tip Validation
+        tipTitle: {
+            regex: /^[^<>"']+$/,  // Block XSS characters
+            maxLength: 50,
+            msg: 'Tip 제목에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 50자)'
+        },
+        tipContent: {
+            regex: /^[^<>"']+$/,  // Block XSS characters
+            maxLength: 500,
+            msg: 'Tip 내용에는 <, >, ", \' 문자를 사용할 수 없습니다. (최대 500자)'
         }
     };
 
     function validateInput(value, type) {
-        if (!value) return { valid: false, msg: '' }; // Empty is handled by required/red
+        if (!value) return { valid: true };
 
         const rule = VALIDATION_RULES[type];
         if (!rule) return { valid: true };
@@ -468,16 +554,48 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         return { valid: true };
     }
 
+    // Time range validation
+    function validateTimeRange(startTime, endTime) {
+        if (!startTime || !endTime) return { valid: true }; // Both must be present to compare
+
+        const start = startTime.replace(':', '');
+        const end = endTime.replace(':', '');
+
+        if (start >= end) {
+            return { valid: false, msg: '종료 시간은 시작 시간보다 늦어야 합니다.' };
+        }
+
+        return { valid: true };
+    }
+
     function updateErrorUI(input, errorId, isValid, msg = '') {
-        const titleError = container.querySelector(`#${errorId}`);
-        if (titleError) {
-            titleError.textContent = msg;
+        let errorEl;
+        if (typeof errorId === 'string' && errorId) {
+            errorEl = container.querySelector(`#${errorId}`);
+        }
+
+        // If not found by ID or no ID provided, try relative search within the same group
+        if (!errorEl && input) {
+            const group = input.closest('.form-group-compact') || input.closest('.form-group');
+            if (group) {
+                errorEl = group.querySelector('.error-message');
+            }
+            // Special case for time range which might be in a row
+            if (!errorEl && (input.classList.contains('event-start-time') || input.classList.contains('event-end-time'))) {
+                errorEl = input.closest('.form-row')?.nextElementSibling?.classList.contains('error-message') ?
+                    input.closest('.form-row').nextElementSibling : null;
+            }
+        }
+
+        if (errorEl) {
+            errorEl.textContent = msg;
             if (isValid) {
-                titleError.classList.remove('visible');
-                input.classList.remove('input-error-border'); // Optional extra style?
+                errorEl.classList.remove('visible');
+                if (input) input.classList.remove('input-error');
             } else {
-                titleError.classList.add('visible');
-                // input.classList.add('input-error-border');
+                errorEl.textContent = msg || ''; // Fallback for empty message if needed
+                errorEl.classList.add('visible');
+                if (input) input.classList.add('input-error');
             }
         }
     }
@@ -521,66 +639,45 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             }
         };
 
-        // Validate Title Logic
         const titleValidation = validateInput(title, 'title');
         const isTitleValid = title && titleValidation.valid;
         toggleError('title', isTitleValid);
-
         toggleError('startDate', !!startDate);
         toggleError('endDate', !!endDate);
 
-        // ...
-
-        // Explicitly handle Tag Inputs (Adult/Child) by ID
         const adultInput = form.querySelector('#adultInput');
-        const childInput = form.querySelector('#childInput');
-
         if (adultInput) {
             if (adultMembers.size === 0) adultInput.classList.add('input-error');
             else adultInput.classList.remove('input-error');
         }
 
-        if (childInput) {
-            childInput.classList.remove('input-error');
-        }
-
-        // Location Info Validation
         const locationInput = form.querySelector('#locationInput');
-        if (!hasLocations) {
-            locationInput.classList.add('input-error');
-        } else {
-            locationInput.classList.remove('input-error');
+        if (locationInput) {
+            if (!hasLocations) locationInput.classList.add('input-error');
+            else locationInput.classList.remove('input-error');
         }
 
         const isStep1Valid = isTitleValid && startDate && endDate && hasLocations && (adultMembers.size > 0);
-        statuses[1] = isStep1Valid ? 'valid' : 'invalid'; // Mandatory
+        statuses[1] = isStep1Valid ? 'valid' : 'invalid';
 
-        // Step 2: Days (Optional)
-        // We need to check if ANY event exists in the collected days data OR existing schedule logic
-        // For accurate real-time check, we might need to look at DOM or internal state
-        // Here we just check if days are generated and likely have events. 
-        // A better check: check DOM for events or use collected data. 
-        // Since Step 2 is rendered dynamically, we check the DOM if visible, or fallback to schedule data?
-        // Let's check schedule.days if we are not on step 2, or DOM if we are? 
-        // Simpler: Check schedule.days length and events count.
-        // NOTE: schedule object is NOT auto-updated until save. 
-        // So we rely on "Valid" (Mint) meaning "User has visited/added something"?
-        // Plan said: "Check if any data exists. Return 'valid' if yes, 'empty' if no."
-        // We'll treat this loosely for now. If events exist > valid.
-        // But since we can't easily peek into un-rendered DOMs for other steps, we rely on manager's state if possible.
-        // Managers (accommodationManager, etc.) usually keep state in DOM or internal array.
-        // accommodationManager exposes .getAccommodations(). 
-        // checklistManager .getChecklists().
-        // tipManager .getTips().
+        // Step 2: Days (Itinerary)
+        const step2Container = container.querySelector('.form-step[data-step="2"]');
+        let isStep2Valid = true;
+        if (step2Container) {
+            const errorMessages = step2Container.querySelectorAll('.error-message');
+            const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
+            if (hasErrors) {
+                isStep2Valid = false;
+            }
+        }
 
-        // However, days are tricky as they are generated on fly. 
-        // We'll check the DOM for Step 2 if rendered, else rely on schedule.days (saved state).
-        // This might be slightly out of sync if user edits but doesn't save? 
-        // Actually, we are in ONE editing session. We should assume managers hold the truth.
-        // Step 2 logic is embedded in ScheduleEditor. 
-        // Let's check container for .event-item
         const hasEvents = container.querySelectorAll('.event-item').length > 0 || (schedule.days && schedule.days.some(d => d.events.length > 0));
-        statuses[2] = hasEvents ? 'valid' : 'empty';
+
+        if (!isStep2Valid) {
+            statuses[2] = 'invalid';
+        } else {
+            statuses[2] = hasEvents ? 'valid' : 'empty';
+        }
 
         // Step 3: Accommodations
         const accs = accommodationManager.getAccommodations();
@@ -588,8 +685,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
         // Step 4: Checklists
         const checks = checklistManager.getChecklists();
-        const hasChecks = checks.length > 0;
-        statuses[4] = hasChecks ? 'valid' : 'empty';
+        statuses[4] = checks.length > 0 ? 'valid' : 'empty';
 
         // Step 5: Tips
         const tips = tipManager.getTips();
@@ -614,16 +710,17 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     function updateGaugeVisuals(statuses) {
         // Step 1 Percent Calculation
-        const form = container.querySelector('#scheduleForm');
-        const formData = new FormData(form);
-
+        const step1Inputs = container.querySelectorAll('.form-step[data-step="1"] input[required], .form-step[data-step="1"] input.tag-input');
         let step1Checks = 0;
-        if (formData.get('title')) step1Checks++;
-        if (formData.get('startDate')) step1Checks++;
-        if (formData.get('endDate')) step1Checks++;
-        if (adultMembers.size > 0) step1Checks++;
-        if (locations.size > 0) step1Checks++;
-
+        if (statuses[1] === 'valid') {
+            step1Checks = 5;
+        } else {
+            if (container.querySelector('input[name="title"]').value.trim()) step1Checks++;
+            if (container.querySelector('input[name="startDate"]').value) step1Checks++;
+            if (container.querySelector('input[name="endDate"]').value) step1Checks++;
+            if (locations.size > 0) step1Checks++;
+            if (adultMembers.size > 0) step1Checks++;
+        }
         const totalStep1 = 5;
         const step1Percent = (step1Checks / totalStep1) * 100;
 
@@ -646,7 +743,10 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             const iconFill = item.querySelector('.step-icon-fill');
 
             if (fillContainer) {
-                const color = interpolateColor(percent);
+                let color = interpolateColor(percent);
+                if (status === 'invalid') {
+                    color = '#ff6b6b';
+                }
                 fillContainer.style.setProperty('--fill-percent', `${percent}%`);
                 fillContainer.style.setProperty('--fill-color', color);
             }
@@ -669,9 +769,14 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         const saveBtn = container.querySelector('#btnEditorSave');
         if (saveBtn) {
             const isStep1Valid = statuses[1] === 'valid';
+            const isAnyStepInvalid = Object.values(statuses).some(s => s === 'invalid');
+
+            // Can save if Step 1 is valid AND no step is explicitly invalid
+            const isSaveable = isStep1Valid && !isAnyStepInvalid;
+
             const wasDisabled = saveBtn.classList.contains('disabled') || !saveBtn.classList.contains('active');
 
-            if (isStep1Valid) {
+            if (isSaveable) {
                 saveBtn.classList.remove('disabled');
                 saveBtn.classList.add('active');
 
@@ -715,9 +820,18 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                     ), Array.from(locations), container);
                 },
 
-                renderAccommodations: () => accommodationManager.renderAccommodations(),
-                renderChecklists: () => checklistManager.renderChecklists(),
-                renderTips: () => tipManager.renderTips()
+                renderAccommodations: () => {
+                    accommodationManager.renderAccommodations();
+                    setupStep3Validation(container);
+                },
+                renderChecklists: () => {
+                    checklistManager.renderChecklists();
+                    setupStep4Validation(container);
+                },
+                renderTips: () => {
+                    tipManager.renderTips();
+                    setupStep5Validation(container);
+                }
             };
 
             // Before moving, if we are on Step 2, capture days data to `schedule.days` so it's preserved
@@ -737,6 +851,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
             // Setup time formatting delegation
             setupTimeFormatting(container);
+            setupStep2Validation(container);
         });
     });
 
@@ -845,6 +960,314 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         form.dataset.timeFormattingAttached = 'true';
     }
 
+    // Step 2 Validation Helper
+    function setupStep2Validation(container) {
+        const form = container.querySelector('#scheduleForm');
+        if (!form || form.dataset.step2ValidationAttached) return;
+
+        form.addEventListener('input', (e) => {
+            // Place validation
+            if (e.target.classList.contains('event-place')) {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'place');
+                    updateErrorUI(e.target, null, result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, null, true, '');
+                }
+            }
+
+            // Description validation
+            if (e.target.classList.contains('event-description')) {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'description');
+                    updateErrorUI(e.target, null, result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, null, true, '');
+                }
+            }
+
+            // Time validation 
+            if (e.target.classList.contains('event-start-time') ||
+                e.target.classList.contains('event-end-time')) {
+                const value = e.target.value;
+                const eventItem = e.target.closest('.event-item');
+
+                if (value.length > 0 && value.length === 5) {
+                    const result = validateInput(value, 'time');
+                    if (!result.valid) {
+                        updateErrorUI(e.target, null, false, result.msg);
+                    } else {
+                        updateErrorUI(e.target, null, true, '');
+
+                        // Validate time range if both times are complete
+                        if (eventItem) {
+                            const startTime = eventItem.querySelector('.event-start-time').value;
+                            const endTime = eventItem.querySelector('.event-end-time').value;
+                            if (startTime.length === 5 && endTime.length === 5) {
+                                const rangeResult = validateTimeRange(startTime, endTime);
+                                // For range error, we use the row's error message
+                                updateErrorUI(e.target, null, rangeResult.valid, rangeResult.msg);
+                            }
+                        }
+                    }
+                } else if (value.length === 0) {
+                    updateErrorUI(e.target, null, true, '');
+                }
+            }
+
+            // Update global save button and step indicators
+            updateStatus();
+        });
+
+        form.dataset.step2ValidationAttached = 'true';
+    }
+
+    // Step 3 Accommodation Validation Helper
+    function setupStep3Validation(container) {
+        const form = container.querySelector('#scheduleForm');
+        if (!form || form.dataset.step3ValidationAttached) return;
+
+        const btnAdd = form.querySelector('#btnAddAccommodation');
+        const stepContainer = form.querySelector('.form-step[data-step="3"]');
+
+        function checkFormValidity() {
+            if (!btnAdd || !stepContainer) return;
+
+            const name = stepContainer.querySelector('#accName').value.trim();
+
+            // 1. Required field check (accName)
+            if (!name) {
+                btnAdd.disabled = true;
+                return;
+            }
+
+            // 2. Check if any error message is visible in THIS step
+            const errorMessages = stepContainer.querySelectorAll('.error-message');
+            const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
+
+            btnAdd.disabled = hasErrors;
+        }
+
+        form.addEventListener('input', (e) => {
+            // Accommodation name validation
+            if (e.target.id === 'accName') {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'accName');
+                    updateErrorUI(e.target, 'accNameError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'accNameError', true, '');
+                }
+            }
+
+            // Type validation
+            if (e.target.id === 'accType') {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'accType');
+                    updateErrorUI(e.target, 'accTypeError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'accTypeError', true, '');
+                }
+            }
+
+            // Accommodation location validation
+            if (e.target.id === 'accLocation') {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'accLocation');
+                    updateErrorUI(e.target, 'accLocationError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'accLocationError', true, '');
+                }
+            }
+
+            // Contact validation with auto-filtering
+            if (e.target.id === 'accContact') {
+                let value = e.target.value;
+                // Remove all characters except numbers and hyphens
+                const cleanValue = value.replace(/[^0-9\-]/g, '');
+
+                // Update the input value with filtered value
+                e.target.value = cleanValue;
+
+                // Validate the cleaned value
+                if (cleanValue.length > 0) {
+                    const result = validateInput(cleanValue, 'accContact');
+                    updateErrorUI(e.target, 'accContactError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'accContactError', true, '');
+                }
+            }
+
+            // Price validation with auto-formatting
+            if (e.target.id === 'accPrice') {
+                let value = e.target.value;
+                // Remove all non-numeric characters except commas
+                const cleanValue = value.replace(/[^0-9]/g, '');
+
+                if (cleanValue.length > 0) {
+                    // Validate only numbers
+                    const result = validateInput(cleanValue, 'accPrice');
+                    if (!result.valid) {
+                        updateErrorUI(e.target, 'accPriceError', false, result.msg);
+                    } else {
+                        // Auto-format with commas
+                        const formatted = Number(cleanValue).toLocaleString();
+                        e.target.value = formatted;
+                        updateErrorUI(e.target, 'accPriceError', true, '');
+                    }
+                } else {
+                    e.target.value = '';
+                    updateErrorUI(e.target, 'accPriceError', true, '');
+                }
+            }
+
+            // URL validation
+            if (e.target.id === 'accUrl') {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'accUrl');
+                    updateErrorUI(e.target, 'accUrlError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'accUrlError', true, '');
+                }
+            }
+
+            // Notes validation
+            if (e.target.id === 'accNotes') {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'accNotes');
+                    updateErrorUI(e.target, 'accNotesError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'accNotesError', true, '');
+                }
+            }
+
+            // Update button state after each input
+            checkFormValidity();
+        });
+
+        // Initial check
+        checkFormValidity();
+
+        form.dataset.step3ValidationAttached = 'true';
+    }
+
+    // Step 4 Checklist Validation Helper
+    function setupStep4Validation(container) {
+        const form = container.querySelector('#scheduleForm');
+        if (!form || form.dataset.step4ValidationAttached) return;
+
+        const btnAdd = form.querySelector('#btnAddCategory');
+        const stepContainer = form.querySelector('.form-step[data-step="4"]');
+
+        function checkFormValidity() {
+            if (!btnAdd || !stepContainer) return;
+
+            const name = stepContainer.querySelector('#categoryName').value.trim();
+            if (name.length < 2) {
+                btnAdd.disabled = true;
+                return;
+            }
+
+            const errorMessages = stepContainer.querySelectorAll('.error-message');
+            const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
+            btnAdd.disabled = hasErrors;
+        }
+
+        form.addEventListener('input', (e) => {
+            // Category name validation
+            if (e.target.id === 'categoryName') {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'checklistCategory');
+                    updateErrorUI(e.target, 'categoryNameError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'categoryNameError', true, '');
+                }
+            }
+
+            // Item input validation (no separate error div for dynamic items yet, use title/border for now)
+            if (e.target.classList.contains('inner-item-input')) {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'checklistItem');
+                    if (!result.valid) {
+                        e.target.style.borderColor = '#ef4444';
+                        e.target.title = result.msg;
+                    } else {
+                        e.target.style.borderColor = '';
+                        e.target.title = '';
+                    }
+                }
+            }
+
+            checkFormValidity();
+        });
+
+        checkFormValidity();
+        form.dataset.step4ValidationAttached = 'true';
+    }
+
+    // Step 5 Tip Validation Helper
+    function setupStep5Validation(container) {
+        const form = container.querySelector('#scheduleForm');
+        if (!form || form.dataset.step5ValidationAttached) return;
+
+        const btnAdd = form.querySelector('#btnAddTip');
+        const stepContainer = form.querySelector('.form-step[data-step="5"]');
+
+        function checkFormValidity() {
+            if (!btnAdd || !stepContainer) return;
+
+            const title = stepContainer.querySelector('#tipTitle').value.trim();
+            const content = stepContainer.querySelector('#tipContent').value.trim();
+
+            // Both required (min 2 chars)
+            if (title.length < 2 || content.length < 2) {
+                btnAdd.disabled = true;
+                return;
+            }
+
+            const errorMessages = stepContainer.querySelectorAll('.error-message');
+            const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
+            btnAdd.disabled = hasErrors;
+        }
+
+        form.addEventListener('input', (e) => {
+            // Tip title validation
+            if (e.target.id === 'tipTitle') {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'tipTitle');
+                    updateErrorUI(e.target, 'tipTitleError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'tipTitleError', true, '');
+                }
+            }
+
+            // Tip content validation
+            if (e.target.id === 'tipContent') {
+                const value = e.target.value;
+                if (value.length > 0) {
+                    const result = validateInput(value, 'tipContent');
+                    updateErrorUI(e.target, 'tipContentError', result.valid, result.msg);
+                } else {
+                    updateErrorUI(e.target, 'tipContentError', true, '');
+                }
+            }
+
+            checkFormValidity();
+        });
+
+        checkFormValidity();
+        form.dataset.step5ValidationAttached = 'true';
+    }
+
     // Step 1 Inputs
     const inputsStep1 = container.querySelectorAll('input[name="title"], input[name="startDate"], input[name="endDate"]');
     inputsStep1.forEach(input => {
@@ -875,6 +1298,17 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     // Initial time formatting setup if we start at step 2 (unlikely but safe)
     if (stepManager.currentStep === 2) {
         setupTimeFormatting(container);
+        setupStep2Validation(container);
+    }
+    // Initial validation setup for other steps
+    if (stepManager.currentStep === 3) {
+        setupStep3Validation(container);
+    }
+    if (stepManager.currentStep === 4) {
+        setupStep4Validation(container);
+    }
+    if (stepManager.currentStep === 5) {
+        setupStep5Validation(container);
     }
 
     // ------------------------------------
@@ -975,17 +1409,30 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             });
             locationsContainer.appendChild(locationElement);
             locationsContainer.style.display = 'flex';
-            locationInput.value = '';
+            // DON'T clear here - already cleared in keydown before calling this
 
             updateStatus(); // Update status on add
         }
     }
 
-    // 위치 입력 이벤트
+    // 위치 입력 이벤트 - Composition tracking for Korean IME
+    let isComposing = false;
+    locationInput.addEventListener('compositionstart', () => {
+        isComposing = true;
+    });
+    locationInput.addEventListener('compositionend', () => {
+        isComposing = false;
+    });
+
     locationInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.keyCode === 13) {
+        if ((e.key === 'Enter' || e.keyCode === 13) && !isComposing) {
             e.preventDefault();
-            addLocation(locationInput.value);
+            e.stopPropagation();
+            const value = locationInput.value;
+            locationInput.value = ''; // Clear immediately to prevent blur from adding again
+            if (value.trim()) {
+                addLocation(value);
+            }
         }
     });
 
@@ -1110,25 +1557,35 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             updateStatus();
         }
 
-        // Clear Input
-        if (type === 'adult') adultInput.value = '';
-        else childInput.value = '';
+        // DON'T clear here - already cleared in keydown before calling this
     }
 
     // Initialize Member UI
     updateMemberUI('adult');
     updateMemberUI('child');
 
-    // Event Listeners for Members
+    // Event Listeners for Members - Composition tracking for Korean IME
     [
         { input: adultInput, type: 'adult' },
         { input: childInput, type: 'child' }
     ].forEach(({ input, type }) => {
+        let isComposingMember = false;
+        input.addEventListener('compositionstart', () => {
+            isComposingMember = true;
+        });
+        input.addEventListener('compositionend', () => {
+            isComposingMember = false;
+        });
+
         input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.keyCode === 13) {
+            if ((e.key === 'Enter' || e.keyCode === 13) && !isComposingMember) {
                 e.preventDefault();
                 e.stopPropagation();
-                addMember(type, input.value);
+                const value = input.value;
+                input.value = ''; // Clear immediately to prevent blur from adding again
+                if (value.trim()) {
+                    addMember(type, value);
+                }
             }
         });
 
@@ -1171,16 +1628,28 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             });
             tagsContainer.appendChild(tagElement);
             tagsContainer.style.display = 'flex';
-            tagInput.value = '';
+            // DON'T clear here - already cleared in keydown before calling this
         }
     }
 
-    // 태그 입력 이벤트
+    // 태그 입력 이벤트 - Composition tracking for Korean IME
+    let isComposingTag = false;
+    tagInput.addEventListener('compositionstart', () => {
+        isComposingTag = true;
+    });
+    tagInput.addEventListener('compositionend', () => {
+        isComposingTag = false;
+    });
+
     tagInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.keyCode === 13) {
+        if ((e.key === 'Enter' || e.keyCode === 13) && !isComposingTag) {
             e.preventDefault();
             e.stopPropagation();
-            addTag(tagInput.value);
+            const value = tagInput.value;
+            tagInput.value = ''; // Clear immediately to prevent blur from adding again
+            if (value.trim()) {
+                addTag(value);
+            }
         }
     });
 
@@ -1417,6 +1886,48 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         return days;
     }
 
+    function validateAllStep2Entries() {
+        const step2Container = container.querySelector('.form-step[data-step="2"]');
+        if (!step2Container) return;
+
+        const eventItems = step2Container.querySelectorAll('.event-item');
+        eventItems.forEach(item => {
+            // Validate Place
+            const placeInput = item.querySelector('.event-place');
+            if (placeInput && placeInput.value.length > 0) {
+                const res = validateInput(placeInput.value, 'place');
+                updateErrorUI(placeInput, null, res.valid, res.msg);
+            }
+
+            // Validate Description
+            const descInput = item.querySelector('.event-description');
+            if (descInput && descInput.value.length > 0) {
+                const res = validateInput(descInput.value, 'description');
+                updateErrorUI(descInput, null, res.valid, res.msg);
+            }
+
+            // Validate Time
+            const startInput = item.querySelector('.event-start-time');
+            const endInput = item.querySelector('.event-end-time');
+
+            if (startInput && startInput.value.length === 5) {
+                const res = validateInput(startInput.value, 'time');
+                updateErrorUI(startInput, null, res.valid, res.msg);
+            }
+            if (endInput && endInput.value.length === 5) {
+                const res = validateInput(endInput.value, 'time');
+                updateErrorUI(endInput, null, res.valid, res.msg);
+            }
+
+            if (startInput && endInput && startInput.value.length === 5 && endInput.value.length === 5) {
+                const rangeRes = validateTimeRange(startInput.value, endInput.value);
+                updateErrorUI(startInput, null, rangeRes.valid, rangeRes.msg);
+            }
+        });
+
+        updateStatus();
+    }
+
     function renderStep2(days, locationsList, containerElement) {
         const daysContainer = containerElement.querySelector('#daysContainer');
         const timeOptions = stepManager.generateTimeOptions(); // Use shared helper
@@ -1424,7 +1935,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
         daysContainer.innerHTML = days.map((day, dayIndex) => {
             // Ensure at least one event if day is empty
             const eventsToRender = day.events.length > 0 ? day.events : [{
-                location: '',
+                location: (locationsList && locationsList.length > 0) ? locationsList[0] : '',
                 place: '',
                 startTime: '',
                 endTime: '',
@@ -1663,6 +2174,9 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 }
             });
         });
+
+        // RE-VALIDATE ALL AFTER RENDER: This preserves red errors and blocks save button upon return to Step 2
+        validateAllStep2Entries();
     }
 
     function renderEventItem(event, eventIndex, locationsList, timeOptions, dayNum) {
@@ -1735,6 +2249,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                 </svg>
                             </button>
                         </div>
+                        <div class="error-message"></div>
                         <input type="hidden" class="event-lat" value="${event.coords?.lat || ''}">
                         <input type="hidden" class="event-lng" value="${event.coords?.lng || ''}">
                     </div>
@@ -1751,10 +2266,12 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                                    inputmode="numeric" maxlength="5" placeholder="00:00">
                         </div>
                     </div>
+                    <div class="error-message"></div>
                     
                     <div class="form-group-compact">
                         <label>내용</label>
                         <textarea class="event-description" placeholder="일정 내용 입력" rows="3">${event.description || ''}</textarea>
+                        <div class="error-message"></div>
                     </div>
                 </div>
             </div>
@@ -1770,7 +2287,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
         const eventCount = eventsList.querySelectorAll('.event-item').length;
         const newEvent = {
-            location: locationsList[0] || '',
+            location: (locationsList && locationsList.length > 0) ? locationsList[0] : '',
             place: '',
             startTime: '',
             endTime: '',

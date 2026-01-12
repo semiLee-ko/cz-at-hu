@@ -1,5 +1,6 @@
 
 import { showCustomAlert, showCustomConfirm } from '../../utils/modalUtils.js';
+import { escapeHtml } from '../../utils/htmlUtils.js';
 
 export function createAccommodationManager(container, schedule, generateDaysFromDateRange) {
     // Scope selectors to this specific step to avoid conflicts with other steps sharing same classes
@@ -179,12 +180,19 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
 
         if (!nameInput || !btnAdd) return;
 
-        const isValid = nameInput.value.trim().length > 0;
-        btnAdd.disabled = !isValid;
+        // Use setTimeout to ensure we check error messages AFTER ScheduleEditor has updated them
+        setTimeout(() => {
+            const hasName = nameInput.value.trim().length > 0;
+            const errorMessages = stepRoot.querySelectorAll('.error-message');
+            const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
 
-        if (btnContainer) {
-            btnContainer.classList.toggle('hidden', !isValid);
-        }
+            const isValid = hasName && !hasErrors;
+            btnAdd.disabled = !isValid;
+
+            if (btnContainer) {
+                btnContainer.classList.toggle('hidden', !isValid);
+            }
+        }, 0);
     }
 
     function renderAccommodations() {
@@ -212,8 +220,8 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
                         </svg>
                     </div>
                     <div class="day-info">
-                        <span class="day-badge">${acc.type || '숙소'}</span>
-                        <span class="day-date">${acc.name}</span>
+                        <span class="day-badge">${escapeHtml(acc.type) || '숙소'}</span>
+                        <span class="day-date">${escapeHtml(acc.name)}</span>
                     </div>
                     <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
@@ -246,12 +254,12 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
                                 ${acc.location ? `
                                     <p class="acc-detail-item full-width" title="위치">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> 
-                                        <span>${acc.location}</span>
+                                        <span>${escapeHtml(acc.location)}</span>
                                     </p>` : ''}
                                 ${acc.contact ? `
                                     <p class="acc-detail-item full-width" title="연락처">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.21-2.21a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> 
-                                        <span>${acc.contact}</span>
+                                        <span>${escapeHtml(acc.contact)}</span>
                                     </p>` : ''}
                                 
                                 <div class="acc-detail-row">
@@ -283,7 +291,7 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
                                         </p>` : ''}
                                 </div>
                             </div>
-                            ${acc.notes ? `<div class="acc-notes-display">${acc.notes}</div>` : ''}
+                            ${acc.notes ? `<div class="acc-notes-display">${escapeHtml(acc.notes)}</div>` : ''}
                         </div>
                     </div>
                 </div>
@@ -387,6 +395,12 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
     function addOrUpdateAccommodation() {
         if (!stepRoot) return;
         const name = stepRoot.querySelector('#accName').value.trim();
+        if (!name) return showCustomAlert('숙소명을 입력해주세요.');
+
+        // Final validation check before saving
+        const errorMessages = stepRoot.querySelectorAll('.error-message');
+        const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
+        if (hasErrors) return showCustomAlert('입력된 정보에 오류가 있습니다. 빨간색으로 표시된 부분을 확인해주세요.');
         const type = stepRoot.querySelector('#accType').value.trim();
         const location = stepRoot.querySelector('#accLocation').value.trim();
         const contact = stepRoot.querySelector('#accContact').value.trim();
@@ -517,9 +531,10 @@ export function createAccommodationManager(container, schedule, generateDaysFrom
         stepRoot.querySelector('.btn-close-edit')?.remove();
     }
 
-    // Direct event assignment scoped to stepRoot
+    // Scoped event assignment
     if (stepRoot) {
-        stepRoot.querySelector('#accName')?.addEventListener('input', validateAccommodationForm);
+        // Listen to all inputs within stepRoot to update button state
+        stepRoot.addEventListener('input', validateAccommodationForm);
         stepRoot.querySelector('#btnAddAccommodation')?.addEventListener('click', addOrUpdateAccommodation);
     }
 

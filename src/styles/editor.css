@@ -370,9 +370,6 @@
 }
 
 /* Location tags - Same as default (Mint) */
-.location-tag {
-    /* Inherit default tag style */
-}
 
 @keyframes tagAppear {
     from {
@@ -1318,4 +1315,18 @@
 
 [data-theme="dark"] .date-checkbox-label:hover {
     background-color: #475569;
+}
+
+/* Disabled State for Circular Add Buttons */
+.btn-add-tip-circular:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #e2e8f0 !important;
+    color: #94a3b8 !important;
+    pointer-events: none;
+}
+
+[data-theme="dark"] .btn-add-tip-circular:disabled {
+    background-color: #334155 !important;
+    color: #64748b !important;
 }

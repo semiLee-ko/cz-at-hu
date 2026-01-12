@@ -1,5 +1,6 @@
 
 import { showCustomAlert, showCustomConfirm } from '../../utils/modalUtils.js';
+import { escapeHtml } from '../../utils/htmlUtils.js';
 
 export function createTipManager(container, schedule) {
     // Scope selectors to this specific step to avoid conflicts with other steps sharing same classes
@@ -122,43 +123,25 @@ export function createTipManager(container, schedule) {
         const contentInput = stepRoot.querySelector('#tipContent');
         const btnAdd = stepRoot.querySelector('#btnAddTip');
         const btnContainer = stepRoot.querySelector('.tip-add-button-container');
-        const validationMsg = stepRoot.querySelector('#tipValidationMsg');
 
         if (!titleInput || !contentInput || !btnAdd) return;
 
-        const title = titleInput.value.trim();
-        const content = contentInput.value.trim();
+        setTimeout(() => {
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
 
-        // Allowed: Korean, English, Numbers, Space and ~!%^&*()-_+=:"',.[]
-        const allowedRegex = /^[가-힣a-zA-Z0-9~!%^&*()\-=_+=\:"',.\[\]\s]*$/;
+            const errorMessages = stepRoot.querySelectorAll('.error-message');
+            const hasExternalErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
 
-        let error = '';
+            const hasRequirements = title.length >= 2 && content.length >= 2;
 
-        if (title.length > 0 || content.length > 0) {
-            if (!allowedRegex.test(title)) {
-                error = '제목에 허용되지 않는 문자가 포함되어 있습니다.';
-            } else if (!allowedRegex.test(content)) {
-                error = '내용에 허용되지 않는 문자가 포함되어 있습니다.';
-            } else if (title.length > 50) {
-                error = '제목은 50자 이내로 입력해주세요.';
-            } else if (content.length > 200) {
-                error = '내용은 200자 이내로 입력해주세요.';
-            } else if (title.length < 2 || content.length < 2) {
-                // Keep the "at least 2 chars" rule but don't show error yet if it's just partially typed
-                // Just keep button hidden
+            const isValid = hasRequirements && !hasExternalErrors;
+            btnAdd.disabled = !isValid;
+
+            if (btnContainer) {
+                btnContainer.classList.toggle('hidden', !isValid);
             }
-        }
-
-        if (validationMsg) {
-            validationMsg.textContent = error;
-        }
-
-        const isValid = !error && title.length >= 2 && content.length >= 2;
-        btnAdd.disabled = !isValid;
-
-        if (btnContainer) {
-            btnContainer.classList.toggle('hidden', !isValid || !!error);
-        }
+        }, 0);
     }
 
     function renderTips() {
@@ -183,7 +166,7 @@ export function createTipManager(container, schedule) {
                         </div>
                         <div class="day-info">
                             <span class="day-badge">TIP</span>
-                            <span class="day-date">${tip.title}</span>
+                            <span class="day-date">${escapeHtml(tip.title)}</span>
                         </div>
                         <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
@@ -192,7 +175,7 @@ export function createTipManager(container, schedule) {
                     <div class="events-list tip-content-wrapper">
                         <div class="tip-content-inner">
                             <div class="tip-body">
-                                <p>${tip.content}</p>
+                                <p>${escapeHtml(tip.content)}</p>
                             </div>
                             <button type="button" class="btn-delete-tip-icon" data-tip-id="${tip.id}" title="삭제">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -412,6 +395,11 @@ export function createTipManager(container, schedule) {
         if (!title) return showCustomAlert('제목을 입력해주세요.');
         if (!content) return showCustomAlert('내용을 입력해주세요.');
 
+        // Final validation check
+        const errorMessages = stepRoot.querySelectorAll('.error-message');
+        const hasErrors = Array.from(errorMessages).some(msg => msg.textContent.trim() !== '');
+        if (hasErrors) return showCustomAlert('유효하지 않은 입력이 있습니다.');
+
         if (editingTipId) {
             const index = tips.findIndex(t => t.id === editingTipId);
             if (index !== -1) tips[index] = { ...tips[index], title, content };
@@ -419,6 +407,7 @@ export function createTipManager(container, schedule) {
             tips.push({ id: generateTipId(), title, content });
         }
         renderTips();
+        clearTipForm();
     }
 
     function editTip(tipId) {
@@ -464,9 +453,10 @@ export function createTipManager(container, schedule) {
     }
 
     // Direct event assignment scoped to stepRoot
+    // Scoped event assignment
     if (stepRoot) {
-        stepRoot.querySelector('#tipTitle')?.addEventListener('input', validateTipForm);
-        stepRoot.querySelector('#tipContent')?.addEventListener('input', validateTipForm);
+        // Listen to all inputs within stepRoot to update button state
+        stepRoot.addEventListener('input', validateTipForm);
         stepRoot.querySelector('#btnAddTip')?.addEventListener('click', addOrUpdateTip);
     }
 
