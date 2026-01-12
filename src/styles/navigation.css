@@ -82,6 +82,22 @@
     pointer-events: none;
 }
 
+#fabHelp {
+    bottom: 96px;
+    background-color: var(--secondary);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+}
+
+#fabHelp:hover {
+    box-shadow: 0 6px 16px rgba(78, 205, 196, 0.5);
+}
+
+@media (max-width: 768px) {
+    #fabHelp {
+        bottom: 88px;
+    }
+}
+
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
     .mobile-container {

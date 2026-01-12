@@ -4,14 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "vite": "^7.2.4"
+    "dev": "granite dev",
+    "build": "granite build",
+    "preview": "vite preview",
+    "deploy": "ait deploy"
   },
   "dependencies": {
+    "@apps-in-toss/framework": "1.6.2",
+    "@apps-in-toss/web-framework": "1.6.2",
+    "firebase": "^10.0.0",
     "html2canvas": "^1.4.1"
+  },
+  "devDependencies": {
+    "@apps-in-toss/cli": "1.6.2",
+    "vite": "^7.2.4"
   }
 }

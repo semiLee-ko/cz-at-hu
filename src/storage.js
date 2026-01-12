@@ -1,11 +1,12 @@
-// localStorage 기반 여행 일정 관리
+// Appintos SDK 기반 여행 일정 관리
+import { SDK } from './utils/sdkUtils.js';
 
 const STORAGE_KEY = 'travel_schedules';
 const CURRENT_SCHEDULE_KEY = 'current_schedule_id';
 
 // 모든 일정 가져오기
 export function getAllSchedules() {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = SDK.storage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
 }
 
@@ -17,7 +18,7 @@ export function getSchedule(id) {
 
 // 현재 선택된 일정 ID 가져오기
 export function getCurrentScheduleId() {
-    return localStorage.getItem(CURRENT_SCHEDULE_KEY);
+    return SDK.storage.getItem(CURRENT_SCHEDULE_KEY);
 }
 
 // 현재 선택된 일정 가져오기
@@ -46,7 +47,7 @@ export function saveSchedule(schedule) {
         schedules.push(schedule);
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules));
+    SDK.storage.setItem(STORAGE_KEY, JSON.stringify(schedules));
     return schedule;
 }
 
@@ -54,24 +55,24 @@ export function saveSchedule(schedule) {
 export function deleteSchedule(id) {
     const schedules = getAllSchedules();
     const filtered = schedules.filter(s => s.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    SDK.storage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 
     // 현재 일정이 삭제된 경우 초기화
     if (getCurrentScheduleId() === id) {
-        localStorage.removeItem(CURRENT_SCHEDULE_KEY);
+        SDK.storage.removeItem(CURRENT_SCHEDULE_KEY);
     }
 }
 
 // 현재 일정 설정
 export function setCurrentSchedule(id) {
-    localStorage.setItem(CURRENT_SCHEDULE_KEY, id);
+    SDK.storage.setItem(CURRENT_SCHEDULE_KEY, id);
 }
 
 // 템플릿 관련 기능
 const TEMPLATE_KEY = 'checklist_templates';
 
 export function getChecklistTemplates() {
-    const data = localStorage.getItem(TEMPLATE_KEY);
+    const data = SDK.storage.getItem(TEMPLATE_KEY);
     return data ? JSON.parse(data) : [];
 }
 
@@ -85,14 +86,14 @@ export function saveChecklistTemplate(name, categories) {
     };
 
     templates.push(newTemplate);
-    localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+    SDK.storage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
     return newTemplate;
 }
 
 export function deleteChecklistTemplate(id) {
     const templates = getChecklistTemplates();
     const filtered = templates.filter(t => t.id !== id);
-    localStorage.setItem(TEMPLATE_KEY, JSON.stringify(filtered));
+    SDK.storage.setItem(TEMPLATE_KEY, JSON.stringify(filtered));
 }
 
 // 기본 템플릿 일정 생성

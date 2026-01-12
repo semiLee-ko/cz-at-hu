@@ -168,7 +168,10 @@ ${tripContext.tips || "팁 정보가 없습니다."}
 
     btnSendChat.addEventListener('click', sendMessage);
     chatInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') sendMessage();
+        if (e.key === 'Enter' && !e.isComposing) {
+            e.preventDefault();
+            sendMessage();
+        }
     });
 
     function addMessage(text, sender) {
@@ -195,45 +198,35 @@ ${tripContext.tips || "팁 정보가 없습니다."}
     }
 }
 
-async function callGroqAPI(message, context) {
-    const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
-    if (!API_KEY) {
-        throw new Error("VITE_GROQ_API_KEY가 설정되지 않았습니다. .env 파일을 확인해 주세요.");
+import { functions, initFirebase } from '../utils/firebase.js';
+import { httpsCallable } from 'firebase/functions';
+
+export async function callGroqAPI(message, context) {
+    try {
+        // Ensure Firebase is initialized and user is signed in
+        await initFirebase();
+
+        const callGroq = httpsCallable(functions, 'callGroq');
+
+        console.log('🔄 Calling Cloud Function: callGroq');
+        const result = await callGroq({
+            message: message,
+            context: context
+        });
+
+        if (result.data && result.data.reply) {
+            return result.data.reply;
+        } else {
+            throw new Error("응답 데이터가 올바르지 않습니다.");
+        }
+    } catch (error) {
+        console.error("❌ Cloud Function Error:", error);
+
+        // Handle specific Firebase errors if needed
+        if (error.code === 'failed-precondition') {
+            throw new Error("서버 설정이 완료되지 않았습니다. (API Key 미설정)");
+        }
+
+        throw new Error(`AI 비서 호출에 실패했습니다: ${error.message}`);
     }
-
-    const systemPrompt = `당신은 여행 일정을 완벽하게 숙지하고 있는 친절한 '여행 비서'입니다. 
-반드시 제공된 [현재 여행 정보]만을 바탕으로 답변해야 하며, 정보에 없는 내용을 추측하거나 지어내지 마세요.
-모든 답변은 반드시 질문한 언어로만 답변해주세요. 다른언어는 사용하지 마세요.
-사용자가 모든 숙소 정보를 요청하면 '배정날짜' 항목이 입력 되어있는 숙소 정보만 출력해주세요. 특정 날짜의 숙소 정보를 요청하면 해당 날짜의 숙소 정보만 출력해주세요. 배정날짜가 등록되지 않은 숙소도 물어보면 그때 대답해주세요.
-만약 질문에 대한 정보가 [현재 여행 정보]에 없다면, "해당 정보는 여행 계획에 포함되어 있지 않습니다" 또는 "내용을 확인할 수 없어 답변해 드리기 어렵습니다"와 같이 정보가 없음을 명확하고 정중하게 한국어로 대답해주세요.
-
-[현재 여행 정보]
-${context}
-`;
-
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${API_KEY}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            model: "llama-3.3-70b-versatile",
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: message }
-            ],
-            temperature: 0.7
-        })
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-        console.error("Groq API Error Detail:", data);
-        const errorMsg = data.error?.message || response.statusText || "Unknown Error";
-        throw new Error(`API 호출 실패: ${errorMsg} (${response.status})`);
-    }
-
-    return data.choices[0].message.content;
 }

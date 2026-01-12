@@ -1330,3 +1330,88 @@
     background-color: #334155 !important;
     color: #64748b !important;
 }
+
+/* Step-specific Help Toggle */
+.step-help-container {
+    margin-bottom: 20px;
+}
+
+.btn-step-help {
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-step-help:hover {
+    color: var(--secondary-dark);
+}
+
+.btn-step-help .icon-toggle {
+    transition: transform 0.3s ease;
+}
+
+.btn-step-help.active {
+    color: var(--secondary-dark);
+}
+
+.btn-step-help.active .icon-toggle {
+    transform: rotate(180deg);
+}
+
+.step-help-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease, margin-top 0.3s ease;
+    margin-top: 0;
+    opacity: 0;
+}
+
+.step-help-content.active {
+    max-height: 600px;
+    margin-top: 10px;
+    opacity: 1;
+}
+
+.step-help-content ul {
+    background: var(--bg-primary);
+    padding: 12px 14px 12px 34px;
+    border-radius: 8px;
+    border-left: 3px solid var(--secondary);
+    margin: 0;
+    list-style-type: none;
+    /* We'll use custom bullets */
+}
+
+.step-help-content li {
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    position: relative;
+}
+
+.step-help-content li::before {
+    content: '•';
+    position: absolute;
+    left: -16px;
+    color: var(--secondary-dark);
+    font-weight: bold;
+}
+
+.step-help-content li:last-child {
+    margin-bottom: 0;
+}
+
+[data-theme="dark"] .step-help-content ul {
+    background: #1e293b;
+    border-left-color: var(--secondary-dark);
+}

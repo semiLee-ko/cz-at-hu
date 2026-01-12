@@ -4,6 +4,7 @@ import { getAllSchedules, deleteSchedule, setCurrentSchedule, getSchedule } from
 import { showShareModal } from './ShareModal.js';
 import { showChatBot } from './ChatBot.js';
 import { showCustomConfirm } from '../utils/modalUtils.js';
+import { SDK } from '../utils/sdkUtils.js';
 
 export function renderScheduleList(container, onSelect) {
     const schedules = getAllSchedules();
@@ -102,6 +103,7 @@ export function renderScheduleList(container, onSelect) {
     // Event Listeners
     container.querySelectorAll('.clickable').forEach(el => {
         el.addEventListener('click', () => {
+            SDK.haptic('selectionChanged');
             onSelect('view', el.dataset.id);
         });
     });
@@ -109,6 +111,7 @@ export function renderScheduleList(container, onSelect) {
     container.querySelectorAll('.btn-edit-icon').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            SDK.haptic('impactLight');
             onSelect('edit', btn.dataset.id);
         });
     });
@@ -116,6 +119,7 @@ export function renderScheduleList(container, onSelect) {
     container.querySelectorAll('.btn-delete-icon').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            SDK.haptic('impactMedium');
             showCustomConfirm('정말 삭제하시겠습니까?', () => {
                 deleteSchedule(btn.dataset.id);
                 renderScheduleList(container, onSelect);
@@ -126,6 +130,7 @@ export function renderScheduleList(container, onSelect) {
     container.querySelectorAll('.btn-share-icon').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            SDK.haptic('impactLight');
             showShareModal(btn.dataset.id);
         });
     });
@@ -143,6 +148,7 @@ export function renderScheduleList(container, onSelect) {
     const btnImport = container.querySelector('#btnImport');
     if (btnImport) {
         btnImport.addEventListener('click', () => {
+            SDK.haptic('impactLight');
             onSelect('import');
         });
     }

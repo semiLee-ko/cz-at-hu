@@ -10,13 +10,19 @@ import { renderScheduleEditor } from './components/ScheduleEditor.js';
 import { showShareModal, showImportModal } from './components/ShareModal.js';
 import { showChatBot } from './components/ChatBot.js';
 import { showSettingsPopup, applySettings } from './components/SettingsPopup.js';
+import { showHelpPopup } from './components/HelpPopup.js';
 import './styles/chatbot.css';
+import { SDK } from './utils/sdkUtils.js';
 
 // 앱 상태
 let currentView = 'list'; // 'list', 'view', 'edit'
 
 // 앱 초기화
-function init() {
+async function init() {
+    // SDK 초기화 (화면 방향 고정 및 데이터 프리페치)
+    SDK.setOrientation('portrait');
+    await SDK.storage.prefetch(['travel_schedules', 'current_schedule_id', 'checklist_templates']);
+
     // 설정 초기화 (폰트/테마 적용)
     applySettings();
 
@@ -39,13 +45,28 @@ function init() {
 // 네비게이션 설정
 function setupNavigation() {
     // FAB 이벤트 리스너
-    document.getElementById('fabAdd')?.addEventListener('click', () => showView('edit'));
+    document.getElementById('fabAdd')?.addEventListener('click', () => {
+        SDK.haptic('impactMedium');
+        showView('edit');
+    });
 
     // 로고 클릭 시 목록으로 이동
-    document.querySelector('.app-logo')?.addEventListener('click', () => showView('list'));
+    document.querySelector('.app-logo')?.addEventListener('click', () => {
+        SDK.haptic('selectionChanged');
+        showView('list');
+    });
+
+    // 도움말 FAB 이벤트
+    document.getElementById('fabHelp')?.addEventListener('click', () => {
+        SDK.haptic('impactLight');
+        showHelpPopup();
+    });
 
     // 설정 버튼 이벤트
-    document.getElementById('btnSettings')?.addEventListener('click', () => showSettingsPopup());
+    document.getElementById('btnSettings')?.addEventListener('click', () => {
+        SDK.haptic('impactLight');
+        showSettingsPopup();
+    });
 }
 
 // 뷰 전환
@@ -53,10 +74,14 @@ function showView(view, scheduleId = null) {
     currentView = view;
     const appContainer = document.getElementById('app');
     const fabButton = document.getElementById('fabAdd');
+    const fabHelp = document.getElementById('fabHelp');
 
     // FAB 표시/숨김 제어: 목록 화면에서만 표시
     if (fabButton) {
         fabButton.style.display = view === 'list' ? 'flex' : 'none';
+    }
+    if (fabHelp) {
+        fabHelp.style.display = view === 'list' ? 'flex' : 'none';
     }
 
     // 헤더 제어 (목록 화면에서만 표시)

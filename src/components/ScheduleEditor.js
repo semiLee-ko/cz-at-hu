@@ -6,6 +6,7 @@ import { createAccommodationManager } from './editor/accommodationManager.js';
 import { createChecklistManager } from './editor/checklistManager.js';
 import { createTipManager } from './editor/tipManager.js';
 import { showCustomConfirm, showCustomAlert } from '../utils/modalUtils.js';
+import { SDK } from '../utils/sdkUtils.js';
 
 export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     // 오늘 날짜 가져오기
@@ -42,6 +43,19 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
             <form id="scheduleForm" class="schedule-form">
                 <!-- Step 1: Basic Information -->
                 <div class="form-step" data-step="1">
+                    <div class="step-help-container">
+                        <button type="button" class="btn-step-help" data-target="step1Help">
+                            <svg class="icon-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            <span>도움말</span>
+                        </button>
+                        <div id="step1Help" class="step-help-content">
+                            <ul>
+                                <li>각 항목이 잘 못 입력된 경우 오류 메시지가 표시되고, 저장버튼(오른쪽 상단의 체크모양)이 비활성화 됩니다.</li>
+                            </ul>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label>제목</label>
                         <input type="text" name="title" value="${schedule.title}" 
@@ -162,6 +176,23 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 
                 <!-- Step 2: Daily Itinerary -->
                 <div class="form-step" data-step="2" style="display: none;">
+                    <div class="step-help-container">
+                        <button type="button" class="btn-step-help" data-target="step2Help">
+                            <svg class="icon-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            <span>도움말</span>
+                        </button>
+                        <div id="step2Help" class="step-help-content">
+                            <ul>
+                                <li>각 항목이 잘 못 입력된 경우 오류 메시지가 표시되고, 저장버튼(오른쪽 상단의 체크모양)이 비활성화 됩니다</li>
+                                <li>각 날짜별로 상세 일정을 등록하세요</li>
+                                <li>"위치" 항목의 위치정보를 등록하시면 해당 지역의 날씨정보(14일 이내)와 지도 상의 피커가 자동생성됩니다</li>
+                                <li>각 날짜별 상세일정 입력영역 하단의 추가버튼(+)을 클릭하여 추가 일정을 등록할 수 있습니다</li>
+                                <li>위치, 시간, 내용 정보 중 하나만 입력해도 등록 가능합니다. 자유롭게 여행일정을 등록해주세요!</li>
+                            </ul>
+                        </div>
+                    </div>
                     <div id="daysContainer">
                         <!-- Days will be generated dynamically -->
                     </div>
@@ -169,6 +200,22 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 
                 <!-- Step 3: Accommodation -->
                 <div class="form-step" data-step="3" style="display: none;">
+                    <div class="step-help-container">
+                        <button type="button" class="btn-step-help" data-target="step3Help">
+                            <svg class="icon-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            <span>도움말</span>
+                        </button>
+                        <div id="step3Help" class="step-help-content">
+                            <ul>
+                                <li>머무르시는 숙소의 이름과 위치를 입력하세요</li>
+                                <li>숙소정보를 정상적으로 입력하시면(숙소명만 입력하셔도 됩니다) 하단에 등록 버튼(체크모양)이 생성됩니다</li>
+                                <li>등록한 숙소 목록 왼쪽의 이동버튼을 드래그 해서 순서를 변경할 수 있어요</li>
+                                <li>숙소 등록 후 등록하신 각 일정별로 매핑할 수 있어요</li>
+                            </ul>
+                        </div>
+                    </div>
                     <div class="accommodation-section">
                         <!-- Accommodation Form -->
                         <div class="accommodation-form tip-form-section">
@@ -250,6 +297,24 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
                 
                 <!-- Step 4: Checklist -->
                 <div class="form-step" data-step="4" style="display: none;">
+                    <div class="step-help-container">
+                        <button type="button" class="btn-step-help" data-target="step4Help">
+                            <svg class="icon-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            <span>도움말</span>
+                        </button>
+                        <div id="step4Help" class="step-help-content">
+                            <ul>
+                                <li>여행에 필요한 준비물과 TODO 리스트를 만들어보세요.</li>
+                                <li>체크리스트 정보를 정상적으로 입력하시면 하단에 등록 버튼(체크모양)이 생성됩니다</li>
+                                <li>등록한 체크리스트 목록 왼쪽의 이동버튼을 드래그 해서 순서를 변경할 수 있어요</li>
+                                <li>등록된 정보를 "템플릿 저장" 버튼을 눌러서 다른 여행 준비에 사용할 수 있어요</li>
+                                <li>내가 등록한 템플릿이나, 기본 제공되는 템플릿 정보를 "불러오기" 버튼을 눌러 확인해 보세요</li>
+                                <li>등록된 체크리스트는 여행상세 화면에서 체크할 수 있어요</li>
+                            </ul>
+                        </div>
+                    </div>
                     <div class="checklist-section">
  
                         <!-- Category Form -->
@@ -290,6 +355,23 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
                 <!-- Step 5: Tips -->
                 <div class="form-step" data-step="5" style="display: none;">
+                    <div class="step-help-container">
+                        <button type="button" class="btn-step-help" data-target="step5Help">
+                            <svg class="icon-toggle" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            <span>도움말</span>
+                        </button>
+                        <div id="step5Help" class="step-help-content">
+                            <ul>
+                                <li>환전, 교통, 맛집 등 나만의 여행 꿀팁을 기록하세요</li>
+                                <li>중요한 유의사항이나 잊지 말아야 할 팁을 기록하세요</li>
+                                <li>팁 정보를 정상적으로 입력하시면 하단에 등록 버튼(체크모양)이 생성됩니다</li>
+                                <li>등록한 팁 목록 왼쪽의 이동버튼을 드래그 해서 순서를 변경할 수 있어요</li>
+                                <li>등록된 정보는 여행상세 화면에서 확인할 수 있어요</li>
+                            </ul>
+                        </div>
+                    </div>
                     <div class="tip-section">
                         <!-- Tip Form -->
                          <div class="tip-form-section">
@@ -608,11 +690,33 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
 
     // Navigation button events
     // NEW: Header Back & Save
-    container.querySelector('#btnEditorBack').addEventListener('click', onCancel);
+    container.querySelector('#btnEditorBack').addEventListener('click', () => {
+        SDK.haptic('impactLight');
+        onCancel();
+    });
     container.querySelector('#btnEditorSave').addEventListener('click', () => {
         // Trigger Submit manually
         form.dispatchEvent(new Event('submit'));
     });
+
+    // 도움말 토글 초기화
+    function initStepHelpToggles() {
+        container.querySelectorAll('.btn-step-help').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.target;
+                const content = container.querySelector(`#${targetId}`);
+                const isExpanded = btn.classList.toggle('active');
+
+                if (content) {
+                    content.classList.toggle('active');
+                }
+
+                SDK.haptic('selectionChanged');
+            });
+        });
+    }
+
+    initStepHelpToggles();
 
     // --- NEW: Step Status & Navigation Logic ---
 
@@ -1677,6 +1781,7 @@ export function renderScheduleEditor(container, scheduleId, onSave, onCancel) {
     const form = container.querySelector('#scheduleForm');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        SDK.haptic('impactMedium');
 
         const formData = new FormData(form);
         const daysData = await collectDaysData(container, true); // Show warning when saving

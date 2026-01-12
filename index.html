@@ -4,8 +4,22 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>2026 동유럽 가을 여행</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Little Trip</title>
+    <script>
+        // Polyfill for global
+        window.global = window;
+
+        // Polyfill for Granite Native Emitter
+        if (!window.__GRANITE_NATIVE_EMITTER) {
+            window.__GRANITE_NATIVE_EMITTER = {
+                emit: function (event, data) {
+                    console.log('[Polyfill] __GRANITE_NATIVE_EMITTER.emit:', event, data);
+                }
+            };
+        }
+    </script>
 </head>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
@@ -27,7 +41,14 @@
             </button>
         </header>
 
-        <!-- Floating Action Button -->
+        <!-- Floating Action Buttons -->
+        <button id="fabHelp" class="fab-button fab-help" aria-label="도움말">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </button>
         <button id="fabAdd" class="fab-button" aria-label="새 일정 등록">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 5v14M5 12h14" stroke-linecap="round" stroke-linejoin="round" />
